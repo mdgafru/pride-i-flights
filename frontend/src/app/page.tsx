@@ -212,7 +212,7 @@ export default function Home() {
 
   return (
     <SiteShell active="Home">
-      <section className="relative flex min-h-[50vh] w-full items-center justify-center overflow-hidden pb-4 pt-10 text-white sm:min-h-[58vh] sm:pb-6 sm:pt-14">
+      <section className="relative flex min-h-[50vh] w-full items-center justify-center overflow-hidden pb-10 pt-10 text-white sm:min-h-[58vh] sm:pb-12 sm:pt-14">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/background.png"
@@ -260,7 +260,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto -mt-8 w-full max-w-[1260px] px-4 pb-6 sm:-mt-10">
+      <section className="relative z-10 mx-auto mt-2 w-full max-w-[1260px] px-4 pb-6 sm:mt-4">
         <div className="section-polish px-5 py-5 text-[#0b2f57] sm:px-6 sm:py-6 md:px-7 md:py-7">
             <div className="flex flex-wrap gap-6 border-b border-slate-200 pb-3">
               {(
