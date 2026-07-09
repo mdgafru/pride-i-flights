@@ -49,10 +49,10 @@ export function FancySelect({
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((v) => !v)}
-        className={`flex w-full items-center justify-between gap-3 rounded-xl border bg-white px-3.5 py-2.5 text-left text-sm font-medium shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition ${
+        className={`flex w-full items-center justify-between gap-3 border-0 border-b bg-transparent px-0 py-2.5 text-left text-sm font-medium transition ${
           open
-            ? "border-[#2f6fed] ring-2 ring-[#2f6fed]/15"
-            : "border-slate-200 hover:border-slate-300"
+            ? "border-[#2f6fed]"
+            : "border-slate-300 hover:border-slate-400"
         }`}
       >
         <span className="truncate text-[#0b2f57]">{selected?.label}</span>
@@ -70,7 +70,7 @@ export function FancySelect({
         <ul
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 z-30 mt-1.5 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white py-1.5 shadow-[0_12px_32px_rgba(15,23,42,0.14)]"
+          className="absolute left-0 right-0 z-30 mt-1.5 max-h-56 overflow-auto border border-slate-200 bg-white py-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.1)]"
         >
           {options.map((option) => {
             const active = option.value === value;

@@ -62,7 +62,7 @@ export default function ContactPage() {
               href="https://wa.me/12345678900"
               target="_blank"
               rel="noreferrer"
-              className="btn-premium mt-8 inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-semibold text-white"
+              className="btn-premium mt-8 inline-flex items-center gap-2 rounded-xl bg-[#e30613] px-6 py-3 text-sm font-semibold text-white hover:bg-[#c40010]"
             >
               <WhatsAppIcon />
               Chat on WhatsApp

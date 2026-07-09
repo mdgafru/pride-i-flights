@@ -7,11 +7,35 @@ import {
   YouTubeIcon,
 } from "@/components/icons";
 
+const quickLinks = [
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "Flights", href: "/flights" },
+  { label: "Hotels", href: "/hotels" },
+  { label: "Tour Packages", href: "/packages" },
+  { label: "Destinations", href: "/destinations" },
+];
+
+const serviceLinks = [
+  { label: "Visa Services", href: "/visa" },
+  { label: "Travel Insurance", href: "/travel-insurance" },
+  { label: "Honeymoon Packages" },
+  { label: "Group Tours" },
+  { label: "Corporate Travel" },
+];
+
+const socialLinks = [
+  { name: "Facebook", icon: FacebookIcon, href: "#" },
+  { name: "Instagram", icon: InstagramIcon, href: "#" },
+  { name: "X", icon: XIcon, href: "#" },
+  { name: "YouTube", icon: YouTubeIcon, href: "#" },
+];
+
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-[#0a1f3d] text-white">
+    <footer className="relative overflow-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
       <video
-        className="footer-video-animate absolute inset-0 h-full w-full object-cover opacity-50"
+        className="footer-video-animate absolute inset-0 h-full w-full object-cover opacity-35"
         src="https://www.pexels.com/download/video/36255229/"
         autoPlay
         muted
@@ -19,7 +43,8 @@ export function Footer() {
         playsInline
       />
       <div className="footer-overlay absolute inset-0" />
-      <div className="relative mx-auto max-w-[1260px] px-4 py-24 md:py-32">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.12),transparent_34%),radial-gradient(circle_at_85%_0%,rgba(227,6,19,0.16),transparent_36%)]" />
+      <div className="relative mx-auto max-w-[1260px] px-4 py-16 md:py-20">
         <div className="grid gap-8 border-b border-white/15 pb-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2">
@@ -37,17 +62,12 @@ export function Footer() {
               unforgettable experiences.
             </p>
             <div className="mt-5 flex gap-2">
-              {[
-                { name: "Facebook", icon: FacebookIcon },
-                { name: "Instagram", icon: InstagramIcon },
-                { name: "X", icon: XIcon },
-                { name: "YouTube", icon: YouTubeIcon },
-              ].map((item) => (
+              {socialLinks.map((item) => (
                 <a
                   key={item.name}
-                  href="#"
+                  href={item.href}
                   aria-label={item.name}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#ff4d5a]/70 bg-[#ff4d5a]/15 text-[#ff4d5a]"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#ff4d5a]/65 bg-white/10 text-[#ffd2d6] transition hover:border-[#ff4d5a] hover:bg-[#e30613] hover:text-white"
                 >
                   <item.icon className="h-4 w-4" />
                 </a>
@@ -58,39 +78,22 @@ export function Footer() {
           <div>
             <p className="mb-3 text-lg font-semibold text-[#ff4d5a]">Quick Links</p>
             <ul className="space-y-2 text-sm text-blue-50/90">
-              <li className="footer-link">
-                <Link href="/">Home</Link>
-              </li>
-              <li className="footer-link">
-                <Link href="/about">About Us</Link>
-              </li>
-              <li className="footer-link">
-                <Link href="/flights">Flights</Link>
-              </li>
-              <li className="footer-link">
-                <Link href="/hotels">Hotels</Link>
-              </li>
-              <li className="footer-link">
-                <Link href="/packages">Tour Packages</Link>
-              </li>
-              <li className="footer-link">
-                <Link href="/destinations">Destinations</Link>
-              </li>
+              {quickLinks.map((item) => (
+                <li key={item.href} className="footer-link">
+                  <Link href={item.href}>{item.label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
             <p className="mb-3 text-lg font-semibold text-[#ff4d5a]">Our Services</p>
             <ul className="space-y-2 text-sm text-blue-50/90">
-              <li className="footer-link">
-                <Link href="/visa">Visa Services</Link>
-              </li>
-              <li className="footer-link">
-                <Link href="/travel-insurance">Travel Insurance</Link>
-              </li>
-              <li className="footer-link">Honeymoon Packages</li>
-              <li className="footer-link">Group Tours</li>
-              <li className="footer-link">Corporate Travel</li>
+              {serviceLinks.map((item) => (
+                <li key={item.label} className="footer-link">
+                  {item.href ? <Link href={item.href}>{item.label}</Link> : item.label}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -108,8 +111,12 @@ export function Footer() {
         <div className="mt-6 flex flex-col gap-3 text-xs text-blue-100/90 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 REDE I FLIGHTS. All Rights Reserved.</p>
           <div className="flex items-center gap-5">
-            <span>Terms & Conditions</span>
-            <span>Privacy Policy</span>
+            <Link href="#" className="footer-link">
+              Terms & Conditions
+            </Link>
+            <Link href="#" className="footer-link">
+              Privacy Policy
+            </Link>
           </div>
         </div>
       </div>

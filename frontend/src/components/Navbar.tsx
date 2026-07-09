@@ -30,17 +30,17 @@ export function Navbar({
   return (
     <header
       className={`${
-        overlay ? "absolute inset-x-0 top-0 z-50" : "sticky top-0 z-50 shadow-sm"
+        overlay ? "absolute inset-x-0 top-0 z-50" : "fixed inset-x-0 top-0 z-50 shadow-sm"
       }`}
     >
       {!overlay && (
         <div className="bg-[#042448] text-white">
-          <div className="mx-auto flex max-w-[1260px] flex-wrap items-center justify-between gap-2 px-4 py-1.5 text-[11px] sm:text-xs">
-            <div className="flex items-center gap-4 sm:gap-6">
+          <div className="mx-auto flex max-w-[1260px] flex-col gap-1 px-4 py-1.5 text-[11px] sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:text-xs">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 sm:gap-6">
               <span>+1 234 567 8900</span>
               <span>info@redeiflights.com</span>
             </div>
-            <span>Mon - Sun: 9:00 AM - 9:00 PM</span>
+            <span className="text-blue-100">Mon - Sun: 9:00 AM - 9:00 PM</span>
           </div>
         </div>
       )}
@@ -52,7 +52,7 @@ export function Navbar({
             : "border-b border-slate-200 bg-white"
         }
       >
-        <div className="mx-auto flex max-w-[1260px] items-center gap-2 px-4 py-2.5 lg:gap-3">
+        <div className="mx-auto flex max-w-[1260px] items-center justify-between gap-2 px-4 py-2.5 lg:gap-3">
           <Link href="/" className="inline-flex shrink-0 items-center gap-2 bg-transparent leading-none">
             <Image
               src="/icon.svg"
@@ -68,7 +68,7 @@ export function Navbar({
               height={110}
               priority
               unoptimized
-              className="block h-auto w-[140px] bg-transparent sm:w-[170px] lg:w-[190px] xl:w-[210px]"
+              className="block h-auto w-[170px] bg-transparent sm:w-[190px] lg:w-[190px] xl:w-[210px]"
             />
           </Link>
 
@@ -105,28 +105,44 @@ export function Navbar({
               <span className="hidden sm:inline">Enquire Now</span>
             </a>
             <button
-              aria-label="Open menu"
-              className="rounded border border-gray-300 bg-white/80 p-2 lg:hidden"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+              className="group relative grid h-12 w-12 place-items-center rounded-xl border border-slate-300/90 bg-gradient-to-b from-white to-slate-50 text-[#0b2f57] shadow-[0_6px_14px_rgba(15,23,42,0.1)] transition hover:border-[#e30613]/45 hover:text-[#e30613] lg:hidden"
               onClick={() => setIsMenuOpen((prev) => !prev)}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeWidth="2" d="M4 7h16M4 12h16M4 17h16" />
-              </svg>
+              <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
+              <span className="relative h-4 w-5">
+                <span
+                  className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
+                    isMenuOpen ? "top-[7px] rotate-45" : ""
+                  }`}
+                />
+                <span
+                  className={`absolute left-0 top-[7px] h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
+                    isMenuOpen ? "opacity-0" : "opacity-100"
+                  }`}
+                />
+                <span
+                  className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
+                    isMenuOpen ? "top-[7px] -rotate-45" : ""
+                  }`}
+                />
+              </span>
             </button>
           </div>
         </div>
 
         {isMenuOpen && (
           <div className="border-t border-gray-200 bg-white px-4 pb-4 lg:hidden">
-            <div className="flex flex-col gap-3 pt-3 text-[15px] font-semibold">
+            <div className="flex flex-col gap-2 pt-3 text-[15px] font-semibold">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={
                     link.enabled
-                      ? "rounded px-2 py-1 hover:bg-gray-100"
-                      : "cursor-not-allowed rounded px-2 py-1 text-slate-500"
+                      ? "rounded-lg px-3 py-2 hover:bg-gray-100"
+                      : "cursor-not-allowed rounded-lg px-3 py-2 text-slate-500"
                   }
                   onClick={(e) => {
                     if (!link.enabled) {

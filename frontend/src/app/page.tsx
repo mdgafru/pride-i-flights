@@ -58,7 +58,7 @@ const passengerOptions = [
 ];
 
 const fieldClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none transition placeholder:text-slate-400 focus:border-[#2f6fed] focus:ring-2 focus:ring-[#2f6fed]/15";
+  "w-full border-0 border-b border-slate-300 bg-transparent px-0 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2f6fed]";
 
 const HERO_TRANSITION_SECONDS = 0.85;
 const HERO_VISIBLE_MS = 5000;
@@ -239,7 +239,7 @@ export default function Home() {
           priority
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/30 to-black/55" />
+        <div className="hero-overlay-premium absolute inset-0" />
 
         <div className="relative mx-auto flex min-h-[480px] max-w-[1100px] flex-col items-center justify-end px-4 pb-8 pt-10 md:min-h-[520px] md:pb-10">
           <div className="relative w-full max-w-[760px]">
@@ -268,7 +268,7 @@ export default function Home() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: direction > 0 ? -70 : 70 }}
                 transition={{ duration: HERO_TRANSITION_SECONDS, ease: [0.22, 0.61, 0.36, 1] }}
-                className="absolute inset-0 rounded-xl border border-white/80 bg-white/95 px-6 py-5 shadow-[0_18px_40px_rgba(0,0,0,0.25)] backdrop-blur-md md:px-8 md:py-6"
+                className="hero-card-premium absolute inset-0 rounded-xl px-6 py-5 backdrop-blur-md md:px-8 md:py-6"
               >
                 <Image
                   src="/rede-flights-logo-clean.png"
@@ -293,7 +293,7 @@ export default function Home() {
                     <p className="text-xs text-[#c40010] md:text-sm">{current.meta}</p>
                     <Link
                       href={current.href}
-                      className="btn-premium shrink-0 rounded-md bg-[#2f6fed] px-4 py-2 text-sm font-semibold text-white hover:bg-[#245cd1]"
+                      className="btn-premium shrink-0 rounded-md bg-[#e30613] px-4 py-2 text-sm font-semibold text-white hover:bg-[#c40010]"
                     >
                       {current.cta}
                     </Link>
@@ -345,18 +345,30 @@ export default function Home() {
 
       <section className="relative z-10 mx-auto -mt-4 w-full max-w-[1260px] px-4 pb-6 md:-mt-6">
         <div className="grid items-stretch gap-4 lg:grid-cols-[0.7fr_1.7fr] lg:gap-5">
-          <div className="relative order-2 min-h-[420px] overflow-hidden rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] lg:order-1 lg:min-h-full">
-            <Image
-              src="/promo-banner.png"
-              alt="REDE Flights — Dubai to Cochin from 900 AED"
-              fill
-              priority
-              unoptimized
-              className="object-cover object-top"
-            />
+          <div className="order-2 lg:order-1">
+            <div className="hover-lift-soft mx-auto w-full max-w-[520px] overflow-hidden rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] lg:max-w-none">
+              <Image
+                src="/promo-banner.png"
+                alt="REDE Flights — Dubai to Cochin from 900 AED"
+                priority
+                unoptimized
+                width={900}
+                height={1200}
+                className="h-auto w-full"
+              />
+            </div>
+            <a
+              href="https://wa.me/12345678900"
+              target="_blank"
+              rel="noreferrer"
+              className="btn-premium mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#e30613] px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(227,6,19,0.28)] transition hover:bg-[#c40010]"
+            >
+              <WhatsAppIcon />
+              Book Now on WhatsApp
+            </a>
           </div>
 
-          <div className="order-1 rounded-2xl bg-white/95 p-5 text-[#0b2f57] shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-sm sm:p-6 md:p-7 lg:order-2">
+          <div className="section-polish order-1 px-5 py-5 text-[#0b2f57] sm:px-6 sm:py-6 md:px-7 md:py-7 lg:order-2">
             <div className="flex flex-wrap gap-6 border-b border-slate-200 pb-3">
               {(
                 [
@@ -550,7 +562,7 @@ export default function Home() {
                     type="button"
                     onClick={addMultiLeg}
                     disabled={multiLegs.length >= 5}
-                    className="text-sm font-semibold text-[#2f6fed] transition hover:text-[#245cd1] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="text-sm font-semibold text-[#e30613] transition hover:text-[#c40010] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     + Add another flight
                   </button>
@@ -560,7 +572,7 @@ export default function Home() {
               <div className="flex justify-end pt-2">
                 <button
                   type="submit"
-                  className="btn-premium rounded-xl bg-[#2f6fed] px-8 py-3 text-sm font-semibold text-white hover:bg-[#245cd1]"
+                  className="btn-premium rounded-xl bg-[#e30613] px-8 py-3 text-sm font-semibold text-white hover:bg-[#c40010]"
                 >
                   Find flights
                 </button>
@@ -594,7 +606,7 @@ export default function Home() {
           <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
             Our Services
           </p>
-          <h2 className="mt-2 text-3xl font-extrabold text-[#111827] md:text-4xl">
+            <h2 className="premium-title mt-2 text-3xl font-extrabold md:text-4xl">
             Flights · Hotels · Visa · Insurance
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-gray-500">
@@ -611,7 +623,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.35, delay: index * 0.08 }}
               whileHover={{ y: -6 }}
-              className="premium-shadow group overflow-hidden rounded-2xl bg-white"
+              className="premium-shadow hover-lift-soft group overflow-hidden rounded-2xl bg-white"
             >
               <div className="relative h-48 overflow-hidden">
                 <Image
@@ -646,7 +658,7 @@ export default function Home() {
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
               Tour Packages
             </p>
-            <h2 className="mt-1 text-3xl font-extrabold text-[#111827] md:text-4xl">
+            <h2 className="mt-1 text-3xl font-extrabold text-[#e30613] md:text-4xl">
               Handpicked holiday packages
             </h2>
           </div>
@@ -664,7 +676,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.08 }}
               whileHover={{ y: -6 }}
-              className="premium-shadow overflow-hidden rounded-2xl bg-white"
+              className="premium-shadow hover-lift-soft overflow-hidden rounded-2xl bg-white"
             >
               <div className="relative">
                 <Image
@@ -722,14 +734,14 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mb-4 mt-14 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-4 mt-14 text-center">
           <div>
-            <h2 className="text-3xl font-extrabold text-[#111827] md:text-4xl">
+            <h2 className="text-3xl font-extrabold text-[#e30613] md:text-4xl">
               Popular Destinations
             </h2>
             <p className="mt-1 text-sm text-gray-500">Handpicked places travelers love most.</p>
           </div>
-          <Link href="/destinations" className="text-sm font-semibold text-[#e30613]">
+          <Link href="/destinations" className="mt-2 inline-block text-sm font-semibold text-[#e30613]">
             View All Destinations →
           </Link>
         </div>
@@ -743,7 +755,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: index * 0.06 }}
               whileHover={{ y: -6 }}
-              className="tilt-shell premium-shadow group relative overflow-hidden rounded-2xl"
+              className="tilt-shell premium-shadow hover-lift-soft group relative overflow-hidden rounded-2xl"
             >
               <Image
                 className="tilt-card h-56 w-full object-cover transition duration-500 group-hover:scale-105"
@@ -764,7 +776,7 @@ export default function Home() {
 
         {/* Reviews */}
         <div className="mt-14">
-          <h3 className="text-center text-3xl font-extrabold text-[#101828]">What Travelers Say</h3>
+          <h3 className="text-center text-3xl font-extrabold text-[#e30613]">What Travelers Say</h3>
           <p className="mt-2 text-center text-sm text-gray-500">
             Real feedback from happy travelers who booked with us.
           </p>
@@ -776,7 +788,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.08 }}
-                className="premium-shadow rounded-2xl border border-[#edf1f8] bg-white p-5"
+              className="premium-shadow hover-lift-soft rounded-2xl border border-[#edf1f8] bg-white p-5"
               >
                 <p className="text-amber-500">★★★★★</p>
                 <p className="mt-3 text-sm leading-6 text-gray-600">&ldquo;{review.text}&rdquo;</p>
@@ -790,7 +802,7 @@ export default function Home() {
         </div>
 
         <section className="soft-section premium-shadow mt-12 rounded-2xl px-6 py-8">
-          <h3 className="text-center text-3xl font-extrabold text-[#101828]">Why Travel With Us?</h3>
+          <h3 className="text-center text-3xl font-extrabold text-[#e30613]">Why Travel With Us?</h3>
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {[
               { title: "Customized Trips", sub: "Tailored to your needs" },
@@ -810,25 +822,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="premium-shadow mt-10 grid grid-cols-1 gap-6 rounded-2xl bg-[#0d3563] p-6 text-white lg:grid-cols-[1fr_auto]">
-          <div>
-            <p className="text-3xl font-extrabold tracking-tight md:text-4xl">
-              Ready for your next journey?
-            </p>
-            <p className="mt-2 text-sm text-blue-100/95">
-              Talk to our destination specialist and get a personalized itinerary instantly.
-            </p>
-      </div>
-          <a
-            href="https://wa.me/12345678900"
-            target="_blank"
-            rel="noreferrer"
-            className="btn-premium flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-7 py-3 text-sm font-semibold text-white"
-          >
-            <WhatsAppIcon />
-            Chat on WhatsApp
-          </a>
-        </section>
       </section>
     </SiteShell>
   );
