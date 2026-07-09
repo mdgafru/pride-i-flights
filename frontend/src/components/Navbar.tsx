@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { WhatsAppIcon } from "@/components/icons";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const navLinks = [
   { label: "Home", href: "/", enabled: true },
@@ -53,23 +52,8 @@ export function Navbar({
         }
       >
         <div className="mx-auto flex max-w-[1260px] items-center justify-between gap-2 px-4 py-2.5 lg:gap-3">
-          <Link href="/" className="inline-flex shrink-0 items-center gap-2 bg-transparent leading-none">
-            <Image
-              src="/icon.svg"
-              alt="REDE icon"
-              width={34}
-              height={34}
-              className="h-7 w-7 rounded-md bg-transparent sm:h-8 sm:w-8"
-            />
-            <Image
-              src="/rede-flights-logo-clean.png"
-              alt="REDE I FLIGHTS"
-              width={320}
-              height={110}
-              priority
-              unoptimized
-              className="block h-auto w-[170px] bg-transparent sm:w-[190px] lg:w-[190px] xl:w-[210px]"
-            />
+          <Link href="/" className="inline-flex shrink-0 bg-transparent leading-none">
+            <BrandLogo />
           </Link>
 
           <nav className="hidden min-w-0 flex-1 flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-semibold tracking-[0.01em] text-[#1f2937] sm:gap-x-3.5 sm:text-xs lg:flex lg:gap-x-4 lg:text-[13px] xl:text-[14px]">
@@ -99,10 +83,9 @@ export function Navbar({
               href="https://wa.me/12345678900"
               target="_blank"
               rel="noreferrer"
-              className="btn-premium premium-shadow hidden items-center gap-2 bg-[#e30613] px-3 py-2 text-xs font-semibold text-white sm:flex lg:px-4 lg:text-sm"
+              className="btn-premium premium-shadow hidden items-center bg-[#e30613] px-3 py-2 text-xs font-semibold text-white sm:inline-flex lg:px-4 lg:text-sm"
             >
-              <WhatsAppIcon />
-              <span className="hidden sm:inline">Enquire Now</span>
+              Enquire Now
             </a>
             <button
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}

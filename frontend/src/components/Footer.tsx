@@ -1,11 +1,4 @@
-import Image from "next/image";
 import Link from "next/link";
-import {
-  FacebookIcon,
-  InstagramIcon,
-  XIcon,
-  YouTubeIcon,
-} from "@/components/icons";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -24,13 +17,6 @@ const serviceLinks = [
   { label: "Corporate Travel" },
 ];
 
-const socialLinks = [
-  { name: "Facebook", icon: FacebookIcon, href: "#" },
-  { name: "Instagram", icon: InstagramIcon, href: "#" },
-  { name: "X", icon: XIcon, href: "#" },
-  { name: "YouTube", icon: YouTubeIcon, href: "#" },
-];
-
 export function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
@@ -47,32 +33,11 @@ export function Footer() {
       <div className="relative mx-auto max-w-[1260px] px-4 py-16 md:py-20">
         <div className="grid gap-8 border-b border-white/15 pb-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/icon.svg"
-                alt="REDE icon"
-                width={34}
-                height={34}
-                className="h-8 w-8 rounded-md"
-              />
-              <p className="text-2xl font-extrabold text-[#ff4d5a]">REDE I FLIGHTS</p>
-            </div>
+            <p className="text-2xl font-extrabold text-[#ff4d5a]">REDE I FLIGHTS</p>
             <p className="mt-3 max-w-md text-sm leading-6 text-blue-50/95">
               We are passionate about travel and committed to providing exceptional service and
               unforgettable experiences.
             </p>
-            <div className="mt-5 flex gap-2">
-              {socialLinks.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  aria-label={item.name}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#ff4d5a]/65 bg-white/10 text-[#ffd2d6] transition hover:border-[#ff4d5a] hover:bg-[#e30613] hover:text-white"
-                >
-                  <item.icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
           </div>
 
           <div>
