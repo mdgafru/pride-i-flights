@@ -3,40 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FancySelect } from "@/components/FancySelect";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
-
-const heroSlides = [
-  {
-    label: "Treat yourself to",
-    city: "New York",
-    fromLabel: "New York flights from",
-    price: "INR 82,200",
-    meta: "Return, from Mumbai, Sep 2026",
-    cta: "Search New York flights",
-    href: "/flights",
-  },
-  {
-    label: "Escape to",
-    city: "Dubai",
-    fromLabel: "Dubai flights from",
-    price: "INR 28,499",
-    meta: "Return, from Delhi, Oct 2026",
-    cta: "Search Dubai flights",
-    href: "/flights",
-  },
-  {
-    label: "Discover",
-    city: "London",
-    fromLabel: "London flights from",
-    price: "INR 54,900",
-    meta: "Return, from Mumbai, Nov 2026",
-    cta: "Search London flights",
-    href: "/flights",
-  },
-];
+import { WHATSAPP_URL } from "@/lib/contact";
 
 const tripTypeOptions = [
   { value: "return", label: "Return trip" },
@@ -60,8 +31,6 @@ const passengerOptions = [
 const fieldClass =
   "w-full border-0 border-b border-slate-300 bg-transparent px-0 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2f6fed]";
 
-const HERO_TRANSITION_SECONDS = 0.85;
-const HERO_VISIBLE_MS = 5000;
 const HERO_SKY =
   "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=2000&q=80";
 
@@ -190,8 +159,6 @@ const reviews = [
 ];
 
 export default function Home() {
-  const [slide, setSlide] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [searchTab, setSearchTab] = useState<"flights" | "multi">("flights");
   const [tripType, setTripType] = useState("return");
   const [travelClass, setTravelClass] = useState("economy");
@@ -200,24 +167,6 @@ export default function Home() {
     { from: "", to: "", date: "" },
     { from: "", to: "", date: "" },
   ]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDirection(1);
-      setSlide((prev) => (prev + 1) % heroSlides.length);
-    }, HERO_VISIBLE_MS + HERO_TRANSITION_SECONDS * 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const current = heroSlides[slide];
-  const prevSlide = () => {
-    setDirection(-1);
-    setSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  };
-  const nextSlide = () => {
-    setDirection(1);
-    setSlide((prev) => (prev + 1) % heroSlides.length);
-  };
 
   const addMultiLeg = () => {
     if (multiLegs.length >= 5) return;
@@ -231,144 +180,39 @@ export default function Home() {
 
   return (
     <SiteShell active="Home">
-      <section className="relative min-h-[480px] overflow-hidden text-white md:min-h-[520px]">
+      <section className="relative w-full overflow-x-hidden text-white">
         <Image
           src={HERO_SKY}
-          alt="Clean sky city landscape"
+          alt="Clean sky landscape"
           fill
           priority
           className="object-cover object-center"
         />
         <div className="hero-overlay-premium absolute inset-0" />
 
-        <div className="relative mx-auto flex min-h-[480px] max-w-[1100px] flex-col items-center justify-end px-4 pb-8 pt-10 md:min-h-[520px] md:pb-10">
-          <div className="relative w-full max-w-[760px]">
-            <div
-              className="invisible rounded-xl border border-transparent px-6 py-5 md:px-8 md:py-6"
-              aria-hidden
+        <div className="relative flex justify-center px-2 pb-2 pt-1">
+          <div className="w-fit max-w-[90vw] rounded-2xl border border-white/80 bg-white/95 p-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:p-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/promo-banner.png"
+              alt="REDE Flights — Dubai to Kochi"
+              className="block h-auto w-[230px] rounded-xl sm:w-[250px] md:w-[280px]"
+            />
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-premium mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#e30613] px-3 py-2 text-xs font-semibold text-white hover:bg-[#c40010] sm:text-sm"
             >
-              <div className="pr-0 sm:pr-[150px] md:pr-[185px]">
-                <p className="text-sm">Treat yourself to</p>
-                <h1 className="mt-0.5 text-3xl font-extrabold tracking-tight md:text-4xl">New York</h1>
-                <p className="mt-3 text-sm">New York flights from</p>
-                <p className="mt-0.5 inline-block border-b-2 border-transparent pb-0.5 text-3xl font-extrabold md:text-4xl">
-                  INR 82,200
-                </p>
-                <div className="mt-4 flex items-end justify-between gap-4">
-                  <p className="text-xs">Return, from Mumbai, Sep 2026</p>
-                  <span className="rounded-md px-4 py-2 text-sm font-semibold">Search New York flights</span>
-                </div>
-              </div>
-            </div>
-
-            <AnimatePresence mode="sync" initial={false}>
-              <motion.div
-                key={current.city}
-                initial={{ opacity: 0, x: direction > 0 ? 70 : -70 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: direction > 0 ? -70 : 70 }}
-                transition={{ duration: HERO_TRANSITION_SECONDS, ease: [0.22, 0.61, 0.36, 1] }}
-                className="hero-card-premium absolute inset-0 rounded-xl px-6 py-5 backdrop-blur-md md:px-8 md:py-6"
-              >
-                <Image
-                  src="/rede-flights-logo-clean.png"
-                  alt="REDE I FLIGHTS"
-                  width={280}
-                  height={80}
-                  priority
-                  unoptimized
-                  className="pointer-events-none absolute right-5 top-4 hidden h-auto w-[140px] bg-transparent object-contain sm:block md:right-7 md:top-5 md:w-[170px]"
-                />
-
-                <div className="pr-0 sm:pr-[150px] md:pr-[185px]">
-                  <p className="text-sm font-medium text-[#e30613]">{current.label}</p>
-                  <h1 className="mt-0.5 text-3xl font-extrabold tracking-tight text-[#e30613] md:text-4xl">
-                    {current.city}
-                  </h1>
-                  <p className="mt-3 text-sm font-medium text-[#e30613]">{current.fromLabel}</p>
-                  <p className="mt-0.5 inline-block border-b-2 border-[#e30613] pb-0.5 text-3xl font-extrabold text-[#e30613] md:text-4xl">
-                    {current.price}
-                  </p>
-                  <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
-                    <p className="text-xs text-[#c40010] md:text-sm">{current.meta}</p>
-                    <Link
-                      href={current.href}
-                      className="btn-premium shrink-0 rounded-md bg-[#e30613] px-4 py-2 text-sm font-semibold text-white hover:bg-[#c40010]"
-                    >
-                      {current.cta}
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          <div className="mt-6 mb-2 flex items-center gap-6 md:gap-8">
-            <button
-              aria-label="Previous slide"
-              onClick={prevSlide}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#0b2f57] shadow-md transition hover:scale-105"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeWidth="2.2" d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-
-            <div className="flex items-center gap-3 px-1">
-              {heroSlides.map((_, index) => (
-                <button
-                  key={index}
-                  aria-label={`Go to slide ${index + 1}`}
-                  onClick={() => {
-                    setDirection(index > slide ? 1 : -1);
-                    setSlide(index);
-                  }}
-                  className={`h-1.5 rounded-full transition-all ${
-                    slide === index ? "w-10 bg-white" : "w-8 bg-white/45 hover:bg-white/70"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <button
-              aria-label="Next slide"
-              onClick={nextSlide}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#0b2f57] shadow-md transition hover:scale-105"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeWidth="2.2" d="M9 6l6 6-6 6" />
-              </svg>
-            </button>
+              <WhatsAppIcon className="h-4 w-4" />
+              Enquire Now
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto -mt-4 w-full max-w-[1260px] px-4 pb-6 md:-mt-6">
-        <div className="grid items-stretch gap-4 lg:grid-cols-[0.7fr_1.7fr] lg:gap-5">
-          <div className="order-2 lg:order-1">
-            <div className="hover-lift-soft mx-auto w-full max-w-[520px] overflow-hidden rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] lg:max-w-none">
-              <Image
-                src="/promo-banner.png"
-                alt="REDE Flights — Dubai to Cochin from 900 AED"
-                priority
-                unoptimized
-                width={900}
-                height={1200}
-                className="h-auto w-full"
-              />
-            </div>
-            <a
-              href="https://wa.me/12345678900"
-              target="_blank"
-              rel="noreferrer"
-              className="btn-premium mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#e30613] px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(227,6,19,0.28)] transition hover:bg-[#c40010]"
-            >
-              <WhatsAppIcon />
-              Book Now on WhatsApp
-            </a>
-          </div>
-
-          <div className="section-polish order-1 px-5 py-5 text-[#0b2f57] sm:px-6 sm:py-6 md:px-7 md:py-7 lg:order-2">
+      <section className="relative z-10 mx-auto w-full max-w-[1260px] px-4 pb-6 pt-2">
+        <div className="section-polish px-5 py-5 text-[#0b2f57] sm:px-6 sm:py-6 md:px-7 md:py-7">
             <div className="flex flex-wrap gap-6 border-b border-slate-200 pb-3">
               {(
                 [
@@ -578,7 +422,6 @@ export default function Home() {
                 </button>
               </div>
             </form>
-          </div>
         </div>
       </section>
 

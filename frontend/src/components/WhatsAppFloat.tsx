@@ -1,9 +1,10 @@
 import { WhatsAppIcon } from "@/components/icons";
+import { WHATSAPP_URL } from "@/lib/contact";
 
 export function WhatsAppFloat() {
   return (
     <a
-      href="https://wa.me/12345678900"
+      href={WHATSAPP_URL}
       target="_blank"
       rel="noreferrer"
       aria-label="Chat on WhatsApp"

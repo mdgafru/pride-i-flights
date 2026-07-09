@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { WhatsAppIcon } from "@/components/icons";
+import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL, WHATSAPP_URL } from "@/lib/contact";
 
 const navLinks = [
   { label: "Home", href: "/", enabled: true },
@@ -36,8 +38,12 @@ export function Navbar({
         <div className="bg-[#042448] text-white">
           <div className="mx-auto flex max-w-[1260px] flex-col gap-1 px-4 py-1.5 text-[11px] sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:text-xs">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 sm:gap-6">
-              <span>+1 234 567 8900</span>
-              <span>info@redeiflights.com</span>
+              <a href={TEL_URL} className="hover:text-blue-100">
+                {CONTACT_PHONE}
+              </a>
+              <a href={MAILTO_URL} className="hover:text-blue-100">
+                {CONTACT_EMAIL}
+              </a>
             </div>
             <span className="text-blue-100">Mon - Sun: 9:00 AM - 9:00 PM</span>
           </div>
@@ -80,11 +86,12 @@ export function Navbar({
 
           <div className="flex shrink-0 items-center gap-2">
             <a
-              href="https://wa.me/12345678900"
+              href={WHATSAPP_URL}
               target="_blank"
               rel="noreferrer"
-              className="btn-premium premium-shadow hidden items-center bg-[#e30613] px-3 py-2 text-xs font-semibold text-white sm:inline-flex lg:px-4 lg:text-sm"
+              className="btn-premium premium-shadow hidden items-center gap-1.5 bg-[#e30613] px-3 py-2 text-xs font-semibold text-white sm:inline-flex lg:px-4 lg:text-sm"
             >
+              <WhatsAppIcon className="h-4 w-4" />
               Enquire Now
             </a>
             <button
@@ -139,6 +146,16 @@ export function Navbar({
                   {link.label}
                 </Link>
               ))}
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-premium mt-1 inline-flex items-center justify-center gap-2 rounded-lg bg-[#e30613] px-3 py-2.5 text-sm font-semibold text-white"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <WhatsAppIcon className="h-4 w-4" />
+                Enquire Now
+              </a>
             </div>
           </div>
         )}

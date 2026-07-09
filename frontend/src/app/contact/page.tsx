@@ -3,6 +3,7 @@
 import { PageHero } from "@/components/PageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
+import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL, WHATSAPP_URL } from "@/lib/contact";
 
 export default function ContactPage() {
   return (
@@ -54,12 +55,20 @@ export default function ContactPage() {
               Prefer instant help? Chat on WhatsApp and get personalized travel options fast.
             </p>
             <ul className="mt-6 space-y-3 text-sm text-blue-50">
-              <li>+1 234 567 8900</li>
-              <li>info@redeiflights.com</li>
+              <li>
+                <a href={TEL_URL} className="hover:text-white">
+                  {CONTACT_PHONE}
+                </a>
+              </li>
+              <li>
+                <a href={MAILTO_URL} className="hover:text-white">
+                  {CONTACT_EMAIL}
+                </a>
+              </li>
               <li>Mon - Sun: 9:00 AM - 9:00 PM</li>
             </ul>
             <a
-              href="https://wa.me/12345678900"
+              href={WHATSAPP_URL}
               target="_blank"
               rel="noreferrer"
               className="btn-premium mt-8 inline-flex items-center gap-2 rounded-xl bg-[#e30613] px-6 py-3 text-sm font-semibold text-white hover:bg-[#c40010]"

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL } from "@/lib/contact";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -65,8 +66,12 @@ export function Footer() {
           <div>
             <p className="mb-3 text-lg font-semibold text-[#ff4d5a]">Contact Us</p>
             <ul className="space-y-2 text-sm text-blue-50/90">
-              <li className="footer-link">+1 234 567 8900</li>
-              <li className="footer-link">info@redeiflights.com</li>
+              <li className="footer-link">
+                <a href={TEL_URL}>{CONTACT_PHONE}</a>
+              </li>
+              <li className="footer-link">
+                <a href={MAILTO_URL}>{CONTACT_EMAIL}</a>
+              </li>
               <li className="footer-link">123 Travel Street, City</li>
               <li className="footer-link">Country - 00000</li>
             </ul>
