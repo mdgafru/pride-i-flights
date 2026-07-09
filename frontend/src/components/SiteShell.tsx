@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 
 export function SiteShell({
   children,
@@ -15,6 +16,7 @@ export function SiteShell({
 
   return (
     <main className={`relative bg-[#f6f6f8] text-[#1d2433] ${contentOffsetClass}`}>
+      <WhatsAppFloat />
       <Navbar active={active} overlay={overlayNav} />
       {children}
       <Footer />
