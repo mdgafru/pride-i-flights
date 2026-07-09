@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { FancySelect } from "@/components/FancySelect";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
@@ -31,8 +31,24 @@ const passengerOptions = [
 const fieldClass =
   "w-full border-0 border-b border-slate-300 bg-transparent px-0 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2f6fed]";
 
-const HERO_SKY =
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=2000&q=80";
+
+const heroBanners = [
+  { src: "/promo-banner.png", alt: "REDE Flights — Dubai to Kochi" },
+  { src: "/image2.png", alt: "REDE Flights — Travel Promotion" },
+  { src: "/image3.png", alt: "REDE Flights — Special Offer" },
+];
+
+const BANNER_VISIBLE_MS = 5000;
+const BANNER_TRANSITION_S = 1.25;
+
+const imageBadgeClass =
+  "absolute left-3 top-3 rounded-md bg-[#e30613] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm";
+
+const catalogImageClass =
+  "h-44 w-full object-cover transition duration-500 group-hover:scale-[1.02]";
+
+const catalogLinkClass =
+  "mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#e30613] transition hover:gap-2";
 
 const services = [
   {
@@ -163,10 +179,26 @@ export default function Home() {
   const [tripType, setTripType] = useState("return");
   const [travelClass, setTravelClass] = useState("economy");
   const [passengers, setPassengers] = useState("1a");
+  const [bannerIndex, setBannerIndex] = useState(0);
   const [multiLegs, setMultiLegs] = useState([
     { from: "", to: "", date: "" },
     { from: "", to: "", date: "" },
   ]);
+
+  useEffect(() => {
+    heroBanners.forEach((banner) => {
+      const img = new window.Image();
+      img.src = banner.src;
+    });
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % heroBanners.length);
+    }, BANNER_VISIBLE_MS + BANNER_TRANSITION_S * 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const addMultiLeg = () => {
     if (multiLegs.length >= 5) return;
@@ -180,25 +212,42 @@ export default function Home() {
 
   return (
     <SiteShell active="Home">
-      <section className="relative flex min-h-[50vh] w-full items-center justify-center overflow-x-hidden py-10 text-white sm:min-h-[58vh] sm:py-14">
-        <Image
-          src={HERO_SKY}
-          alt="Clean sky landscape"
-          fill
-          priority
-          className="object-cover object-center"
+      <section className="relative flex min-h-[50vh] w-full items-center justify-center overflow-hidden pb-4 pt-10 text-white sm:min-h-[58vh] sm:pb-6 sm:pt-14">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/background.png"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 z-0 h-full w-full object-cover object-center"
         />
-        <div className="hero-overlay-premium absolute inset-0" />
+        <div className="hero-overlay-premium pointer-events-none absolute inset-0 z-[1]" />
 
-        <div className="hero-card-premium relative flex w-fit flex-col overflow-hidden rounded-2xl leading-none">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/promo-banner.png"
-            alt="REDE Flights — Dubai to Kochi"
-            width={751}
-            height={808}
-            className="block h-auto w-[200px] sm:w-[240px] md:w-[280px]"
-          />
+        <div className="hero-card-premium relative z-[2] flex w-fit flex-col overflow-hidden rounded-2xl leading-none">
+          <div className="relative aspect-[2/3] w-[200px] overflow-hidden sm:w-[240px] md:w-[280px]">
+            <motion.div
+              className="flex h-full will-change-transform"
+              style={{ width: `${heroBanners.length * 100}%` }}
+              animate={{
+                x: `-${bannerIndex * (100 / heroBanners.length)}%`,
+              }}
+              transition={{
+                duration: BANNER_TRANSITION_S,
+                ease: [0.45, 0, 0.25, 1],
+              }}
+            >
+              {heroBanners.map((banner) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={banner.src}
+                  src={banner.src}
+                  alt={banner.alt}
+                  className="h-full shrink-0 object-contain object-top"
+                  style={{ width: `${100 / heroBanners.length}%` }}
+                  draggable={false}
+                />
+              ))}
+            </motion.div>
+          </div>
           <a
             href={WHATSAPP_URL}
             target="_blank"
@@ -211,7 +260,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto w-full max-w-[1260px] px-4 pb-6 pt-2">
+      <section className="relative z-10 mx-auto -mt-8 w-full max-w-[1260px] px-4 pb-6 sm:-mt-10">
         <div className="section-polish px-5 py-5 text-[#0b2f57] sm:px-6 sm:py-6 md:px-7 md:py-7">
             <div className="flex flex-wrap gap-6 border-b border-slate-200 pb-3">
               {(
@@ -446,49 +495,45 @@ export default function Home() {
 
       <section className="section-fade-top mx-auto max-w-[1260px] px-4 pb-14 pt-10">
         <div className="mb-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
-            Our Services
-          </p>
-            <h2 className="premium-title mt-2 text-3xl font-extrabold md:text-4xl">
-            Flights · Hotels · Visa · Insurance
-          </h2>
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
+              Our Services
+            </p>
+            <h2 className="mt-1 text-3xl font-extrabold text-[#e30613] md:text-4xl">
+              Flights · Hotels · Visa · Insurance
+            </h2>
+          </div>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-gray-500">
             Everything for your trip in one place — designed with a clean premium travel-agency look.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
           {services.map((item, index) => (
             <motion.article
               key={item.title}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: index * 0.08 }}
-              whileHover={{ y: -6 }}
-              className="premium-shadow hover-lift-soft group overflow-hidden rounded-2xl bg-white"
+              transition={{ duration: 0.35, delay: index * 0.06 }}
+              className="group"
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative overflow-hidden rounded-xl">
                 <Image
                   src={item.image}
                   alt={item.title}
                   width={640}
                   height={360}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  className={catalogImageClass}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-[#e30613]">
-                  {item.badge}
-                </span>
-                <p className="absolute bottom-3 left-4 text-xl font-bold text-white">{item.title}</p>
+                <span className={imageBadgeClass}>{item.badge}</span>
               </div>
-              <div className="p-4">
-                <p className="text-sm text-gray-500">{item.desc}</p>
-                <Link
-                  href={item.href}
-                  className="mt-4 inline-flex rounded-lg border border-[#e30613] px-4 py-2 text-sm font-semibold text-[#e30613] transition hover:bg-[#e30613] hover:text-white"
-                >
+              <div className="pt-3">
+                <h3 className="text-lg font-bold text-[#0b2f57]">{item.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{item.desc}</p>
+                <Link href={item.href} className={catalogLinkClass}>
                   Explore {item.title}
+                  <span aria-hidden>→</span>
                 </Link>
               </div>
             </motion.article>
@@ -510,44 +555,38 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {packages.map((pkg, index) => (
             <motion.article
               key={pkg.title}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.08 }}
-              whileHover={{ y: -6 }}
-              className="premium-shadow hover-lift-soft overflow-hidden rounded-2xl bg-white"
+              transition={{ duration: 0.35, delay: index * 0.06 }}
+              className="group"
             >
-              <div className="relative">
+              <div className="relative overflow-hidden rounded-xl">
                 <Image
                   src={pkg.image}
                   alt={pkg.title}
                   width={700}
                   height={420}
-                  className="h-48 w-full object-cover"
+                  className={catalogImageClass}
                 />
-                <span className="absolute left-3 top-3 rounded bg-[#e30613] px-2 py-1 text-xs font-semibold text-white">
-                  {pkg.tag}
-                </span>
+                <span className={imageBadgeClass}>{pkg.tag}</span>
               </div>
-              <div className="p-4">
-                <p className="text-xs text-gray-500">{pkg.duration}</p>
-                <h3 className="mt-1 text-lg font-bold text-[#111827]">{pkg.title}</h3>
-                <div className="mt-4 flex items-center justify-between">
-                  <p className="text-xl font-extrabold text-[#0b2f57]">
-                    {pkg.price}
-                    <span className="text-sm font-medium text-gray-500"> / person</span>
-                  </p>
-                  <Link
-                    href="/packages"
-                    className="text-sm font-semibold text-[#e30613] hover:underline"
-                  >
-                    Details
-                  </Link>
-                </div>
+              <div className="pt-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                  {pkg.duration}
+                </p>
+                <h3 className="mt-1 text-lg font-bold text-[#0b2f57]">{pkg.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
+                  <span className="font-extrabold text-[#0b2f57]">{pkg.price}</span> / person
+                </p>
+                <Link href="/packages" className={catalogLinkClass}>
+                  Details
+                  <span aria-hidden>→</span>
+                </Link>
               </div>
             </motion.article>
           ))}
