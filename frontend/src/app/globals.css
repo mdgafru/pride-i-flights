@@ -257,3 +257,184 @@ h3 {
     0 10px 18px rgba(11, 36, 74, 0.08),
     0 3px 8px rgba(11, 36, 74, 0.05);
 }
+
+/* Dashboard */
+.dash-shell {
+  background: #f3f6fb;
+}
+
+.dash-sidebar {
+  background: #0f2f57;
+  box-shadow: 2px 0 10px rgba(2, 16, 36, 0.14);
+  overflow: hidden;
+}
+
+.dash-sidebar-brand {
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.dash-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 0.45rem;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: rgba(219, 234, 254, 0.82);
+  border: 1px solid transparent;
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+
+.dash-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: none;
+}
+
+.dash-nav-link:active {
+  transform: translateX(1px) scale(0.99);
+}
+
+.dash-nav-link-active {
+  background: #e30613;
+  color: #fff;
+  border-color: rgba(255, 186, 191, 0.3);
+  box-shadow: none;
+}
+
+.dash-user-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dash-signout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.dash-signout-btn:active {
+  transform: scale(0.98);
+}
+
+.dash-signout-btn:hover {
+  background: rgba(227, 6, 19, 0.22);
+  border-color: rgba(255, 120, 130, 0.55);
+}
+
+.dash-signout-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.dash-topbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dash-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.45rem;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0b2f57;
+}
+
+.dash-menu-btn:active {
+  transform: scale(0.98);
+}
+
+.dash-header-chip {
+  border-radius: 999px;
+  border: 1px solid #dbe3ee;
+  background: #f8fafc;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.dash-content {
+  padding: 0.55rem;
+}
+
+@media (min-width: 640px) {
+  .dash-content {
+    padding: 0.7rem;
+  }
+}
+
+.dash-card {
+  border-radius: 0.65rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.dash-stat {
+  border-radius: 0.65rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 0.55rem 0.65rem;
+}
+
+.dash-table th,
+.dash-table td {
+  padding: 0.45rem 0.55rem;
+  font-size: 0.72rem;
+}
+
+.dash-table th {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+@keyframes dashSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dashBarSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+.dash-inline-spinner {
+  animation: dashSpin 0.8s linear infinite;
+}
+
+.dash-top-loader {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 2px;
+  width: 32%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e30613, #ff7580);
+  animation: dashBarSlide 0.9s ease-in-out infinite;
+}
