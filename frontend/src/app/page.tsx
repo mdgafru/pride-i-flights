@@ -218,7 +218,7 @@ export default function Home() {
           src="/background.png"
           alt=""
           aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-center"
+          className="absolute inset-0 z-0 h-full w-full object-cover object-center brightness-[1.24] saturate-[1.15] contrast-[1.08]"
         />
         <div className="hero-overlay-premium pointer-events-none absolute inset-0 z-[1]" />
 

@@ -17,16 +17,6 @@ const hotels = [
       "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80",
   },
   {
-    name: "Burj Al Arab",
-    location: "Dubai, UAE",
-    rating: "4.9",
-    reviews: "3.4k reviews",
-    price: "$520",
-    amenities: "Wi-Fi · Pool · Spa · Sea View",
-    image:
-      "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=900&q=80",
-  },
-  {
     name: "Conrad Maldives",
     location: "Maldives",
     rating: "4.9",
