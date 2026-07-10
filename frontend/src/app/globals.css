@@ -223,8 +223,63 @@ h3 {
 
 .hero-overlay-premium {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0.1) 100%),
-    radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.32), transparent 60%);
+    linear-gradient(105deg, rgba(11, 47, 87, 0.28) 0%, rgba(11, 47, 87, 0.08) 42%, rgba(255, 255, 255, 0.05) 100%),
+    radial-gradient(circle at 18% 40%, rgba(255, 255, 255, 0.2), transparent 55%);
+}
+
+.hero-search-date-wrap {
+  position: relative;
+  margin-top: 0.375rem;
+  min-width: 0;
+  padding-right: 0.125rem;
+}
+
+.hero-search-bar input[type="date"] {
+  color: #0b2f57;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hero-search-date {
+  color-scheme: light;
+}
+
+.hero-search-bar input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0.125rem;
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transform: translateY(-50%);
+}
+
+.hero-route-swap {
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition: transform 0.25s ease, border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.hero-route-swap:active {
+  background-color: #fff5f5;
+  border-color: #e30613;
+  color: #e30613;
+}
+
+.hero-search-bar input:disabled {
+  color: #94a3b8;
+}
+
+.hero-search-bar select.hero-search-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230b2f57' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  background-size: 1rem;
 }
 
 .hero-card-premium {

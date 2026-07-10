@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { FancySelect } from "@/components/FancySelect";
+import { HeroRouteSwap } from "@/components/HeroRouteSwap";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
@@ -28,9 +28,20 @@ const passengerOptions = [
   { value: "2a1c", label: "2 Adults, 1 Child" },
 ];
 
-const fieldClass =
-  "w-full border-0 border-b border-slate-300 bg-transparent px-0 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2f6fed]";
-
+const heroSearchLabelClass = "text-xs font-bold uppercase tracking-wide text-slate-600";
+const heroSearchInputClass =
+  "mt-1.5 w-full min-w-0 border-0 bg-transparent p-0 text-[15px] font-semibold leading-snug text-[#0b2f57] outline-none placeholder:font-medium placeholder:text-slate-500";
+const heroSearchCellClass =
+  "flex min-h-[82px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 px-4 py-4 sm:border-r sm:border-b-0 sm:px-4 lg:px-4 lg:last:border-r-0";
+const heroSearchDateCellClass =
+  "flex min-h-[82px] min-w-0 flex-col justify-center border-b border-slate-200 px-4 py-4 sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 lg:px-3.5 lg:pr-4";
+const heroSearchTravellerCellClass = heroSearchCellClass;
+const heroSearchSelectClass =
+  "hero-search-select w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-sm font-semibold text-[#0b2f57] outline-none sm:text-[15px]";
+const heroSearchBarClass =
+  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 rounded-xl border border-slate-200/90 bg-white shadow-[0_14px_36px_rgba(11,47,87,0.16)] sm:grid-cols-2 lg:grid-cols-[minmax(0,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)]";
+const heroTripSelectClass =
+  "mb-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none";
 
 const heroBanners = [
   { src: "/promo-banner.png", alt: "REDE Flights — Dubai to Kochi" },
@@ -175,15 +186,10 @@ const reviews = [
 ];
 
 export default function Home() {
-  const [searchTab, setSearchTab] = useState<"flights" | "multi">("flights");
   const [tripType, setTripType] = useState("return");
   const [travelClass, setTravelClass] = useState("economy");
   const [passengers, setPassengers] = useState("1a");
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [multiLegs, setMultiLegs] = useState([
-    { from: "", to: "", date: "" },
-    { from: "", to: "", date: "" },
-  ]);
 
   useEffect(() => {
     heroBanners.forEach((banner) => {
@@ -200,311 +206,176 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const addMultiLeg = () => {
-    if (multiLegs.length >= 5) return;
-    setMultiLegs((prev) => [...prev, { from: "", to: "", date: "" }]);
-  };
-
-  const removeMultiLeg = (index: number) => {
-    if (multiLegs.length <= 2) return;
-    setMultiLegs((prev) => prev.filter((_, i) => i !== index));
-  };
-
   return (
     <SiteShell active="Home">
-      <section className="relative flex min-h-[50vh] w-full items-center justify-center overflow-hidden pb-10 pt-10 text-white sm:min-h-[58vh] sm:pb-12 sm:pt-14">
+      <section className="relative w-full overflow-hidden py-5 sm:py-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/background.png"
           alt=""
           aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-center brightness-[1.24] saturate-[1.15] contrast-[1.08]"
+          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_30%] brightness-[1.24] saturate-[1.15] contrast-[1.08]"
         />
         <div className="hero-overlay-premium pointer-events-none absolute inset-0 z-[1]" />
 
-        <div className="hero-card-premium relative z-[2] flex w-fit flex-col overflow-hidden rounded-2xl leading-none">
-          <div className="relative aspect-[2/3] w-[200px] overflow-hidden sm:w-[240px] md:w-[280px]">
-            <motion.div
-              className="flex h-full will-change-transform"
-              style={{ width: `${heroBanners.length * 100}%` }}
-              animate={{
-                x: `-${bannerIndex * (100 / heroBanners.length)}%`,
-              }}
-              transition={{
-                duration: BANNER_TRANSITION_S,
-                ease: [0.45, 0, 0.25, 1],
-              }}
-            >
-              {heroBanners.map((banner) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={banner.src}
-                  src={banner.src}
-                  alt={banner.alt}
-                  className="h-full shrink-0 object-contain object-top"
-                  style={{ width: `${100 / heroBanners.length}%` }}
-                  draggable={false}
-                />
-              ))}
-            </motion.div>
-          </div>
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="flex w-full items-center justify-center gap-1.5 bg-[#e30613] px-2 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#c40010] sm:text-xs"
-          >
-            <WhatsAppIcon className="h-3.5 w-3.5 shrink-0" />
-            Enquire Now
-          </a>
-        </div>
-      </section>
-
-      <section className="relative z-10 mx-auto mt-2 w-full max-w-[1260px] px-4 pb-6 sm:mt-4">
-        <div className="section-polish px-5 py-5 text-[#0b2f57] sm:px-6 sm:py-6 md:px-7 md:py-7">
-            <div className="flex flex-wrap gap-6 border-b border-slate-200 pb-3">
-              {(
-                [
-                  { id: "flights", label: "Flights" },
-                  { id: "multi", label: "Multi-city" },
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setSearchTab(tab.id)}
-                  className={`inline-flex items-center gap-2 border-b-2 pb-2 text-sm font-semibold transition ${
-                    searchTab === tab.id
-                      ? "border-[#0b2f57] text-[#0b2f57]"
-                      : "border-transparent text-slate-400 hover:text-[#0b2f57]"
+        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-5 px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-5 xl:gap-6">
+          <div className="w-full min-w-0 lg:flex-[1.4] lg:max-w-none">
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "Flights", href: "/", active: true },
+                { label: "Hotels", href: "/hotels", active: false },
+                { label: "Visa", href: "/visa", active: false },
+                { label: "Insurance", href: "/travel-insurance", active: false },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition sm:text-sm ${
+                    item.active
+                      ? "bg-[#e30613] text-white shadow-sm"
+                      : "border border-white/40 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
                   }`}
                 >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                      d="M3 13l8-2 9-6-1.5 5.5L21 16l-6.5-1.5L10 18v-3.5L3 13z"
-                    />
-                  </svg>
-                  {tab.label}
-                </button>
+                  {item.label}
+                </Link>
               ))}
             </div>
 
+            <h1 className="mt-3 text-xl font-extrabold leading-tight text-[#e30613] drop-shadow-[0_2px_6px_rgba(255,255,255,0.85)] sm:text-2xl">
+              Best fares for your next journey.
+              <span className="mt-0.5 block text-sm font-semibold text-[#e30613] sm:text-base">
+                One simple search.
+              </span>
+            </h1>
+
             <form
               action="/flights"
-              className="mt-5 space-y-5"
+              className="mt-4 rounded-2xl bg-white/20 p-3 ring-1 ring-white/40 backdrop-blur-sm sm:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
                 window.location.href = "/flights";
               }}
             >
-              {searchTab === "flights" ? (
-                <>
-                  <FancySelect
-                    label="Trip type"
-                    value={tripType}
-                    options={tripTypeOptions}
-                    onChange={setTripType}
-                    className="max-w-xs"
-                  />
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-medium tracking-wide text-slate-500 uppercase">
-                        From
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Departure city"
-                        className={fieldClass}
-                      />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-medium tracking-wide text-slate-500 uppercase">
-                        To
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="Where can we take you?"
-                        className={fieldClass}
-                      />
-                    </label>
-                  </div>
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-medium tracking-wide text-slate-500 uppercase">
-                        Depart
-                      </span>
-                      <input type="date" className={fieldClass} />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-medium tracking-wide text-slate-500 uppercase">
-                        Return
-                      </span>
+              <select
+                value={tripType}
+                onChange={(e) => setTripType(e.target.value)}
+                className={heroTripSelectClass}
+              >
+                {tripTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-stretch">
+                <div className={heroSearchBarClass}>
+                  <HeroRouteSwap />
+                  <label className={heroSearchDateCellClass}>
+                    <span className={heroSearchLabelClass}>Depart</span>
+                    <div className="hero-search-date-wrap">
+                      <input type="date" className="hero-search-date mt-0 w-full min-w-0 border-0 bg-transparent p-0 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none" />
+                    </div>
+                  </label>
+                  <label className={heroSearchDateCellClass}>
+                    <span className={heroSearchLabelClass}>Return</span>
+                    <div className="hero-search-date-wrap">
                       <input
                         type="date"
-                        className={fieldClass}
+                        className="hero-search-date mt-0 w-full min-w-0 border-0 bg-transparent p-0 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none disabled:opacity-45"
                         disabled={tripType === "oneway"}
                       />
-                    </label>
-                    <FancySelect
-                      label="Travel class"
-                      value={travelClass}
-                      options={travelClassOptions}
-                      onChange={setTravelClass}
-                    />
-                    <FancySelect
-                      label="Passengers"
-                      value={passengers}
-                      options={passengerOptions}
-                      onChange={setPassengers}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  {multiLegs.map((leg, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-1 gap-5 rounded-xl border border-slate-100 bg-slate-50/60 p-4 sm:grid-cols-2"
-                    >
-                      <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase sm:col-span-2">
-                        Flight {index + 1}
-                      </p>
-                      <label className="block">
-                        <span className="mb-1.5 block text-xs font-medium tracking-wide text-slate-500 uppercase">
-                          From
-                        </span>
-                        <input
-                          type="text"
-                          value={leg.from}
-                          onChange={(e) =>
-                            setMultiLegs((prev) =>
-                              prev.map((item, i) =>
-                                i === index ? { ...item, from: e.target.value } : item,
-                              ),
-                            )
-                          }
-                          placeholder="Departure city"
-                          className={fieldClass}
-                        />
-                      </label>
-                      <label className="block">
-                        <span className="mb-1.5 block text-xs font-medium tracking-wide text-slate-500 uppercase">
-                          To
-                        </span>
-                        <input
-                          type="text"
-                          value={leg.to}
-                          onChange={(e) =>
-                            setMultiLegs((prev) =>
-                              prev.map((item, i) =>
-                                i === index ? { ...item, to: e.target.value } : item,
-                              ),
-                            )
-                          }
-                          placeholder="Arrival city"
-                          className={fieldClass}
-                        />
-                      </label>
-                      <label className="block">
-                        <span className="mb-1.5 block text-xs font-medium tracking-wide text-slate-500 uppercase">
-                          Depart
-                        </span>
-                        <input
-                          type="date"
-                          value={leg.date}
-                          onChange={(e) =>
-                            setMultiLegs((prev) =>
-                              prev.map((item, i) =>
-                                i === index ? { ...item, date: e.target.value } : item,
-                              ),
-                            )
-                          }
-                          className={fieldClass}
-                        />
-                      </label>
-                      <div className="flex items-end">
-                        <button
-                          type="button"
-                          onClick={() => removeMultiLeg(index)}
-                          disabled={multiLegs.length <= 2}
-                          className="rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-400 transition hover:bg-white hover:text-[#e30613] disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          Remove
-                        </button>
-                      </div>
                     </div>
-                  ))}
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <FancySelect
-                      label="Travel class"
-                      value={travelClass}
-                      options={travelClassOptions}
-                      onChange={setTravelClass}
-                    />
-                    <FancySelect
-                      label="Passengers"
-                      value={passengers}
-                      options={passengerOptions}
-                      onChange={setPassengers}
-                    />
+                  </label>
+                  <div className={heroSearchTravellerCellClass}>
+                    <span className={heroSearchLabelClass}>Travellers &amp; class</span>
+                    <div className="mt-1.5 grid min-w-0 grid-cols-1 gap-1.5">
+                      <select
+                        value={passengers}
+                        onChange={(e) => setPassengers(e.target.value)}
+                        className={heroSearchSelectClass}
+                      >
+                        {passengerOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={travelClass}
+                        onChange={(e) => setTravelClass(e.target.value)}
+                        className={`${heroSearchSelectClass} text-slate-600`}
+                      >
+                        {travelClassOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={addMultiLeg}
-                    disabled={multiLegs.length >= 5}
-                    className="text-sm font-semibold text-[#e30613] transition hover:text-[#c40010] disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    + Add another flight
-                  </button>
-                </>
-              )}
+                </div>
 
-              <div className="flex justify-end pt-2">
                 <button
                   type="submit"
-                  className="btn-premium rounded-xl bg-[#e30613] px-8 py-3 text-sm font-semibold text-white hover:bg-[#c40010]"
+                  className="btn-premium shrink-0 rounded-xl bg-[#e30613] px-8 py-4 text-base font-bold text-white shadow-md hover:bg-[#c40010] lg:min-h-[82px] lg:min-w-[128px] lg:self-stretch"
                 >
-                  Find flights
+                  Search
                 </button>
               </div>
-            </form>
-        </div>
-      </section>
 
-      <section className="relative mx-auto w-full max-w-[1260px] px-4 pb-5">
-        <div className="soft-section premium-shadow grid grid-cols-1 gap-4 rounded-xl p-5 md:grid-cols-2 lg:grid-cols-4">
-          {[
-            { title: "Best Price Guarantee", sub: "We ensure the best prices" },
-            { title: "Expert Travel Support", sub: "24/7 assistance" },
-            { title: "Handpicked Experiences", sub: "Curated just for you" },
-            { title: "Secure & Safe", sub: "Your safety is our priority" },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="home-feature border-l-2 border-[#e30613]/25 pl-4 transition hover:border-[#e30613]"
-            >
-              <p className="font-semibold text-[#e30613]">{item.title}</p>
-              <p className="text-sm text-gray-500">{item.sub}</p>
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-[#0b2f57] sm:text-sm">
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" className="accent-[#e30613]" />
+                  Direct flights
+                </label>
+              </div>
+            </form>
+          </div>
+
+          <div className="hero-card-premium flex w-fit shrink-0 flex-col self-center overflow-hidden rounded-2xl leading-none lg:mt-10 xl:mt-12">
+            <div className="relative aspect-[2/3] w-[170px] overflow-hidden sm:w-[200px] md:w-[220px]">
+              <motion.div
+                className="flex h-full will-change-transform"
+                style={{ width: `${heroBanners.length * 100}%` }}
+                animate={{
+                  x: `-${bannerIndex * (100 / heroBanners.length)}%`,
+                }}
+                transition={{
+                  duration: BANNER_TRANSITION_S,
+                  ease: [0.45, 0, 0.25, 1],
+                }}
+              >
+                {heroBanners.map((banner) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={banner.src}
+                    src={banner.src}
+                    alt={banner.alt}
+                    className="h-full shrink-0 object-contain object-top"
+                    style={{ width: `${100 / heroBanners.length}%` }}
+                    draggable={false}
+                  />
+                ))}
+              </motion.div>
             </div>
-          ))}
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex w-full items-center justify-center gap-1.5 bg-[#e30613] px-2 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#c40010] sm:text-xs"
+            >
+              <WhatsAppIcon className="h-3.5 w-3.5 shrink-0" />
+              Enquire Now
+            </a>
+          </div>
         </div>
       </section>
 
       <section className="section-fade-top mx-auto max-w-[1260px] px-4 pb-14 pt-10">
         <div className="mb-6 text-center">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
-              Our Services
-            </p>
-            <h2 className="mt-1 text-3xl font-extrabold text-[#e30613] md:text-4xl">
-              Flights · Hotels · Visa · Insurance
-            </h2>
-          </div>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-gray-500">
-            Everything for your trip in one place — designed with a clean premium travel-agency look.
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
+            Our Services
           </p>
         </div>
 
@@ -537,6 +408,23 @@ export default function Home() {
                 </Link>
               </div>
             </motion.article>
+          ))}
+        </div>
+
+        <div className="soft-section premium-shadow mt-10 grid grid-cols-1 gap-4 rounded-xl p-5 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            { title: "Best Price Guarantee", sub: "We ensure the best prices" },
+            { title: "Expert Travel Support", sub: "24/7 assistance" },
+            { title: "Handpicked Experiences", sub: "Curated just for you" },
+            { title: "Secure & Safe", sub: "Your safety is our priority" },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="home-feature border-l-2 border-[#e30613]/25 pl-4 transition hover:border-[#e30613]"
+            >
+              <p className="font-semibold text-[#e30613]">{item.title}</p>
+              <p className="text-sm text-gray-500">{item.sub}</p>
+            </div>
           ))}
         </div>
 
@@ -683,9 +571,12 @@ export default function Home() {
           </div>
         </div>
 
-        <section className="soft-section premium-shadow mt-12 rounded-2xl px-6 py-8">
+        <section className="mt-12 border-t border-slate-200 pt-10">
           <h3 className="text-center text-3xl font-extrabold text-[#e30613]">Why Travel With Us?</h3>
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <p className="mx-auto mt-2 max-w-xl text-center text-sm text-gray-500">
+            Trusted travel support with transparent service at every step.
+          </p>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5 lg:gap-8">
             {[
               { title: "Customized Trips", sub: "Tailored to your needs" },
               { title: "Wide Destinations", sub: "Across the globe" },
@@ -695,10 +586,10 @@ export default function Home() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-xl border border-[#edf1f8] bg-white px-4 py-5 text-center transition hover:border-[#d8dfed] hover:shadow-sm"
+                className="home-feature border-l-2 border-[#e30613]/25 pl-4 transition hover:border-[#e30613]"
               >
-                <p className="font-semibold text-[#0f2b4d]">{item.title}</p>
-                <p className="mt-1 text-sm text-gray-500">{item.sub}</p>
+                <p className="font-semibold text-[#0b2f57]">{item.title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-gray-500">{item.sub}</p>
               </div>
             ))}
           </div>

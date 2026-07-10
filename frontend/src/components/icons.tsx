@@ -1,3 +1,12 @@
+export function SwapRoutesIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 10h9m0 0-3-3m3 3-3 3" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17 14H8m0 0 3-3m-3 3 3 3" />
+    </svg>
+  );
+}
+
 export function WhatsAppIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
