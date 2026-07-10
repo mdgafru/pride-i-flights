@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -16,8 +15,6 @@ const CTA_IMAGE =
 const eyebrowClass = "text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]";
 const sectionTitleClass = "text-2xl font-extrabold leading-tight text-[#e30613] sm:text-3xl md:text-4xl";
 const bodyClass = "text-base leading-relaxed text-gray-600";
-const imageBadgeClass =
-  "absolute left-3 top-3 rounded-md bg-[#e30613] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm";
 
 const highlights = [
   { title: "Expert Guidance", sub: "Document checklist and profile review" },
@@ -31,72 +28,40 @@ const trustItems = [
   { title: "Student Visas", sub: "Study abroad application support" },
 ];
 
-const visaTypes = ["All Visas", "Tourist", "Business", "Student", "Family"];
-
 const visaCards = [
   {
     id: "usa",
-    country: "USA Visa",
-    region: "Americas",
-    types: ["Tourist", "Business", "Student"],
-    typesLabel: "Tourist · Business · Student",
-    price: "$160",
-    processing: "10-15 days",
+    country: "USA",
     image:
       "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "schengen",
-    country: "Schengen Visa",
-    region: "Europe",
-    types: ["Tourist", "Business", "Family"],
-    typesLabel: "Tourist · Business · Family",
-    price: "$110",
-    processing: "7-12 days",
+    country: "Schengen",
     image:
       "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "uk",
-    country: "UK Visa",
-    region: "Europe",
-    types: ["Tourist", "Student", "Business"],
-    typesLabel: "Tourist · Student · Work",
-    price: "$140",
-    processing: "10-14 days",
+    country: "United Kingdom",
     image:
       "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "uae",
-    country: "UAE Visa",
-    region: "Middle East",
-    types: ["Tourist", "Business", "Family"],
-    typesLabel: "Tourist · Transit · Long Stay",
-    price: "$95",
-    processing: "3-5 days",
+    country: "UAE",
     image:
       "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "australia",
-    country: "Australia Visa",
-    region: "Oceania",
-    types: ["Tourist", "Student", "Business"],
-    typesLabel: "Tourist · Student · Visit",
-    price: "$135",
-    processing: "8-12 days",
+    country: "Australia",
     image:
       "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=900&q=80",
   },
   {
     id: "canada",
-    country: "Canada Visa",
-    region: "Americas",
-    types: ["Tourist", "Student", "Business"],
-    typesLabel: "Tourist · Student · Business",
-    price: "$150",
-    processing: "12-18 days",
+    country: "Canada",
     image:
       "https://images.unsplash.com/photo-1519832979-6fa011b87667?auto=format&fit=crop&w=900&q=80",
   },
@@ -125,13 +90,6 @@ const steps = [
 ];
 
 export default function VisaPage() {
-  const [activeType, setActiveType] = useState("All Visas");
-
-  const filteredVisas = useMemo(() => {
-    if (activeType === "All Visas") return visaCards;
-    return visaCards.filter((item) => item.types.includes(activeType));
-  }, [activeType]);
-
   return (
     <SiteShell active="Visa">
       <ContentPageHero
@@ -139,7 +97,7 @@ export default function VisaPage() {
         imagePosition="center 40%"
         eyebrow="Hassle-Free Documentation · REDE I FLIGHTS"
         title="Visa Services"
-        description="Expert visa guidance with high success rate and end-to-end support. Tourist, business and student visas handled by trusted UAE travel advisors."
+        description="Expert visa guidance with high success rate and end-to-end support. Tourist and business visas handled by trusted travel advisors."
         breadcrumb="Visa Services"
         highlights={highlights}
       />
@@ -156,31 +114,6 @@ export default function VisaPage() {
         </div>
       </section>
 
-      {/* Visa filter */}
-      <section className="border-b border-slate-200 bg-[#f8fafc]">
-        <div className="mx-auto max-w-[1260px] px-4 py-8 md:py-10">
-          <div className="mb-5 text-center">
-            <h2 className="text-2xl font-extrabold text-[#e30613] md:text-3xl">Browse Visa Types</h2>
-          </div>
-          <div className="-mx-4 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-4 pb-1 snap-x snap-mandatory">
-            {visaTypes.map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setActiveType(type)}
-                className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
-                  activeType === type
-                    ? "bg-[#e30613] text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Visa cards */}
       <section className="mx-auto max-w-[1260px] px-4 py-12 md:py-16">
         <div className="mb-10 text-center">
@@ -189,57 +122,39 @@ export default function VisaPage() {
           <p className={`mx-auto mt-3 max-w-2xl ${bodyClass}`}>
             Choose your destination and start your application with expert support.
           </p>
-          <p className="mt-3 text-sm font-semibold text-[#0b2f57]">
-            Showing <span className="text-[#e30613]">{filteredVisas.length}</span> visa
-            {filteredVisas.length === 1 ? "" : "s"}
-          </p>
         </div>
 
-        {filteredVisas.length === 0 ? (
-          <p className="text-center text-base text-gray-500">
-            No visas in this category. Contact us for a custom visa enquiry.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredVisas.map((item, index) => (
-              <motion.article
-                key={item.id}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="group"
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {visaCards.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <Link
+                href="/contact"
+                className="group relative block overflow-hidden rounded-xl"
               >
-                <div className="relative overflow-hidden rounded-xl">
-                  <Image
-                    src={item.image}
-                    alt={item.country}
-                    width={700}
-                    height={420}
-                    className="h-52 w-full object-cover transition duration-500 group-hover:scale-[1.03] sm:h-56"
-                  />
-                  <span className={imageBadgeClass}>{item.region}</span>
+                <Image
+                  src={item.image}
+                  alt={item.country}
+                  width={700}
+                  height={420}
+                  className="h-52 w-full object-cover transition duration-500 group-hover:scale-[1.03] sm:h-56"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#042448]/90 via-[#042448]/35 to-transparent" />
+                <div className="absolute right-0 bottom-0 left-0 flex items-end justify-between gap-3 p-5">
+                  <h3 className="text-xl font-bold text-white sm:text-2xl">{item.country}</h3>
+                  <span className="btn-premium shrink-0 bg-[#e30613] px-4 py-2.5 text-sm font-semibold text-white group-hover:bg-[#c40010]">
+                    Apply Now
+                  </span>
                 </div>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-[#e30613]">
-                  {item.typesLabel}
-                </p>
-                <h3 className="mt-1 text-xl font-bold text-[#0b2f57]">{item.country}</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Processing: <span className="font-semibold text-[#0b2f57]">{item.processing}</span>
-                </p>
-                <p className="mt-1 text-sm font-semibold text-gray-700">
-                  Starting from <span className="text-[#e30613]">{item.price}</span>
-                </p>
-                <Link
-                  href="/contact"
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#e30613] transition group-hover:gap-2"
-                >
-                  Apply Now <span aria-hidden>→</span>
-                </Link>
-              </motion.article>
-            ))}
-          </div>
-        )}
+              </Link>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* Why choose us */}
