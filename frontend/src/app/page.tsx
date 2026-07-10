@@ -29,8 +29,6 @@ const passengerOptions = [
 ];
 
 const heroSearchLabelClass = "text-xs font-bold uppercase tracking-wide text-slate-600";
-const heroSearchInputClass =
-  "mt-1.5 w-full min-w-0 border-0 bg-transparent p-0 text-[15px] font-semibold leading-snug text-[#0b2f57] outline-none placeholder:font-medium placeholder:text-slate-500";
 const heroSearchCellClass =
   "flex min-h-[68px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 px-4 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 lg:px-4 lg:last:border-r-0";
 const heroSearchDateCellClass =

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(_request: NextRequest) {
+export function middleware(request: NextRequest) {
+  void request;
   const response = NextResponse.next();
 
   // Block Vercel Toolbar script (vercel.live) on deployed environments.

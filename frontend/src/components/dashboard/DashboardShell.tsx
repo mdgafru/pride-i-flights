@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useSyncExternalStore, useState, type ReactNode } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { dashboardNavItems } from "@/components/dashboard/dashboard-nav";
 import {
@@ -55,19 +55,17 @@ export function DashboardShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    setPendingHref(null);
-  }, [pathname]);
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setIsDesktop(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
+  const isDesktop = useSyncExternalStore(
+    (onStoreChange) => {
+      const media = window.matchMedia("(min-width: 1024px)");
+      media.addEventListener("change", onStoreChange);
+      return () => media.removeEventListener("change", onStoreChange);
+    },
+    () => window.matchMedia("(min-width: 1024px)").matches,
+    () => false,
+  );
+  const navigationPending =
+    pendingHref && pathname !== pendingHref ? pendingHref : null;
 
   const iconByKey = {
     layout: LayoutDashboard,
@@ -158,7 +156,7 @@ export function DashboardShell({
                   key={item.href}
                   href={item.href}
                   onClick={(event) => {
-                    if (item.href === pathname || pendingHref) return;
+                    if (item.href === pathname || navigationPending) return;
                     event.preventDefault();
                     setMenuOpen(false);
                     setPendingHref(item.href);
@@ -177,7 +175,7 @@ export function DashboardShell({
                   >
                     {item.label}
                   </span>
-                  {pendingHref === item.href && (
+                  {navigationPending === item.href && (
                     <LoaderCircle size={13} className="dash-inline-spinner ml-auto" />
                   )}
                 </Link>
@@ -202,7 +200,7 @@ export function DashboardShell({
 
         <section className="flex min-h-screen min-w-0 flex-col">
           <header className="dash-topbar sticky top-0 z-20">
-            {pendingHref && <div className="dash-top-loader" />}
+            {navigationPending && <div className="dash-top-loader" />}
             <div className="flex items-center justify-between gap-2 px-2.5 py-2 sm:px-3">
               <div className="flex min-w-0 items-center gap-2">
                 <button
