@@ -2,115 +2,268 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { PageHero } from "@/components/PageHero";
+import { motion } from "framer-motion";
+import { DestinationSearchSection } from "@/components/destinations/DestinationSearchSection";
 import { SiteShell } from "@/components/SiteShell";
+import { WHATSAPP_URL } from "@/lib/contact";
 
-const destinations = [
-  {
-    title: "Bali, Indonesia",
-    subtitle: "Island of Gods",
-    packages: "32 Packages",
-    image:
-      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Dubai, UAE",
-    subtitle: "City of Dreams",
-    packages: "28 Packages",
-    image:
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Paris, France",
-    subtitle: "City of Love",
-    packages: "24 Packages",
-    image:
-      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Maldives",
-    subtitle: "Tropical Paradise",
-    packages: "18 Packages",
-    image:
-      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Singapore",
-    subtitle: "City of Possibilities",
-    packages: "22 Packages",
-    image:
-      "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Switzerland",
-    subtitle: "Alpine Beauty",
-    packages: "20 Packages",
-    image:
-      "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?auto=format&fit=crop&w=800&q=80",
-  },
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=85";
+const FEATURED_IMAGE =
+  "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85";
+const CTA_IMAGE =
+  "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1800&q=85";
+
+const eyebrowClass = "text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]";
+const sectionTitleClass = "text-3xl font-extrabold leading-tight text-[#e30613] md:text-4xl";
+const bodyClass = "text-base leading-relaxed text-gray-600";
+
+const travelTypes = [
+  { title: "Beach & Island", sub: "Relax by the sea" },
+  { title: "City Breaks", sub: "Urban culture & shopping" },
+  { title: "Adventure", sub: "Thrills & outdoor trips" },
+  { title: "Family Holidays", sub: "Comfort for all ages" },
+];
+
+const highlights = [
+  { title: "150+ Destinations", sub: "Worldwide travel options" },
+  { title: "Curated Packages", sub: "Handpicked by our experts" },
+  { title: "Best Price Options", sub: "Transparent, competitive fares" },
+];
+
+const strengths = [
+  { title: "Expert Planning", text: "Routes, stays and visas handled by specialists." },
+  { title: "Flexible Options", text: "Dates, budgets and travel styles tailored to you." },
+  { title: "UAE-Based Team", text: "Local advisors with global destination knowledge." },
+  { title: "End-to-End Support", text: "From enquiry to return - we stay with you." },
 ];
 
 export default function DestinationsPage() {
   return (
     <SiteShell active="Destinations">
-      <PageHero
-        eyebrow="Explore The World"
-        title="Destinations"
-        description="Discover amazing places at exclusive deals and create unforgettable memories."
-        breadcrumb="Destinations"
-        image="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=80"
-      >
-        <div className="mx-auto mt-[-40px] max-w-[1260px] px-4 pb-6">
-          <div className="soft-section premium-shadow grid grid-cols-1 gap-3 rounded-xl p-4 md:grid-cols-3">
-            {["All Destinations", "All Countries", "Any Time"].map((item) => (
-              <button
-                key={item}
-                className="rounded-lg border border-gray-200 px-4 py-3 text-left text-sm text-gray-600"
-              >
-                {item}
-              </button>
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={HERO_IMAGE}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 z-0 h-full w-full object-cover object-center brightness-[1.1] saturate-[1.12] contrast-[1.05]"
+        />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#042448]/92 via-[#0b2f57]/68 to-[#0b2f57]/40" />
+
+        <div className="relative z-[2] mx-auto max-w-[1260px] px-4 pt-14 pb-32 md:pt-20 md:pb-36">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="max-w-3xl"
+          >
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#e30613] drop-shadow-[0_1px_6px_rgba(255,255,255,0.9)]">
+              Explore The World · REDE I FLIGHTS
+            </p>
+            <h1 className="mt-3 text-4xl font-extrabold leading-[1.15] text-[#e30613] drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)] sm:text-5xl lg:text-[3.25rem]">
+              Destinations
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white sm:text-lg">
+              Discover handpicked destinations worldwide. From Dubai to Europe, Asia and beyond -
+              plan your next journey with trusted UAE travel experts.
+            </p>
+            <p className="mt-6 text-base text-white/90">
+              <Link href="/" className="font-medium transition hover:text-white">
+                Home
+              </Link>
+              <span className="mx-2 text-[#ff6b75]">&gt;</span>
+              <span className="font-semibold text-white">Destinations</span>
+            </p>
+          </motion.div>
+        </div>
+
+        <div className="absolute right-0 bottom-0 left-0 z-[3] border-t border-white/20 bg-[#042448]/95 backdrop-blur-md">
+          <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            {highlights.map((item) => (
+              <div key={item.title} className="px-6 py-5 text-center sm:px-8 sm:py-6">
+                <p className="text-base font-bold text-[#e30613] sm:text-lg">{item.title}</p>
+                <p className="mt-1 text-sm text-white/75">{item.sub}</p>
+              </div>
             ))}
           </div>
         </div>
-      </PageHero>
+      </section>
 
-      <section className="mx-auto max-w-[1260px] px-4 py-12">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-3xl font-extrabold text-[#111827]">Popular Destinations</h2>
-            <p className="text-sm text-gray-500">Browse top places with ready packages.</p>
-          </div>
-          <p className="rounded-lg bg-white px-3 py-2 text-sm text-gray-500 shadow-sm">
-            Sort By: Most Popular
-          </p>
-        </div>
+      <DestinationSearchSection />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {destinations.map((place) => (
-            <article
-              key={place.title}
-              className="premium-shadow group relative overflow-hidden rounded-2xl"
-            >
-              <Image
-                src={place.image}
-                alt={place.title}
-                width={700}
-                height={460}
-                className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
-              <div className="absolute left-3 top-3 rounded bg-white px-2 py-1 text-xs font-semibold text-[#e30613]">
-                {place.subtitle}
-              </div>
-              <div className="absolute bottom-0 p-4 text-white">
-                <h3 className="text-xl font-bold">{place.title}</h3>
-                <p className="mt-1 text-sm text-gray-200">{place.packages}</p>
-                <Link href="/contact" className="mt-2 inline-block text-sm font-semibold text-[#ffb3bc]">
-                  Explore Now →
-                </Link>
-              </div>
-            </article>
+      {/* Trust strip */}
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-slate-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {[
+            { title: "Global Coverage", sub: "International flights worldwide" },
+            { title: "Personalized Plans", sub: "Built around your dates and budget" },
+            { title: "24/7 Assistance", sub: "Support before and after travel" },
+          ].map((item) => (
+            <div key={item.title} className="px-6 py-7 text-center sm:py-8">
+              <p className="text-lg font-bold text-[#e30613]">{item.title}</p>
+              <p className="mt-2 text-base text-gray-500">{item.sub}</p>
+            </div>
           ))}
+        </div>
+      </section>
+
+      {/* Featured destination */}
+      <section className="mx-auto max-w-[1260px] px-4 py-12 md:py-16">
+        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+          <div className="relative order-2 overflow-hidden rounded-xl lg:order-1">
+            <Image
+              src={FEATURED_IMAGE}
+              alt="Dubai skyline"
+              width={900}
+              height={600}
+              className="h-64 w-full object-cover sm:h-80"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#042448]/75 to-transparent" />
+            <div className="absolute right-4 bottom-4 left-4">
+              <p className="text-xs font-bold uppercase tracking-wide text-white/80">Featured</p>
+              <p className="mt-1 text-xl font-bold text-white sm:text-2xl">Dubai, UAE</p>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2">
+            <p className={eyebrowClass}>Top Pick</p>
+            <h2 className={`mt-2 ${sectionTitleClass}`}>City of Dreams</h2>
+            <p className={`mt-4 ${bodyClass}`}>
+              Dubai remains one of our most requested destinations - luxury stays, family holidays,
+              shopping breaks and seamless flight connections from the UAE.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {["28 Curated Packages", "Flights & Hotels", "Visa Guidance", "Family Friendly"].map(
+                (item) => (
+                  <div
+                    key={item}
+                    className="home-feature border-l-[3px] border-[#e30613]/30 py-1 pl-4"
+                  >
+                    <p className="text-sm font-semibold text-[#0b2f57] sm:text-base">{item}</p>
+                  </div>
+                ),
+              )}
+            </div>
+            <Link
+              href="/contact"
+              className="btn-premium mt-7 inline-block bg-[#e30613] px-7 py-3.5 text-base font-semibold text-white hover:bg-[#c40010]"
+            >
+              Plan Dubai Trip
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Travel types */}
+      <section className="border-t border-slate-200 bg-[#f8fafc]">
+        <div className="mx-auto max-w-[1260px] px-4 py-12 md:py-14">
+          <div className="mb-8 text-center">
+            <p className={eyebrowClass}>Travel Styles</p>
+            <h2 className={`mt-2 ${sectionTitleClass}`}>Every Kind of Journey</h2>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {travelTypes.map((type, index) => (
+              <motion.div
+                key={type.title}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+                className="home-feature border-l-[3px] border-[#e30613]/30 bg-white px-5 py-5"
+              >
+                <p className="text-base font-bold text-[#e30613]">{type.title}</p>
+                <p className="mt-2 text-sm text-gray-500">{type.sub}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why book */}
+      <section className="border-t border-slate-200 bg-white">
+        <div className="mx-auto max-w-[1260px] px-4 py-12 md:py-16">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            <div>
+              <p className={eyebrowClass}>Why Book With Us</p>
+              <h2 className={`mt-2 ${sectionTitleClass}`}>Plan With Confidence</h2>
+              <p className={`mt-4 ${bodyClass}`}>
+                Whether it is a family holiday, honeymoon or business trip - our team finds the
+                right destination, dates and budget with honest advice and fast support.
+              </p>
+              <div className="mt-7 grid gap-4 sm:grid-cols-2">
+                {strengths.map((item) => (
+                  <div
+                    key={item.title}
+                    className="home-feature border-l-[3px] border-[#e30613]/30 py-0.5 pl-4"
+                  >
+                    <p className="text-sm font-bold text-[#e30613] sm:text-base">{item.title}</p>
+                    <p className="mt-1 text-sm text-gray-500">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-xl">
+              <Image
+                src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=1000&q=80"
+                alt="Maldives tropical destination"
+                width={900}
+                height={600}
+                className="h-64 w-full object-cover sm:h-80"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#042448]/70 to-transparent" />
+              <div className="absolute right-4 bottom-4 left-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-white/75">
+                  Worldwide Destinations
+                </p>
+                <p className="mt-1 text-lg font-bold text-white">
+                  From UAE to the world - every journey possible
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative overflow-hidden border-t border-slate-200">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={CTA_IMAGE}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 z-0 h-full w-full object-cover object-center brightness-[0.55]"
+        />
+        <div className="absolute inset-0 z-[1] bg-[#042448]/88" />
+
+        <div className="relative z-[2] mx-auto max-w-[1260px] px-4 py-14 text-center md:py-16">
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
+            Ready to Travel?
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold text-[#e30613] md:text-4xl">
+            Let&apos;s Plan Your Next Destination
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-base text-white/90">
+            Share your travel plans and our experts will send curated options within hours.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/contact"
+              className="btn-premium bg-[#e30613] px-7 py-3.5 text-base font-semibold text-white hover:bg-[#c40010]"
+            >
+              Contact Us
+            </Link>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-premium inline-flex items-center gap-2 border border-white/35 bg-white/10 px-7 py-3.5 text-base font-semibold text-white hover:bg-white/20"
+            >
+              Chat on WhatsApp
+            </a>
+          </div>
         </div>
       </section>
     </SiteShell>

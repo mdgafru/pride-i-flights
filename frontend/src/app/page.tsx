@@ -373,10 +373,12 @@ export default function Home() {
       </section>
 
       <section className="section-fade-top mx-auto max-w-[1260px] px-4 pb-14 pt-10">
-        <div className="mb-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
-            Our Services
-          </p>
+        <div className="mb-6 flex justify-center">
+          <div className="flex h-28 w-28 items-center justify-center border-2 border-[#0b2f57] bg-white p-3 text-center shadow-sm">
+            <p className="text-sm font-bold uppercase leading-snug tracking-wide text-[#0b2f57]">
+              Our Services
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">

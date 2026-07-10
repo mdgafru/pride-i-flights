@@ -62,19 +62,33 @@ export function Navbar({
           </Link>
 
           <nav className="hidden min-w-0 flex-1 flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-semibold tracking-[0.01em] text-[#1f2937] sm:gap-x-3.5 sm:text-xs lg:flex lg:gap-x-4 lg:text-[13px] xl:text-[14px]">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`shrink-0 whitespace-nowrap transition ${
-                  link.label === active
-                    ? "border-b-2 border-[#e30613] pb-1 text-[#e30613]"
-                    : "premium-link hover:text-[#e30613]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const className = `shrink-0 whitespace-nowrap transition ${
+                link.label === active
+                  ? "border-b-2 border-[#e30613] pb-1 text-[#e30613]"
+                  : "premium-link hover:text-[#e30613]"
+              }`;
+
+              if (link.external) {
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={className}
+                  >
+                    {link.label}
+                  </a>
+                );
+              }
+
+              return (
+                <Link key={link.label} href={link.href} className={className}>
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -118,18 +132,37 @@ export function Navbar({
         {isMenuOpen && (
           <div className="border-t border-gray-200 bg-white px-4 pb-4 lg:hidden">
             <div className="flex flex-col gap-2 pt-3 text-[15px] font-semibold">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`rounded-lg px-3 py-2 hover:bg-gray-100 ${
-                    link.label === active ? "text-[#e30613]" : ""
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const className = `rounded-lg px-3 py-2 hover:bg-gray-100 ${
+                  link.label === active ? "text-[#e30613]" : ""
+                }`;
+
+                if (link.external) {
+                  return (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={className}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className={className}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
