@@ -12,7 +12,6 @@ const quickLinks = [
 
 const serviceLinks = [
   { label: "Visa Services", href: "/visa" },
-  { label: "Travel Insurance", href: "/travel-insurance" },
   { label: "Honeymoon Packages" },
   { label: "Group Tours" },
   { label: "Corporate Travel" },

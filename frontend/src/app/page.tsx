@@ -86,14 +86,6 @@ const services = [
     image:
       "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=80",
   },
-  {
-    title: "Travel Insurance",
-    desc: "Protect your journey with reliable travel & medical insurance plans.",
-    href: "/travel-insurance",
-    badge: "Secure Cover",
-    image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=80",
-  },
 ];
 
 const destinations = [
@@ -225,7 +217,6 @@ export default function Home() {
                 { label: "Flights", href: "/", active: true },
                 { label: "Hotels", href: "/hotels", active: false },
                 { label: "Visa", href: "/visa", active: false },
-                { label: "Insurance", href: "/travel-insurance", active: false },
               ].map((item) => (
                 <Link
                   key={item.label}
@@ -381,7 +372,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
           {services.map((item, index) => (
             <motion.article
               key={item.title}

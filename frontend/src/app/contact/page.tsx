@@ -44,7 +44,7 @@ const trustItems = [
   { title: "Fast Response", sub: "Quick answers to your queries" },
 ];
 
-const services = ["Flights", "Hotels", "Visa", "Travel Insurance", "Tour Packages"];
+const services = ["Flights", "Hotels", "Visa", "Tour Packages"];
 
 const quickActions = [
   { title: "Call Us", sub: CONTACT_PHONE, href: TEL_URL },
@@ -60,7 +60,7 @@ export default function ContactPage() {
         imagePosition="center 70%"
         eyebrow="UAE Travel Experts · REDE I FLIGHTS"
         title="Contact Our Travel Experts"
-        description="Your trusted partner for flights, hotels, visa and travel insurance. Reach out today and let our team plan your next journey from Dubai to destinations worldwide."
+        description="Your trusted partner for flights, hotels and visa. Reach out today and let our team plan your next journey from Dubai to destinations worldwide."
         breadcrumb="Contact Us"
         highlights={quickActions}
       />
@@ -219,7 +219,7 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
             {services.map((service) => (
               <div
                 key={service}

@@ -17,7 +17,7 @@ type ContentPageHeroProps = {
   title: string;
   description: string;
   breadcrumb: string;
-  highlights: ContentHeroHighlight[];
+  highlights?: ContentHeroHighlight[];
 };
 
 export function ContentPageHero({
@@ -27,7 +27,7 @@ export function ContentPageHero({
   title,
   description,
   breadcrumb,
-  highlights,
+  highlights = [],
 }: ContentPageHeroProps) {
   return (
     <section className="content-page-hero relative flex flex-col overflow-hidden">
@@ -69,48 +69,50 @@ export function ContentPageHero({
           </motion.div>
         </div>
 
-        <div className="relative z-[3] border-t border-white/20 bg-[#042448]/95 backdrop-blur-md">
-          <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            {highlights.map((item) => {
-              const inner = (
-                <>
-                  <p className="text-sm font-bold text-[#e30613] sm:text-base md:text-lg">
-                    {item.title}
-                  </p>
-                  <p className="mt-0.5 text-xs text-white/75 sm:mt-1 sm:text-sm">{item.sub}</p>
-                </>
-              );
-
-              if (item.href) {
-                return (
-                  <a
-                    key={item.title}
-                    href={item.href}
-                    target={item.external ? "_blank" : undefined}
-                    rel={item.external ? "noreferrer" : undefined}
-                    className="group flex min-h-[56px] flex-col justify-center px-4 py-4 transition hover:bg-white/5 sm:min-h-0 sm:px-6 sm:py-5 md:px-8 md:py-6"
-                  >
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-white/70 sm:text-xs">
+        {highlights.length > 0 ? (
+          <div className="relative z-[3] border-t border-white/20 bg-[#042448]/95 backdrop-blur-md">
+            <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              {highlights.map((item) => {
+                const inner = (
+                  <>
+                    <p className="text-sm font-bold text-[#e30613] sm:text-base md:text-lg">
                       {item.title}
-                    </span>
-                    <span className="mt-1 break-all text-sm font-semibold text-white group-hover:text-[#ffb3b8] sm:mt-1.5 sm:break-normal sm:text-base md:text-lg">
-                      {item.sub}
-                    </span>
-                  </a>
+                    </p>
+                    <p className="mt-0.5 text-xs text-white/75 sm:mt-1 sm:text-sm">{item.sub}</p>
+                  </>
                 );
-              }
 
-              return (
-                <div
-                  key={item.title}
-                  className="px-4 py-4 text-center sm:px-6 sm:py-5 md:px-8 md:py-6"
-                >
-                  {inner}
-                </div>
-              );
-            })}
+                if (item.href) {
+                  return (
+                    <a
+                      key={item.title}
+                      href={item.href}
+                      target={item.external ? "_blank" : undefined}
+                      rel={item.external ? "noreferrer" : undefined}
+                      className="group flex min-h-[56px] flex-col justify-center px-4 py-4 transition hover:bg-white/5 sm:min-h-0 sm:px-6 sm:py-5 md:px-8 md:py-6"
+                    >
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/70 sm:text-xs">
+                        {item.title}
+                      </span>
+                      <span className="mt-1 break-all text-sm font-semibold text-white group-hover:text-[#ffb3b8] sm:mt-1.5 sm:break-normal sm:text-base md:text-lg">
+                        {item.sub}
+                      </span>
+                    </a>
+                  );
+                }
+
+                return (
+                  <div
+                    key={item.title}
+                    className="px-4 py-4 text-center sm:px-6 sm:py-5 md:px-8 md:py-6"
+                  >
+                    {inner}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );

@@ -70,14 +70,6 @@ const services = [
       "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
     href: "/visa",
   },
-  {
-    title: "Insurance",
-    badge: "Secure Cover",
-    text: "Travel and medical protection for peace of mind.",
-    image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80",
-    href: "/travel-insurance",
-  },
 ];
 
 const strengths = [
@@ -91,7 +83,7 @@ const promises = [
   "Best price options matched to your budget",
   "Fast response on WhatsApp, phone and email",
   "Trusted partners for flights and hotels",
-  "Visa and insurance guidance included",
+  "Visa guidance included",
 ];
 
 const steps = [
@@ -113,7 +105,7 @@ export default function AboutPage() {
         image={IMAGES.hero}
         eyebrow="UAE Travel Experts · REDE I FLIGHTS"
         title="About REDE I FLIGHTS"
-        description="A UAE-based travel agency for flights, hotels, visas and insurance - with honest pricing, expert advisors and reliable support."
+        description="A UAE-based travel agency for flights, hotels and visas - with honest pricing, expert advisors and reliable support."
         breadcrumb="About Us"
         highlights={highlights}
       />
@@ -213,11 +205,11 @@ export default function AboutPage() {
           <p className={eyebrowClass}>What We Offer</p>
           <h2 className={`mt-2 ${sectionTitleClass}`}>Complete Travel Solutions</h2>
           <p className={`mx-auto mt-3 max-w-2xl ${bodyClass}`}>
-            One trusted team for flights, hotels, visa and insurance.
+            One trusted team for flights, hotels and visa.
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((item, index) => (
             <motion.article
               key={item.title}

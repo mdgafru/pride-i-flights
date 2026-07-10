@@ -12,7 +12,6 @@ const navLinks = [
   { label: "Hotels", href: "/hotels" },
   { label: "Tour Packages", href: "/packages" },
   { label: "Visa", href: "/visa" },
-  { label: "Travel Insurance", href: "/travel-insurance" },
   { label: "Destinations", href: "/destinations" },
   { label: "About Us", href: "/about" },
   { label: "Contact Us", href: "/contact" },
