@@ -7,16 +7,15 @@ import { WhatsAppIcon } from "@/components/icons";
 import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL, WHATSAPP_URL } from "@/lib/contact";
 
 const navLinks = [
-  { label: "Home", href: "/", enabled: true },
-  // Keep these visible in navbar, but disabled for now.
-  { label: "Flights", href: "/flights", enabled: false },
-  { label: "Hotels", href: "/hotels", enabled: false },
-  { label: "Tour Packages", href: "/packages", enabled: false },
-  { label: "Visa", href: "/visa", enabled: false },
-  { label: "Travel Insurance", href: "/travel-insurance", enabled: false },
-  { label: "Destinations", href: "/destinations", enabled: false },
-  { label: "About Us", href: "/about", enabled: false },
-  { label: "Contact Us", href: "/contact", enabled: false },
+  { label: "Home", href: "/" },
+  { label: "Flights", href: "/flights" },
+  { label: "Hotels", href: "/hotels" },
+  { label: "Tour Packages", href: "/packages" },
+  { label: "Visa", href: "/visa" },
+  { label: "Travel Insurance", href: "/travel-insurance" },
+  { label: "Destinations", href: "/destinations" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact Us", href: "/contact" },
 ];
 
 export function Navbar({
@@ -67,17 +66,11 @@ export function Navbar({
               <Link
                 key={link.href}
                 href={link.href}
-                className={`shrink-0 whitespace-nowrap ${
+                className={`shrink-0 whitespace-nowrap transition ${
                   link.label === active
                     ? "border-b-2 border-[#e30613] pb-1 text-[#e30613]"
-                    : link.enabled
-                      ? "premium-link transition hover:text-[#e30613]"
-                      : "cursor-not-allowed text-slate-500"
+                    : "premium-link hover:text-[#e30613]"
                 }`}
-                onClick={(e) => {
-                  if (!link.enabled) e.preventDefault();
-                }}
-                aria-disabled={!link.enabled}
               >
                 {link.label}
               </Link>
@@ -129,19 +122,10 @@ export function Navbar({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={
-                    link.enabled
-                      ? "rounded-lg px-3 py-2 hover:bg-gray-100"
-                      : "cursor-not-allowed rounded-lg px-3 py-2 text-slate-500"
-                  }
-                  onClick={(e) => {
-                    if (!link.enabled) {
-                      e.preventDefault();
-                      return;
-                    }
-                    setIsMenuOpen(false);
-                  }}
-                  aria-disabled={!link.enabled}
+                  className={`rounded-lg px-3 py-2 hover:bg-gray-100 ${
+                    link.label === active ? "text-[#e30613]" : ""
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
                 </Link>

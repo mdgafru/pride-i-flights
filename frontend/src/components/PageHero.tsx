@@ -25,7 +25,11 @@ export function PageHero({
         backgroundImage: `linear-gradient(rgba(6, 24, 53, 0.55), rgba(6, 24, 53, 0.5)), url('${image}')`,
       }}
     >
-      <div className="mx-auto min-h-[380px] max-w-[1260px] px-4 py-16 text-white md:min-h-[420px]">
+      <div
+        className={`mx-auto max-w-[1260px] px-4 py-16 text-white ${
+          children ? "min-h-[460px] pb-28 md:min-h-[500px] md:pb-32" : "min-h-[380px] md:min-h-[420px]"
+        }`}
+      >
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}

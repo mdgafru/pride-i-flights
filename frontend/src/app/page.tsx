@@ -44,9 +44,9 @@ const heroTripSelectClass =
   "mb-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none";
 
 const heroBanners = [
-  { src: "/promo-banner.png", alt: "REDE Flights — Dubai to Kochi" },
-  { src: "/image2.png", alt: "REDE Flights — Travel Promotion" },
-  { src: "/image3.png", alt: "REDE Flights — Special Offer" },
+  { src: "/promo-banner.png", alt: "REDE Flights - Dubai to Kochi" },
+  { src: "/image2.png", alt: "REDE Flights - Travel Promotion" },
+  { src: "/image3.png", alt: "REDE Flights - Special Offer" },
 ];
 
 const BANNER_VISIBLE_MS = 5000;
@@ -64,7 +64,7 @@ const catalogLinkClass =
 const services = [
   {
     title: "Flights",
-    desc: "Best domestic & international flight deals with flexible options.",
+    desc: "We deal with international Flights worldwide",
     href: "/flights",
     badge: "Best Fares",
     image:

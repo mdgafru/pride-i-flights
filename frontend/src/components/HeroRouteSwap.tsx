@@ -51,16 +51,12 @@ export function HeroRouteSwap() {
         />
       </label>
 
-      <div className="relative flex w-[3.75rem] shrink-0 items-center justify-center sm:w-16">
-        <span
-          aria-hidden
-          className="pointer-events-none absolute top-3 bottom-3 left-1/2 w-[2px] -translate-x-1/2 bg-[#0b2f57]"
-        />
+      <div className="flex w-[3.75rem] shrink-0 items-center justify-center sm:w-16">
         <button
           type="button"
           aria-label="Swap departure and destination"
           title="Swap From and To"
-          className="hero-route-swap relative z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-[#0b2f57] bg-white text-[#0b2f57] shadow-sm hover:border-[#e30613] hover:text-[#e30613]"
+          className="hero-route-swap flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-[#0b2f57] bg-white text-[#0b2f57] shadow-sm hover:border-[#e30613] hover:text-[#e30613]"
           style={{ transform: `rotate(${swapRotation}deg)` }}
           onClick={swapRoute}
         >
