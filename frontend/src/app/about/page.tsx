@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
@@ -15,7 +16,7 @@ const IMAGES = {
 };
 
 const eyebrowClass = "text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]";
-const sectionTitleClass = "text-3xl font-extrabold leading-tight text-[#e30613] md:text-4xl";
+const sectionTitleClass = "text-2xl font-extrabold leading-tight text-[#e30613] sm:text-3xl md:text-4xl";
 const bodyClass = "text-base leading-relaxed text-gray-600";
 
 const imageBadgeClass =
@@ -108,60 +109,25 @@ const highlights = [
 export default function AboutPage() {
   return (
     <SiteShell active="About Us">
-      <section className="relative overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={IMAGES.hero}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-center brightness-[1.05] saturate-[1.08]"
-        />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#042448]/92 via-[#0b2f57]/65 to-[#0b2f57]/40" />
-
-        <div className="relative z-[2] mx-auto max-w-[1260px] px-4 pt-12 pb-28 md:pt-16 md:pb-32">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="max-w-3xl"
-          >
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#e30613] drop-shadow-[0_1px_6px_rgba(255,255,255,0.9)]">
-              UAE Travel Experts · REDE I FLIGHTS
-            </p>
-            <h1 className="mt-2 text-4xl font-extrabold leading-[1.12] text-[#e30613] drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)] sm:text-5xl">
-              About REDE I FLIGHTS
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white sm:text-lg">
-              A UAE-based travel agency for flights, hotels, visas and insurance - with honest
-              pricing, expert advisors and reliable support.
-            </p>
-            <p className="mt-4 text-base text-white/90">
-              <Link href="/" className="font-medium transition hover:text-white">
-                Home
-              </Link>
-              <span className="mx-2 text-[#ff6b75]">&gt;</span>
-              <span className="font-semibold text-white">About Us</span>
-            </p>
-          </motion.div>
-        </div>
-
-        <div className="absolute right-0 bottom-0 left-0 z-[3] border-t border-white/15 bg-[#042448]/95 backdrop-blur-md">
-          <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            {highlights.map((item) => (
-              <div key={item.title} className="px-5 py-4 sm:px-6">
-                <p className="text-base font-bold text-[#e30613]">{item.title}</p>
-                <p className="mt-0.5 text-sm text-white/80">{item.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ContentPageHero
+        image={IMAGES.hero}
+        eyebrow="UAE Travel Experts · REDE I FLIGHTS"
+        title="About REDE I FLIGHTS"
+        description="A UAE-based travel agency for flights, hotels, visas and insurance - with honest pricing, expert advisors and reliable support."
+        breadcrumb="About Us"
+        highlights={highlights}
+      />
 
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-[1260px] grid-cols-2 divide-x divide-y divide-slate-200 md:grid-cols-5 md:divide-y-0">
-          {stats.map((item) => (
-            <div key={item.label} className="px-3 py-5 text-center sm:py-6">
-              <p className="text-2xl font-extrabold text-[#e30613] sm:text-3xl">{item.value}</p>
+        <div className="mx-auto grid max-w-[1260px] grid-cols-2 divide-x divide-y divide-slate-200 sm:grid-cols-3 md:grid-cols-5 md:divide-y-0">
+          {stats.map((item, index) => (
+            <div
+              key={item.label}
+              className={`px-2 py-5 text-center sm:px-3 sm:py-6 ${
+                index === stats.length - 1 ? "col-span-2 sm:col-span-1" : ""
+              }`}
+            >
+              <p className="text-xl font-extrabold text-[#e30613] sm:text-2xl md:text-3xl">{item.value}</p>
               <p className="mt-1 text-sm text-gray-500">{item.label}</p>
             </div>
           ))}

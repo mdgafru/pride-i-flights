@@ -32,9 +32,9 @@ const heroSearchLabelClass = "text-xs font-bold uppercase tracking-wide text-sla
 const heroSearchInputClass =
   "mt-1.5 w-full min-w-0 border-0 bg-transparent p-0 text-[15px] font-semibold leading-snug text-[#0b2f57] outline-none placeholder:font-medium placeholder:text-slate-500";
 const heroSearchCellClass =
-  "flex min-h-[82px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 px-4 py-4 sm:border-r sm:border-b-0 sm:px-4 lg:px-4 lg:last:border-r-0";
+  "flex min-h-[68px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 px-4 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 lg:px-4 lg:last:border-r-0";
 const heroSearchDateCellClass =
-  "flex min-h-[82px] min-w-0 flex-col justify-center border-b border-slate-200 px-4 py-4 sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 lg:px-3.5 lg:pr-4";
+  "flex min-h-[68px] min-w-0 flex-col justify-center border-b border-slate-200 px-4 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 lg:px-3.5 lg:pr-4";
 const heroSearchTravellerCellClass = heroSearchCellClass;
 const heroSearchSelectClass =
   "hero-search-select w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-sm font-semibold text-[#0b2f57] outline-none sm:text-[15px]";
@@ -230,7 +230,7 @@ export default function Home() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition sm:text-sm ${
+                  className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
                     item.active
                       ? "bg-[#e30613] text-white shadow-sm"
                       : "border border-white/40 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
@@ -318,7 +318,7 @@ export default function Home() {
 
                 <button
                   type="submit"
-                  className="btn-premium shrink-0 rounded-xl bg-[#e30613] px-8 py-4 text-base font-bold text-white shadow-md hover:bg-[#c40010] lg:min-h-[82px] lg:min-w-[128px] lg:self-stretch"
+                  className="btn-premium w-full min-h-[44px] shrink-0 rounded-xl bg-[#e30613] px-8 py-4 text-base font-bold text-white shadow-md hover:bg-[#c40010] sm:w-auto lg:min-h-[82px] lg:min-w-[128px] lg:self-stretch"
                 >
                   Search
                 </button>
@@ -484,11 +484,11 @@ export default function Home() {
 
         {/* How it works */}
         <div className="mt-14 px-2 py-4">
-          <h3 className="text-center text-3xl font-extrabold text-[#101828]">How It Works</h3>
+          <h3 className="text-center text-2xl font-extrabold text-[#101828] sm:text-3xl">How It Works</h3>
           <p className="mt-2 text-center text-sm text-gray-500">
             Simple 3-step booking process with expert support.
           </p>
-          <div className="mt-7 grid grid-cols-3 gap-4">
+          <div className="mt-7 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-4">
             {steps.map((step, index) => (
               <motion.div
                 key={step.n}
@@ -496,7 +496,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.08 }}
-                className="px-5 py-4 text-center"
+                className="px-2 py-4 text-center sm:px-5"
               >
                 <p className="text-sm font-bold text-[#e30613]">{step.n}</p>
                 <h4 className="mt-2 text-lg font-bold text-[#0b2f57]">{step.title}</h4>

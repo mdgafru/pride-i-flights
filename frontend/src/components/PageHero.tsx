@@ -26,8 +26,10 @@ export function PageHero({
       }}
     >
       <div
-        className={`mx-auto max-w-[1260px] px-4 py-16 text-white ${
-          children ? "min-h-[460px] pb-28 md:min-h-[500px] md:pb-32" : "min-h-[380px] md:min-h-[420px]"
+        className={`mx-auto max-w-[1260px] px-4 py-10 text-white sm:py-14 md:py-16 ${
+          children
+            ? "min-h-0 pb-20 sm:min-h-[360px] sm:pb-24 md:min-h-[460px] md:pb-32"
+            : "min-h-0 sm:min-h-[320px] md:min-h-[380px]"
         }`}
       >
         <motion.div
@@ -36,8 +38,12 @@ export function PageHero({
           transition={{ duration: 0.5 }}
           className="max-w-3xl"
         >
-          {eyebrow ? <p className="font-display text-xl italic text-[#ffdadf]">{eyebrow}</p> : null}
-          <h1 className="mt-2 text-4xl font-extrabold leading-tight sm:text-5xl">{title}</h1>
+          {eyebrow ? (
+            <p className="font-display text-base italic text-[#ffdadf] sm:text-xl">{eyebrow}</p>
+          ) : null}
+          <h1 className="mt-2 max-w-2xl text-3xl font-extrabold leading-tight sm:text-4xl md:text-5xl">
+            {title}
+          </h1>
           <p className="mt-3 max-w-xl text-sm leading-6 text-gray-100 sm:text-base">{description}</p>
           <p className="mt-5 text-sm text-white/90">
             Home <span className="text-[#ff4d5a]">&gt;</span> {breadcrumb}

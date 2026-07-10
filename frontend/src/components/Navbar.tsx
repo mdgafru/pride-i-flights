@@ -35,12 +35,12 @@ export function Navbar({
     >
       {!overlay && (
         <div className="bg-[#042448] text-white">
-          <div className="mx-auto flex max-w-[1260px] flex-col gap-1 px-4 py-1.5 text-[11px] sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:text-xs">
+          <div className="mx-auto flex max-w-[1260px] flex-col gap-1 px-4 py-1.5 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-2">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 sm:gap-6">
-              <a href={TEL_URL} className="hover:text-blue-100">
+              <a href={TEL_URL} className="break-all hover:text-blue-100 sm:break-normal">
                 {CONTACT_PHONE}
               </a>
-              <a href={MAILTO_URL} className="hover:text-blue-100">
+              <a href={MAILTO_URL} className="break-all hover:text-blue-100 sm:break-normal">
                 {CONTACT_EMAIL}
               </a>
             </div>
@@ -122,7 +122,7 @@ export function Navbar({
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`rounded-lg px-3 py-2 hover:bg-gray-100 ${
+                  className={`flex min-h-[44px] items-center rounded-lg px-3 py-3 hover:bg-gray-100 ${
                     link.label === active ? "text-[#e30613]" : ""
                   }`}
                   onClick={() => setIsMenuOpen(false)}
@@ -134,7 +134,7 @@ export function Navbar({
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-premium mt-1 inline-flex items-center justify-center gap-2 rounded-lg bg-[#e30613] px-3 py-2.5 text-sm font-semibold text-white"
+                className="btn-premium mt-1 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-[#e30613] px-3 py-2.5 text-sm font-semibold text-white"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <WhatsAppIcon className="h-4 w-4" />

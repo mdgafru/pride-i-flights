@@ -31,10 +31,10 @@ export function Footer() {
       />
       <div className="footer-overlay absolute inset-0" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.12),transparent_34%),radial-gradient(circle_at_85%_0%,rgba(227,6,19,0.16),transparent_36%)]" />
-      <div className="relative mx-auto max-w-[1260px] px-4 py-16 md:py-20">
+      <div className="relative mx-auto max-w-[1260px] px-4 py-10 sm:py-16 md:py-20">
         <div className="grid gap-8 border-b border-white/15 pb-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <p className="text-2xl font-extrabold text-[#ff4d5a]">REDE I FLIGHTS</p>
+            <p className="text-xl font-extrabold text-[#ff4d5a] sm:text-2xl">REDE I FLIGHTS</p>
             <p className="mt-3 max-w-md text-sm leading-6 text-blue-50/95">
               We are passionate about travel and committed to providing exceptional service and
               unforgettable experiences.
@@ -78,7 +78,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 text-xs text-blue-100/90 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col flex-wrap gap-3 text-xs text-blue-100/90 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 REDE I FLIGHTS. All Rights Reserved.</p>
           <div className="flex items-center gap-5">
             <Link href="#" className="footer-link">

@@ -50,7 +50,7 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label} filter`}
-        className="text-[#e30613] transition hover:text-[#c40010]"
+        className="text-[#e30613] transition hover:text-[#c40010] min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
       >
         ×
       </button>
@@ -290,7 +290,7 @@ export function DestinationSearchSection() {
                   </select>
                 </div>
 
-                <div className="flex items-stretch px-3.5 py-3 lg:px-4">
+                <div className="col-span-full flex items-stretch px-3.5 py-3 sm:col-span-2 lg:col-span-1 lg:px-4">
                   <button
                     type="submit"
                     disabled={isSearching}
@@ -306,7 +306,7 @@ export function DestinationSearchSection() {
               <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
                 Region
               </p>
-              <div className="flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-1 pb-1">
+              <div className="-mx-4 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-4 pb-1 snap-x snap-mandatory">
                 {DESTINATION_REGIONS.map((region) => (
                   <button
                     key={region}
@@ -317,7 +317,7 @@ export function DestinationSearchSection() {
                         region: region as DestinationRegion,
                       }))
                     }
-                    className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition sm:text-sm ${
+                    className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
                       draftFilters.region === region
                         ? "bg-[#e30613] text-white shadow-sm"
                         : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"
@@ -333,7 +333,7 @@ export function DestinationSearchSection() {
               <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
                 Travel Style
               </p>
-              <div className="flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-1 pb-1">
+              <div className="-mx-4 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-4 pb-1 snap-x snap-mandatory">
                 {DESTINATION_TRAVEL_STYLES.map((style) => (
                   <button
                     key={style}
@@ -344,7 +344,7 @@ export function DestinationSearchSection() {
                         travelStyle: style as DestinationTravelStyle,
                       }))
                     }
-                    className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition sm:text-sm ${
+                    className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
                       draftFilters.travelStyle === style
                         ? "bg-[#0b2f57] text-white shadow-sm"
                         : "border border-slate-200 bg-white text-slate-600 hover:border-[#0b2f57] hover:text-[#0b2f57]"
@@ -379,7 +379,7 @@ export function DestinationSearchSection() {
                   setDraftFilters(next);
                   applyFilters(next);
                 }}
-                className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[#0b2f57] outline-none focus:border-[#e30613]"
+                className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-[#0b2f57] outline-none focus:border-[#e30613] min-h-[44px]"
               >
                 {DESTINATION_SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -393,7 +393,7 @@ export function DestinationSearchSection() {
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="text-sm font-semibold text-[#e30613] transition hover:text-[#c40010]"
+                className="min-h-[44px] px-2 text-sm font-semibold text-[#e30613] transition hover:text-[#c40010]"
               >
                 Clear all
               </button>
@@ -430,7 +430,7 @@ export function DestinationSearchSection() {
             <button
               type="button"
               onClick={handleClearAll}
-              className="btn-premium mt-6 bg-[#e30613] px-6 py-3 text-sm font-semibold text-white hover:bg-[#c40010]"
+                className="btn-premium mt-6 min-h-[44px] w-full bg-[#e30613] px-6 py-3 text-sm font-semibold text-white hover:bg-[#c40010] sm:w-auto"
             >
               Reset Search
             </button>

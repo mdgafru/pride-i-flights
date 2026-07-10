@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WHATSAPP_URL } from "@/lib/contact";
 
@@ -12,7 +13,7 @@ const CTA_IMAGE =
   "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1800&q=85";
 
 const eyebrowClass = "text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]";
-const sectionTitleClass = "text-3xl font-extrabold leading-tight text-[#e30613] md:text-4xl";
+const sectionTitleClass = "text-2xl font-extrabold leading-tight text-[#e30613] sm:text-3xl md:text-4xl";
 const bodyClass = "text-base leading-relaxed text-gray-600";
 
 const highlights = [
@@ -117,56 +118,15 @@ function getPlanWhatsAppUrl(planName: string, price: string) {
 export default function TravelInsurancePage() {
   return (
     <SiteShell active="Travel Insurance">
-      {/* Hero */}
-      <section className="relative min-h-[520px] overflow-hidden md:min-h-[580px]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={HERO_IMAGE}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_45%] brightness-[1.1] saturate-[1.14] contrast-[1.06]"
-        />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#042448]/90 via-[#0b2f57]/62 to-[#0b2f57]/25" />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[#042448]/40 via-transparent to-transparent" />
-
-        <div className="relative z-[2] mx-auto max-w-[1260px] px-4 pt-14 pb-36 md:pt-20 md:pb-40">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="max-w-3xl"
-          >
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#e30613] drop-shadow-[0_1px_6px_rgba(255,255,255,0.9)]">
-              Fly Protected · REDE I FLIGHTS
-            </p>
-            <h1 className="mt-3 text-4xl font-extrabold leading-[1.15] text-[#e30613] drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)] sm:text-5xl lg:text-[3.25rem]">
-              Travel Insurance
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white sm:text-lg">
-              Airline-ready travel insurance for international journeys. Medical cover, flight delays,
-              trip cancellation and baggage protection - aligned with how you fly.
-            </p>
-            <p className="mt-6 text-base text-white/90">
-              <Link href="/" className="font-medium transition hover:text-white">
-                Home
-              </Link>
-              <span className="mx-2 text-[#ff6b75]">&gt;</span>
-              <span className="font-semibold text-white">Travel Insurance</span>
-            </p>
-          </motion.div>
-        </div>
-
-        <div className="absolute right-0 bottom-0 left-0 z-[3] border-t border-white/20 bg-[#042448]/95 backdrop-blur-md">
-          <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            {highlights.map((item) => (
-              <div key={item.title} className="px-6 py-5 text-center sm:px-8 sm:py-6">
-                <p className="text-base font-bold text-[#e30613] sm:text-lg">{item.title}</p>
-                <p className="mt-1 text-sm text-white/75">{item.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ContentPageHero
+        image={HERO_IMAGE}
+        imagePosition="center 45%"
+        eyebrow="Fly Protected · REDE I FLIGHTS"
+        title="Travel Insurance"
+        description="Airline-ready travel insurance for international journeys. Medical cover, flight delays, trip cancellation and baggage protection - aligned with how you fly."
+        breadcrumb="Travel Insurance"
+        highlights={highlights}
+      />
 
       {/* Trust strip */}
       <section className="border-b border-slate-200 bg-white">
@@ -204,7 +164,7 @@ export default function TravelInsurancePage() {
                   : "border-slate-200"
               }`}
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-[#e30613]">
                     {plan.badge}
@@ -228,7 +188,7 @@ export default function TravelInsurancePage() {
                 href={getPlanWhatsAppUrl(plan.name, plan.price)}
                 target="_blank"
                 rel="noreferrer"
-                className={`btn-premium mt-6 inline-block w-full px-5 py-3 text-center text-sm font-semibold ${
+                className={`btn-premium mt-6 inline-block min-h-[44px] w-full px-5 py-3 text-center text-sm font-semibold ${
                   plan.highlighted
                     ? "bg-[#e30613] text-white hover:bg-[#c40010]"
                     : "border border-[#0b2f57] text-[#0b2f57] hover:bg-[#0b2f57] hover:text-white"

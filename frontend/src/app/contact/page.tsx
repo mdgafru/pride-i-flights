@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL, WHATSAPP_URL } from "@/lib/contact";
@@ -10,7 +11,7 @@ const CONTACT_HERO_IMAGE =
   "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1800&q=85";
 
 const eyebrowClass = "text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]";
-const sectionTitleClass = "text-3xl font-extrabold leading-tight text-[#e30613] md:text-4xl";
+const sectionTitleClass = "text-2xl font-extrabold leading-tight text-[#e30613] sm:text-3xl md:text-4xl";
 const blockTitleClass = "text-2xl font-bold leading-snug text-[#e30613]";
 const bodyClass = "text-base leading-relaxed text-gray-600";
 const fieldLabelClass = "text-sm font-semibold text-slate-600";
@@ -46,72 +47,23 @@ const trustItems = [
 const services = ["Flights", "Hotels", "Visa", "Travel Insurance", "Tour Packages"];
 
 const quickActions = [
-  { label: "Call Us", value: CONTACT_PHONE, href: TEL_URL },
-  { label: "Email Us", value: CONTACT_EMAIL, href: MAILTO_URL },
-  { label: "WhatsApp", value: "Chat instantly", href: WHATSAPP_URL, external: true },
+  { title: "Call Us", sub: CONTACT_PHONE, href: TEL_URL },
+  { title: "Email Us", sub: CONTACT_EMAIL, href: MAILTO_URL },
+  { title: "WhatsApp", sub: "Chat instantly", href: WHATSAPP_URL, external: true },
 ];
 
 export default function ContactPage() {
   return (
     <SiteShell active="Contact Us">
-      <section className="relative overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={CONTACT_HERO_IMAGE}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_70%] brightness-[1.08] saturate-[1.12] contrast-[1.05]"
-        />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#042448]/88 via-[#0b2f57]/55 to-transparent" />
-
-        <div className="relative z-[2] mx-auto max-w-[1260px] px-4 pt-14 pb-36 md:pt-20 md:pb-40">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="max-w-3xl"
-          >
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#e30613] drop-shadow-[0_1px_6px_rgba(255,255,255,0.9)]">
-              UAE Travel Experts · REDE I FLIGHTS
-            </p>
-            <h1 className="mt-3 text-4xl font-extrabold leading-[1.15] text-[#e30613] drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)] sm:text-5xl lg:text-[3.25rem]">
-              Contact Our Travel Experts
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white sm:text-lg">
-              Your trusted partner for flights, hotels, visa and travel insurance. Reach out today
-              and let our team plan your next journey from Dubai to destinations worldwide.
-            </p>
-            <p className="mt-6 text-base text-white/90">
-              <Link href="/" className="font-medium transition hover:text-white">
-                Home
-              </Link>
-              <span className="mx-2 text-[#ff6b75]">&gt;</span>
-              <span className="font-semibold text-white">Contact Us</span>
-            </p>
-          </motion.div>
-        </div>
-
-        <div className="absolute right-0 bottom-0 left-0 z-[3] border-t border-white/20 bg-[#042448]/95 backdrop-blur-md">
-          <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            {quickActions.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                target={item.external ? "_blank" : undefined}
-                rel={item.external ? "noreferrer" : undefined}
-                className="group flex flex-col px-6 py-5 transition hover:bg-white/5 sm:px-8 sm:py-6"
-              >
-                <span className="text-xs font-bold uppercase tracking-wider text-white/70">
-                  {item.label}
-                </span>
-                <span className="mt-1.5 text-base font-semibold text-white group-hover:text-[#ffb3b8] sm:text-lg">
-                  {item.value}
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ContentPageHero
+        image={CONTACT_HERO_IMAGE}
+        imagePosition="center 70%"
+        eyebrow="UAE Travel Experts · REDE I FLIGHTS"
+        title="Contact Our Travel Experts"
+        description="Your trusted partner for flights, hotels, visa and travel insurance. Reach out today and let our team plan your next journey from Dubai to destinations worldwide."
+        breadcrumb="Contact Us"
+        highlights={quickActions}
+      />
 
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-slate-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
@@ -124,7 +76,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1260px] px-4 py-14 md:py-20">
+      <section className="mx-auto max-w-[1260px] px-4 py-10 md:py-20">
         <div className="mb-12 text-center">
           <p className={eyebrowClass}>Get in Touch</p>
           <h2 className={`mt-3 ${sectionTitleClass}`}>Start Planning Your Trip Today</h2>
@@ -187,7 +139,7 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="btn-premium bg-[#e30613] px-10 py-4 text-base font-semibold text-white hover:bg-[#c40010]"
+                className="btn-premium w-full min-h-[44px] bg-[#e30613] px-10 py-4 text-base font-semibold text-white hover:bg-[#c40010] sm:w-auto"
               >
                 Submit Enquiry
               </button>
@@ -240,7 +192,7 @@ export default function ContactPage() {
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-premium mt-5 inline-flex items-center gap-2.5 bg-[#e30613] px-7 py-4 text-base font-semibold text-white hover:bg-[#c40010]"
+                className="btn-premium mt-5 inline-flex w-full min-h-[44px] items-center justify-center gap-2.5 bg-[#e30613] px-7 py-4 text-base font-semibold text-white hover:bg-[#c40010] sm:w-auto"
               >
                 <WhatsAppIcon className="h-5 w-5" />
                 Chat on WhatsApp

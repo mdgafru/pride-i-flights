@@ -12,10 +12,10 @@ export function SiteShell({
   active?: string;
   overlayNav?: boolean;
 }) {
-  const contentOffsetClass = overlayNav ? "" : "pt-[116px] sm:pt-[92px]";
+  const contentOffsetClass = overlayNav ? "" : "pt-[124px] sm:pt-[92px]";
 
   return (
-    <main className={`relative bg-[#f6f6f8] text-[#1d2433] ${contentOffsetClass}`}>
+    <main className={`relative overflow-x-clip bg-[#f6f6f8] text-[#1d2433] ${contentOffsetClass}`}>
       <WhatsAppFloat />
       <Navbar active={active} overlay={overlayNav} />
       {children}

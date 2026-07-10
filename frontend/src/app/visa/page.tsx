@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WHATSAPP_URL } from "@/lib/contact";
 
@@ -13,7 +14,7 @@ const CTA_IMAGE =
   "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?auto=format&fit=crop&w=1800&q=85";
 
 const eyebrowClass = "text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]";
-const sectionTitleClass = "text-3xl font-extrabold leading-tight text-[#e30613] md:text-4xl";
+const sectionTitleClass = "text-2xl font-extrabold leading-tight text-[#e30613] sm:text-3xl md:text-4xl";
 const bodyClass = "text-base leading-relaxed text-gray-600";
 const imageBadgeClass =
   "absolute left-3 top-3 rounded-md bg-[#e30613] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm";
@@ -133,56 +134,15 @@ export default function VisaPage() {
 
   return (
     <SiteShell active="Visa">
-      {/* Hero */}
-      <section className="relative min-h-[520px] overflow-hidden md:min-h-[580px]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={HERO_IMAGE}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_40%] brightness-[1.08] saturate-[1.12] contrast-[1.05]"
-        />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#042448]/92 via-[#0b2f57]/65 to-[#0b2f57]/30" />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[#042448]/45 via-transparent to-transparent" />
-
-        <div className="relative z-[2] mx-auto max-w-[1260px] px-4 pt-14 pb-36 md:pt-20 md:pb-40">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="max-w-3xl"
-          >
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#e30613] drop-shadow-[0_1px_6px_rgba(255,255,255,0.9)]">
-              Hassle-Free Documentation · REDE I FLIGHTS
-            </p>
-            <h1 className="mt-3 text-4xl font-extrabold leading-[1.15] text-[#e30613] drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)] sm:text-5xl lg:text-[3.25rem]">
-              Visa Services
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white sm:text-lg">
-              Expert visa guidance with high success rate and end-to-end support. Tourist, business
-              and student visas handled by trusted UAE travel advisors.
-            </p>
-            <p className="mt-6 text-base text-white/90">
-              <Link href="/" className="font-medium transition hover:text-white">
-                Home
-              </Link>
-              <span className="mx-2 text-[#ff6b75]">&gt;</span>
-              <span className="font-semibold text-white">Visa Services</span>
-            </p>
-          </motion.div>
-        </div>
-
-        <div className="absolute right-0 bottom-0 left-0 z-[3] border-t border-white/20 bg-[#042448]/95 backdrop-blur-md">
-          <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            {highlights.map((item) => (
-              <div key={item.title} className="px-6 py-5 text-center sm:px-8 sm:py-6">
-                <p className="text-base font-bold text-[#e30613] sm:text-lg">{item.title}</p>
-                <p className="mt-1 text-sm text-white/75">{item.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ContentPageHero
+        image={HERO_IMAGE}
+        imagePosition="center 40%"
+        eyebrow="Hassle-Free Documentation · REDE I FLIGHTS"
+        title="Visa Services"
+        description="Expert visa guidance with high success rate and end-to-end support. Tourist, business and student visas handled by trusted UAE travel advisors."
+        breadcrumb="Visa Services"
+        highlights={highlights}
+      />
 
       {/* Trust strip */}
       <section className="border-b border-slate-200 bg-white">
@@ -202,13 +162,13 @@ export default function VisaPage() {
           <div className="mb-5 text-center">
             <h2 className="text-2xl font-extrabold text-[#e30613] md:text-3xl">Browse Visa Types</h2>
           </div>
-          <div className="flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-1 pb-1">
+          <div className="-mx-4 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-4 pb-1 snap-x snap-mandatory">
             {visaTypes.map((type) => (
               <button
                 key={type}
                 type="button"
                 onClick={() => setActiveType(type)}
-                className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
                   activeType === type
                     ? "bg-[#e30613] text-white shadow-sm"
                     : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"

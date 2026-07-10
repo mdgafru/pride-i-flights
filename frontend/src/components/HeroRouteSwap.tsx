@@ -37,7 +37,7 @@ export function HeroRouteSwap() {
   };
 
   return (
-    <div className="flex min-h-[82px] min-w-0 items-stretch border-b border-slate-200 sm:col-span-2 sm:border-r sm:border-b-0 lg:col-span-1">
+    <div className="flex min-h-[68px] min-w-0 flex-col items-stretch border-b border-slate-200 sm:min-h-[82px] sm:flex-row sm:col-span-2 sm:border-r sm:border-b-0 lg:col-span-1">
       <label className="flex min-w-0 flex-1 flex-col justify-center px-4 py-4 sm:px-5">
         <span className={fieldLabelClass}>From</span>
         <input
@@ -56,7 +56,7 @@ export function HeroRouteSwap() {
           type="button"
           aria-label="Swap departure and destination"
           title="Swap From and To"
-          className="hero-route-swap flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-[#0b2f57] bg-white text-[#0b2f57] shadow-sm hover:border-[#e30613] hover:text-[#e30613]"
+          className="hero-route-swap flex h-11 w-11 min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-full border-2 border-[#0b2f57] bg-white text-[#0b2f57] shadow-sm hover:border-[#e30613] hover:text-[#e30613]"
           style={{ transform: `rotate(${swapRotation}deg)` }}
           onClick={swapRoute}
         >

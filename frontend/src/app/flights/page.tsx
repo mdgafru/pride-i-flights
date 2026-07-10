@@ -49,19 +49,19 @@ export default function FlightsPage() {
         breadcrumb="Flights"
         image="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1800&q=80"
       >
-        <div className="mx-auto mt-[-40px] max-w-[1260px] px-4 pb-6">
+        <div className="mx-auto mt-0 max-w-[1260px] px-4 pb-6 sm:mt-[-24px] lg:mt-[-40px]">
           <div className="soft-section premium-shadow grid grid-cols-1 gap-3 rounded-xl p-4 md:grid-cols-2 xl:grid-cols-5">
             {["From", "To", "Departure", "Return", "Travel Class"].map((item) => (
               <button
                 key={item}
-                className="rounded-lg border border-gray-200 px-4 py-3 text-left text-sm text-gray-600"
+                className="min-h-[44px] rounded-lg border border-gray-200 px-4 py-3 text-left text-sm text-gray-600"
               >
                 {item}
               </button>
             ))}
           </div>
-          <div className="mt-3 flex justify-end">
-            <button className="btn-premium rounded-lg bg-[#e30613] px-6 py-3 text-sm font-semibold text-white">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <button className="btn-premium min-h-[44px] w-full rounded-lg bg-[#e30613] px-6 py-3 text-sm font-semibold text-white sm:w-auto">
               Search Flights
             </button>
           </div>
@@ -71,7 +71,7 @@ export default function FlightsPage() {
       <section className="mx-auto max-w-[1260px] px-4 py-12">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-3xl font-extrabold text-[#111827]">Top Flight Deals</h2>
+            <h2 className="text-2xl font-extrabold text-[#111827] sm:text-3xl">Top Flight Deals</h2>
             <p className="text-sm text-gray-500">Popular routes travelers book most.</p>
           </div>
           <p className="rounded-lg bg-white px-3 py-2 text-sm text-gray-500 shadow-sm">Sort by: Lowest Price</p>
@@ -96,7 +96,7 @@ export default function FlightsPage() {
               <div className="mt-4 flex justify-end">
                 <Link
                   href="/contact"
-                  className="rounded-lg border border-[#e30613] px-4 py-2 text-sm font-semibold text-[#e30613] transition hover:bg-[#e30613] hover:text-white"
+                  className="min-h-[44px] rounded-lg border border-[#e30613] px-5 py-2.5 text-sm font-semibold text-[#e30613] transition hover:bg-[#e30613] hover:text-white"
                 >
                   Book Now
                 </Link>

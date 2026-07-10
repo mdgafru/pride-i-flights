@@ -85,26 +85,66 @@ export default function PackagesPage() {
         breadcrumb="Tour Packages"
         image="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=80"
       >
-        <div className="mx-auto mt-[-40px] max-w-[1260px] px-4 pb-6">
+        <div className="mx-auto mt-0 max-w-[1260px] px-4 pb-6 sm:mt-[-24px] lg:mt-[-40px]">
           <div className="soft-section premium-shadow grid grid-cols-1 gap-3 rounded-xl p-3 md:grid-cols-2 xl:grid-cols-5">
             {["All Destinations", "All Themes", "Any Duration", "Any Budget"].map((item) => (
               <button
                 key={item}
-                className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-600"
+                className="flex min-h-[44px] items-center justify-between rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-600"
               >
                 {item}
                 <span className="text-xs">▼</span>
               </button>
             ))}
-            <button className="btn-premium rounded-lg bg-[#e30613] px-4 py-3 text-sm font-semibold text-white">
+            <button className="btn-premium col-span-full min-h-[44px] rounded-lg bg-[#e30613] px-4 py-3 text-sm font-semibold text-white xl:col-span-1">
               Search Packages
             </button>
           </div>
         </div>
       </PageHero>
 
-      <section className="mx-auto grid max-w-[1260px] gap-6 px-4 py-12 lg:grid-cols-[260px_1fr]">
-        <aside className="h-fit rounded-2xl bg-white p-5 shadow-sm">
+      <section className="mx-auto grid max-w-[1260px] gap-6 px-4 py-8 sm:py-12 lg:grid-cols-[260px_1fr]">
+        <details className="rounded-2xl bg-white p-5 shadow-sm lg:hidden">
+          <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-lg font-bold text-[#111827] [&::-webkit-details-marker]:hidden">
+            Filter Packages
+          </summary>
+          <div className="mt-6 space-y-7 text-sm text-gray-600">
+            <div>
+              <p className="mb-3 font-semibold text-gray-700">Destination</p>
+              <div className="space-y-2">
+                {["Europe", "Asia", "Australia", "Africa", "North America", "Middle East"].map(
+                  (item) => (
+                    <label key={item} className="flex min-h-[44px] items-center gap-3">
+                      <input type="checkbox" className="accent-[#e30613]" />
+                      {item}
+                    </label>
+                  ),
+                )}
+              </div>
+            </div>
+            <div>
+              <p className="mb-3 font-semibold text-gray-700">Theme</p>
+              <div className="space-y-2">
+                {["Family", "Honeymoon", "Adventure", "Beach", "Luxury"].map((item) => (
+                  <label key={item} className="flex min-h-[44px] items-center gap-3">
+                    <input type="checkbox" className="accent-[#e30613]" />
+                    {item}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="mb-3 font-semibold text-gray-700">Budget (Per Person)</p>
+              <input type="range" min={200} max={5000} defaultValue={1500} className="w-full accent-[#e30613]" />
+              <div className="mt-1 flex justify-between text-xs text-gray-500">
+                <span>$200</span>
+                <span>$5000+</span>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <aside className="hidden h-fit rounded-2xl bg-white p-5 shadow-sm lg:block">
           <h3 className="text-lg font-bold text-[#111827]">Filter Packages</h3>
 
           <div className="mt-6 space-y-7 text-sm text-gray-600">
@@ -113,7 +153,7 @@ export default function PackagesPage() {
               <div className="space-y-2">
                 {["Europe", "Asia", "Australia", "Africa", "North America", "Middle East"].map(
                   (item) => (
-                    <label key={item} className="flex items-center gap-2">
+                    <label key={item} className="flex min-h-[44px] items-center gap-3">
                       <input type="checkbox" className="accent-[#e30613]" />
                       {item}
                     </label>
@@ -126,7 +166,7 @@ export default function PackagesPage() {
               <p className="mb-3 font-semibold text-gray-700">Theme</p>
               <div className="space-y-2">
                 {["Family", "Honeymoon", "Adventure", "Beach", "Luxury"].map((item) => (
-                  <label key={item} className="flex items-center gap-2">
+                  <label key={item} className="flex min-h-[44px] items-center gap-3">
                     <input type="checkbox" className="accent-[#e30613]" />
                     {item}
                   </label>
@@ -148,7 +188,7 @@ export default function PackagesPage() {
         <div>
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-3xl font-extrabold text-[#111827]">Top Tour Packages</h2>
+              <h2 className="text-2xl font-extrabold text-[#111827] sm:text-3xl">Top Tour Packages</h2>
               <p className="text-sm text-gray-500">Explore our most popular and trending tours.</p>
             </div>
             <p className="rounded-lg bg-white px-3 py-2 text-sm text-gray-500 shadow-sm">
