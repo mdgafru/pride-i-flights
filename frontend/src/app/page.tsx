@@ -33,16 +33,16 @@ const passengerOptions = [
 
 const heroSearchLabelClass = "text-[11px] font-extrabold uppercase tracking-wide text-[#0b2f57]";
 const heroSearchCellClass =
-  "flex min-h-[68px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 bg-white px-3 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 lg:px-4 lg:last:border-r-0";
+  "flex min-h-[56px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 bg-white px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 sm:py-3 lg:px-4 lg:last:border-r-0";
 const heroSearchDateCellClass =
-  "flex min-h-[68px] min-w-0 flex-col justify-center border-b border-slate-200 bg-white px-3 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 lg:px-3.5 lg:pr-4";
+  "flex min-h-[56px] min-w-0 flex-col justify-center border-b border-slate-200 bg-white px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 sm:py-3 lg:px-3.5 lg:pr-4";
 const heroSearchTravellerCellClass = heroSearchCellClass;
 const heroSearchSelectClass =
   "hero-search-select w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-sm font-semibold text-[#0b2f57] outline-none sm:text-[15px]";
 const heroSearchBarClass =
   "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 border border-slate-200 bg-white shadow-[0_8px_24px_rgba(11,47,87,0.1)] sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)]";
 const heroTripSelectClass =
-  "mb-2 min-h-[40px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none sm:min-h-0 sm:w-fit sm:min-w-[9.5rem]";
+  "min-h-[40px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none sm:mb-2 sm:min-h-0 sm:w-fit sm:min-w-[9.5rem]";
 
 const BANNER_VISIBLE_MS = 5000;
 const BANNER_TRANSITION_S = 1.25;
@@ -220,7 +220,7 @@ export default function Home() {
 
   return (
     <SiteShell active="Home">
-      <section className="relative w-full overflow-hidden py-5 sm:py-6">
+      <section className="relative w-full overflow-visible pb-32 pt-16 sm:overflow-hidden sm:py-6">
         <video
           className="footer-video-animate absolute inset-0 z-0 h-full w-full object-cover object-[center_30%] brightness-[1.24] saturate-[1.15] contrast-[1.08]"
           src={SITE_BACKGROUND_VIDEO_SRC}
@@ -233,31 +233,11 @@ export default function Home() {
         />
         <div className="hero-overlay-premium pointer-events-none absolute inset-0 z-[1]" />
 
-        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-5 px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-6 px-5 sm:gap-5 sm:px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
           <div className="flex w-full min-w-0 flex-1 flex-col lg:max-w-none">
-            <div className="mb-4 flex flex-wrap items-center gap-5 sm:gap-8">
-              {[
-                { label: "Flights", href: "/", active: true },
-                { label: "Visa", href: "/visa", active: false },
-                { label: "Hotels", href: "/hotels", active: false },
-              ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`text-2xl font-extrabold uppercase tracking-wide transition sm:text-3xl lg:text-4xl ${
-                    item.active
-                      ? "text-[#e30613] drop-shadow-[0_2px_8px_rgba(255,255,255,1)]"
-                      : "text-[#e30613] drop-shadow-[0_2px_8px_rgba(255,255,255,0.95)] hover:text-[#c40010]"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-
             <form
               action="/flights"
-              className="w-full rounded-2xl bg-white/95 p-3 shadow-[0_12px_32px_rgba(11,47,87,0.14)] ring-1 ring-slate-200/80 backdrop-blur-md sm:p-4"
+              className="w-full space-y-3 rounded-2xl bg-white/95 p-3.5 shadow-[0_12px_32px_rgba(11,47,87,0.14)] ring-1 ring-slate-200/80 backdrop-blur-md sm:space-y-0 sm:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
                 window.location.href = "/flights";
@@ -275,7 +255,7 @@ export default function Home() {
                 ))}
               </select>
 
-              <div className="mt-2 flex min-w-0 flex-col gap-3 border-t border-slate-200 pt-3 lg:flex-row lg:items-stretch">
+              <div className="flex min-w-0 flex-col gap-3 border-t border-slate-200 pt-3 sm:mt-2 lg:flex-row lg:items-stretch">
                 <div className={`${heroSearchBarClass} overflow-hidden rounded-xl lg:min-h-[82px]`}>
                   <HeroRouteSwap />
                   <label className={heroSearchDateCellClass}>
@@ -296,7 +276,7 @@ export default function Home() {
                   </label>
                   <div className={heroSearchTravellerCellClass}>
                     <span className={heroSearchLabelClass}>Travellers &amp; class</span>
-                    <div className="mt-1.5 grid min-w-0 grid-cols-1 gap-1.5">
+                    <div className="mt-1 grid min-w-0 grid-cols-2 gap-2 sm:mt-1.5 sm:grid-cols-1 sm:gap-1.5">
                       <select
                         value={passengers}
                         onChange={(e) => setPassengers(e.target.value)}
@@ -341,7 +321,7 @@ export default function Home() {
           </div>
 
           {heroBanners.length > 0 ? (
-          <div className="hero-card-premium flex w-full max-w-none flex-col overflow-hidden rounded-2xl leading-none sm:mx-0 sm:w-[240px] sm:max-w-[240px] md:w-[270px] md:max-w-[270px] lg:shrink-0">
+          <div className="hero-card-premium mx-auto flex w-full max-w-[320px] flex-col overflow-hidden rounded-2xl leading-none sm:mx-0 sm:w-[240px] sm:max-w-[240px] md:w-[270px] md:max-w-[270px] lg:shrink-0">
             <div className="relative aspect-[3/4] w-full overflow-hidden">
               <motion.div
                 className="flex h-full will-change-transform"
@@ -402,7 +382,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
           {services.map((item, index) => (
             <motion.article
               key={item.title}
@@ -466,7 +446,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-5">
           {packages.map((pkg, index) => (
             <motion.article
               key={pkg.title}
@@ -543,7 +523,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 lg:gap-4">
           {destinations.map((place, index) => (
             <motion.article
               key={place.title}
@@ -577,7 +557,7 @@ export default function Home() {
           <p className="mt-2 text-center text-sm text-gray-500">
             Real feedback from happy travelers who booked with us.
           </p>
-          <div className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-5">
             {reviews.map((review, index) => (
               <motion.article
                 key={review.name}
