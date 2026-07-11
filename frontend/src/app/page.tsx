@@ -8,8 +8,9 @@ import { HeroRouteSwap } from "@/components/HeroRouteSwap";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
-import { bannersToSlides, DEFAULT_HERO_BANNERS } from "@/lib/banner";
-import type { Banner } from "@/types/banner";
+import { bannersToSlides } from "@/lib/banner";
+import { SITE_BACKGROUND_VIDEO_SRC } from "@/lib/site-media";
+import type { Banner, BannerSlide } from "@/types/banner";
 
 const tripTypeOptions = [
   { value: "return", label: "Return trip" },
@@ -30,18 +31,18 @@ const passengerOptions = [
   { value: "2a1c", label: "2 Adults, 1 Child" },
 ];
 
-const heroSearchLabelClass = "text-xs font-bold uppercase tracking-wide text-slate-600";
+const heroSearchLabelClass = "text-[11px] font-extrabold uppercase tracking-wide text-[#0b2f57]";
 const heroSearchCellClass =
-  "flex min-h-[68px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 px-4 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 lg:px-4 lg:last:border-r-0";
+  "flex min-h-[68px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 bg-white px-3 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 lg:px-4 lg:last:border-r-0";
 const heroSearchDateCellClass =
-  "flex min-h-[68px] min-w-0 flex-col justify-center border-b border-slate-200 px-4 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 lg:px-3.5 lg:pr-4";
+  "flex min-h-[68px] min-w-0 flex-col justify-center border-b border-slate-200 bg-white px-3 py-3 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 lg:px-3.5 lg:pr-4";
 const heroSearchTravellerCellClass = heroSearchCellClass;
 const heroSearchSelectClass =
   "hero-search-select w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-sm font-semibold text-[#0b2f57] outline-none sm:text-[15px]";
 const heroSearchBarClass =
-  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 rounded-xl border border-slate-200/90 bg-white shadow-[0_14px_36px_rgba(11,47,87,0.16)] sm:grid-cols-2 lg:grid-cols-[minmax(0,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)]";
+  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 border border-slate-200 bg-white shadow-[0_8px_24px_rgba(11,47,87,0.1)] sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)]";
 const heroTripSelectClass =
-  "mb-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none";
+  "mb-2 min-h-[40px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none sm:min-h-0 sm:w-fit sm:min-w-[9.5rem]";
 
 const BANNER_VISIBLE_MS = 5000;
 const BANNER_TRANSITION_S = 1.25;
@@ -176,7 +177,7 @@ export default function Home() {
   const [travelClass, setTravelClass] = useState("economy");
   const [passengers, setPassengers] = useState("1a");
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [heroBanners, setHeroBanners] = useState(DEFAULT_HERO_BANNERS);
+  const [heroBanners, setHeroBanners] = useState<BannerSlide[]>([]);
 
   useEffect(() => {
     async function loadBanners() {
@@ -189,11 +190,11 @@ export default function Home() {
           setHeroBanners(bannersToSlides(activeBanners));
           setBannerIndex(0);
         } else {
-          setHeroBanners(DEFAULT_HERO_BANNERS);
+          setHeroBanners([]);
           setBannerIndex(0);
         }
       } catch {
-        setHeroBanners(DEFAULT_HERO_BANNERS);
+        setHeroBanners([]);
       }
     }
 
@@ -220,30 +221,33 @@ export default function Home() {
   return (
     <SiteShell active="Home">
       <section className="relative w-full overflow-hidden py-5 sm:py-6">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/background.png"
-          alt=""
+        <video
+          className="footer-video-animate absolute inset-0 z-0 h-full w-full object-cover object-[center_30%] brightness-[1.24] saturate-[1.15] contrast-[1.08]"
+          src={SITE_BACKGROUND_VIDEO_SRC}
+          autoPlay
+          muted
+          loop
+          playsInline
           aria-hidden
-          className="absolute inset-0 z-0 h-full w-full object-cover object-[center_30%] brightness-[1.24] saturate-[1.15] contrast-[1.08]"
+          poster="/background.png"
         />
         <div className="hero-overlay-premium pointer-events-none absolute inset-0 z-[1]" />
 
-        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-5 px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-5 xl:gap-6">
-          <div className="w-full min-w-0 lg:flex-[1.4] lg:max-w-none">
-            <div className="flex flex-wrap gap-2">
+        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-5 px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+          <div className="flex w-full min-w-0 flex-1 flex-col lg:max-w-none">
+            <div className="mb-4 flex flex-wrap items-center gap-5 sm:gap-8">
               {[
                 { label: "Flights", href: "/", active: true },
-                { label: "Hotels", href: "/hotels", active: false },
                 { label: "Visa", href: "/visa", active: false },
+                { label: "Hotels", href: "/hotels", active: false },
               ].map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition sm:text-sm ${
+                  className={`text-2xl font-extrabold uppercase tracking-wide transition sm:text-3xl lg:text-4xl ${
                     item.active
-                      ? "bg-[#e30613] text-white shadow-sm"
-                      : "border border-white/40 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
+                      ? "text-[#e30613] drop-shadow-[0_2px_8px_rgba(255,255,255,1)]"
+                      : "text-[#e30613] drop-shadow-[0_2px_8px_rgba(255,255,255,0.95)] hover:text-[#c40010]"
                   }`}
                 >
                   {item.label}
@@ -251,16 +255,9 @@ export default function Home() {
               ))}
             </div>
 
-            <h1 className="mt-3 text-xl font-extrabold leading-tight text-[#e30613] drop-shadow-[0_2px_6px_rgba(255,255,255,0.85)] sm:text-2xl">
-              Best fares for your next journey.
-              <span className="mt-0.5 block text-sm font-semibold text-[#e30613] sm:text-base">
-                One simple search.
-              </span>
-            </h1>
-
             <form
               action="/flights"
-              className="mt-4 rounded-2xl bg-white/20 p-3 ring-1 ring-white/40 backdrop-blur-sm sm:p-4"
+              className="w-full rounded-2xl bg-white/95 p-3 shadow-[0_12px_32px_rgba(11,47,87,0.14)] ring-1 ring-slate-200/80 backdrop-blur-md sm:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
                 window.location.href = "/flights";
@@ -278,8 +275,8 @@ export default function Home() {
                 ))}
               </select>
 
-              <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-stretch">
-                <div className={heroSearchBarClass}>
+              <div className="mt-2 flex min-w-0 flex-col gap-3 border-t border-slate-200 pt-3 lg:flex-row lg:items-stretch">
+                <div className={`${heroSearchBarClass} overflow-hidden rounded-xl lg:min-h-[82px]`}>
                   <HeroRouteSwap />
                   <label className={heroSearchDateCellClass}>
                     <span className={heroSearchLabelClass}>Depart</span>
@@ -314,7 +311,7 @@ export default function Home() {
                       <select
                         value={travelClass}
                         onChange={(e) => setTravelClass(e.target.value)}
-                        className={`${heroSearchSelectClass} text-slate-600`}
+                        className={heroSearchSelectClass}
                       >
                         {travelClassOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -343,7 +340,8 @@ export default function Home() {
             </form>
           </div>
 
-          <div className="hero-card-premium flex w-full max-w-none flex-col overflow-hidden rounded-2xl leading-none sm:mx-0 sm:w-[240px] sm:max-w-[240px] md:w-[270px] md:max-w-[270px] lg:mt-8 lg:shrink-0 lg:ml-auto xl:mt-10">
+          {heroBanners.length > 0 ? (
+          <div className="hero-card-premium flex w-full max-w-none flex-col overflow-hidden rounded-2xl leading-none sm:mx-0 sm:w-[240px] sm:max-w-[240px] md:w-[270px] md:max-w-[270px] lg:shrink-0">
             <div className="relative aspect-[3/4] w-full overflow-hidden">
               <motion.div
                 className="flex h-full will-change-transform"
@@ -391,13 +389,14 @@ export default function Home() {
               Enquire Now
             </a>
           </div>
+          ) : null}
         </div>
       </section>
 
       <section className="section-fade-top mx-auto max-w-[1260px] px-4 pb-14 pt-10">
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center justify-center border-2 border-[#e30613] bg-white px-8 py-3 shadow-sm">
-            <p className="whitespace-nowrap text-sm font-bold uppercase tracking-wide text-[#e30613]">
+          <div className="inline-flex items-center justify-center bg-[#e30613] px-8 py-3 shadow-sm">
+            <p className="whitespace-nowrap text-sm font-bold uppercase tracking-wide text-white">
               Our Services
             </p>
           </div>
@@ -510,7 +509,7 @@ export default function Home() {
 
         {/* How it works */}
         <div className="mt-14 px-2 py-4">
-          <h3 className="text-center text-2xl font-extrabold text-[#101828] sm:text-3xl">How It Works</h3>
+          <h3 className="text-center text-2xl font-extrabold text-[#e30613] sm:text-3xl">How It Works</h3>
           <p className="mt-2 text-center text-sm text-gray-500">
             Simple 3-step booking process with expert support.
           </p>
@@ -586,7 +585,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.08 }}
-              className="premium-shadow hover-lift-soft rounded-2xl border border-[#edf1f8] bg-white p-5"
+                className="premium-shadow hover-lift-soft rounded-2xl border border-[#edf1f8] bg-white p-5"
               >
                 <p className="text-amber-500">★★★★★</p>
                 <p className="mt-3 text-sm leading-6 text-gray-600">&ldquo;{review.text}&rdquo;</p>

@@ -3,9 +3,9 @@
 import { useReducer, useState } from "react";
 import { SwapRoutesIcon } from "@/components/icons";
 
-const fieldLabelClass = "text-sm text-slate-500";
+const fieldLabelClass = "text-[11px] font-extrabold uppercase tracking-wide text-[#0b2f57]";
 const fieldInputClass =
-  "mt-1 w-full min-w-0 border-0 bg-transparent p-0 text-[15px] font-semibold text-[#0b2f57] outline-none placeholder:font-normal placeholder:text-slate-400";
+  "mt-1 w-full min-w-0 border-0 bg-transparent p-0 text-[15px] font-semibold text-[#0b2f57] outline-none placeholder:font-medium placeholder:text-slate-500";
 
 type RouteState = { from: string; to: string };
 
@@ -37,8 +37,8 @@ export function HeroRouteSwap() {
   };
 
   return (
-    <div className="flex min-h-[68px] min-w-0 flex-col items-stretch border-b border-slate-200 sm:min-h-[82px] sm:flex-row sm:col-span-2 sm:border-r sm:border-b-0 lg:col-span-1">
-      <label className="flex min-w-0 flex-1 flex-col justify-center px-4 py-4 sm:px-5">
+    <div className="flex min-h-[68px] min-w-0 flex-col items-stretch border-b border-slate-200 bg-white sm:min-h-[82px] sm:flex-row sm:col-span-2 sm:border-r sm:border-b-0 lg:col-span-1">
+      <label className="flex min-w-0 flex-1 flex-col justify-center px-3 py-3 sm:px-4 sm:py-4">
         <span className={fieldLabelClass}>From</span>
         <input
           type="text"
@@ -64,7 +64,7 @@ export function HeroRouteSwap() {
         </button>
       </div>
 
-      <label className="flex min-w-0 flex-1 flex-col justify-center px-4 py-4 sm:px-5">
+      <label className="flex min-w-0 flex-1 flex-col justify-center px-3 py-3 sm:px-4 sm:py-4">
         <span className={fieldLabelClass}>To</span>
         <input
           type="text"

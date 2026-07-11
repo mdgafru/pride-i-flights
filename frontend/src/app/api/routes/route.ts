@@ -3,7 +3,8 @@ import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { upsertLinkedEntities } from "@/lib/link-route-entities";
 import { buildRouteSeo, sanitizeAirportIataCode } from "@/lib/route-meta";
-import { findLocalRouteBySlug, insertLocalRoute, readLocalRoutes, updateLocalRouteStatus } from "@/lib/route-local";
+import { findLocalRouteBySlug, insertLocalRoute, readLocalRoutes } from "@/lib/route-local";
+import { saveRouteById } from "@/lib/route-store";
 import { createAdminClient } from "@/lib/supabase-admin";
 import type { EntityStatus } from "@/types/airline";
 import type { Route } from "@/types/route";
@@ -163,7 +164,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ route: data });
     }
 
-    const localRoute = await updateLocalRouteStatus(body.id, body.status);
+    const localRoute = await saveRouteById(body.id, { status: body.status });
     if (!localRoute) {
       return NextResponse.json({ error: "Route not found." }, { status: 404 });
     }

@@ -17,12 +17,6 @@ export {
   getSiteOrigin,
 } from "@/lib/banner-meta";
 
-export const DEFAULT_HERO_BANNERS: BannerSlide[] = [
-  { src: "/promo-banner.png", alt: "REDE Flights - Dubai to Kochi" },
-  { src: "/image2.png", alt: "REDE Flights - Travel Promotion" },
-  { src: "/image3.png", alt: "REDE Flights - Special Offer" },
-];
-
 export const BANNER_BUCKET = "banners";
 export const BANNER_MAX_BYTES = 5 * 1024 * 1024;
 export const BANNER_ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];

@@ -3,8 +3,7 @@ import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { upsertLinkedEntities } from "@/lib/link-route-entities";
 import { buildRouteSeo, sanitizeAirportIataCode } from "@/lib/route-meta";
-import { deleteLocalRoute, updateLocalRoute } from "@/lib/route-local";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { removeRouteById, saveRouteById } from "@/lib/route-store";
 import type { EntityStatus } from "@/types/airline";
 
 export async function PATCH(
@@ -50,33 +49,11 @@ export async function PATCH(
       meta_description: seo.meta_description,
       h1_heading: seo.h1_heading,
       page_url: seo.page_url,
-      status: body.status,
+      ...(body.status ? { status: body.status } : {}),
     };
 
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("routes")
-      .update(patch)
-      .eq("id", id)
-      .select("*")
-      .single();
-
-    if (!error && data) {
-      await upsertLinkedEntities(
-        {
-          airline_name: airlineName,
-          from_airport_code: patch.from_airport_code || undefined,
-          to_airport_code: patch.to_airport_code || undefined,
-          from_city: fromCity,
-          to_city: toCity,
-        },
-        siteOrigin,
-      );
-      return NextResponse.json({ route: data });
-    }
-
-    const localRoute = await updateLocalRoute(id, patch);
-    if (!localRoute) {
+    const route = await saveRouteById(id, patch);
+    if (!route) {
       return NextResponse.json({ error: "Route not found." }, { status: 404 });
     }
 
@@ -91,10 +68,10 @@ export async function PATCH(
       siteOrigin,
     );
 
-    return NextResponse.json({ route: localRoute });
+    return NextResponse.json({ route });
   } catch (error) {
     console.error("route PATCH error:", error);
-    return NextResponse.json({ error: "Unable to update route." }, { status: 404 });
+    return NextResponse.json({ error: "Unable to update route." }, { status: 500 });
   }
 }
 
@@ -109,15 +86,8 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    const supabase = createAdminClient();
-    const { error } = await supabase.from("routes").delete().eq("id", id);
-
-    if (!error) {
-      return NextResponse.json({ success: true });
-    }
-
-    const localRoute = await deleteLocalRoute(id);
-    if (!localRoute) {
+    const route = await removeRouteById(id);
+    if (!route) {
       return NextResponse.json({ error: "Route not found." }, { status: 404 });
     }
 

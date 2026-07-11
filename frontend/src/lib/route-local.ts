@@ -74,6 +74,11 @@ export async function findLocalRouteBySlug(slug: string) {
   return routes.find((item) => item.slug === slug) ?? null;
 }
 
+export async function getLocalRoute(id: string) {
+  const routes = await readLocalRoutes();
+  return routes.find((item) => item.id === id) ?? null;
+}
+
 export async function updateLocalRouteStatus(id: string, status: EntityStatus) {
   return updateLocalRoute(id, { status });
 }

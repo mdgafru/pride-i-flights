@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL } from "@/lib/contact";
+import { SITE_BACKGROUND_VIDEO_SRC } from "@/lib/site-media";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -22,7 +23,7 @@ export function Footer() {
     <footer className="relative overflow-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
       <video
         className="footer-video-animate absolute inset-0 h-full w-full object-cover opacity-35"
-        src="https://www.pexels.com/download/video/36255229/"
+        src={SITE_BACKGROUND_VIDEO_SRC}
         autoPlay
         muted
         loop
