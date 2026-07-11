@@ -82,7 +82,7 @@ export function guessAirlineCodeFromName(name: string) {
   return name.trim().slice(0, 2).toUpperCase();
 }
 
-export function resolveAirlineIata(name: string, provided?: string) {
+export function resolveAirlineIata(name: string, provided?: string | null) {
   const code = String(provided || "").trim().toUpperCase();
   if (/^[A-Z0-9]{2}$/.test(code)) return code;
   if (name.trim()) return guessAirlineCodeFromName(name);

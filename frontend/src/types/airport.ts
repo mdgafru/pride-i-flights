@@ -5,7 +5,7 @@ export type Airport = {
   name: string;
   iata_code: string;
   city: string;
-  country?: string;
+  country?: string | null;
   slug: string;
   seo_title: string;
   meta_description: string;

@@ -4,8 +4,8 @@ export type Airline = {
   id: string;
   name: string;
   iata_code: string;
-  icao_code?: string;
-  country?: string;
+  icao_code?: string | null;
+  country?: string | null;
   slug: string;
   seo_title: string;
   meta_description: string;

@@ -42,10 +42,10 @@ export async function syncLocalAirlinesFromRoutes(siteOrigin: string) {
 
 export async function upsertLinkedEntities(
   input: {
-    airline_name?: string;
-    airline_iata_code?: string;
-    from_airport_code?: string;
-    to_airport_code?: string;
+    airline_name?: string | null;
+    airline_iata_code?: string | null;
+    from_airport_code?: string | null;
+    to_airport_code?: string | null;
     from_city: string;
     to_city: string;
   },

@@ -4,10 +4,10 @@ export type Route = {
   id: string;
   from_city: string;
   to_city: string;
-  from_airport_code?: string;
-  to_airport_code?: string;
-  airline_name?: string;
-  airline_iata_code?: string;
+  from_airport_code?: string | null;
+  to_airport_code?: string | null;
+  airline_name?: string | null;
+  airline_iata_code?: string | null;
   slug: string;
   og_title: string;
   og_description: string;
