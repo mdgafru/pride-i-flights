@@ -220,7 +220,7 @@ export default function Home() {
 
   return (
     <SiteShell active="Home">
-      <section className="relative w-full overflow-visible pb-32 pt-16 sm:overflow-hidden sm:py-6">
+      <section className="relative w-full overflow-visible pb-32 pt-28 sm:overflow-hidden sm:py-6">
         <video
           className="footer-video-animate absolute inset-0 z-0 h-full w-full object-cover object-[center_30%] brightness-[1.24] saturate-[1.15] contrast-[1.08]"
           src={SITE_BACKGROUND_VIDEO_SRC}
@@ -233,11 +233,11 @@ export default function Home() {
         />
         <div className="hero-overlay-premium pointer-events-none absolute inset-0 z-[1]" />
 
-        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-6 px-5 sm:gap-5 sm:px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
-          <div className="flex w-full min-w-0 flex-1 flex-col lg:max-w-none">
+        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-6 px-8 sm:gap-5 sm:px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+          <div className="flex w-full min-w-0 flex-1 flex-col max-sm:mt-4 max-sm:px-1 sm:mt-0 sm:px-0 lg:max-w-none">
             <form
               action="/flights"
-              className="w-full space-y-3 rounded-2xl bg-white/95 p-3.5 shadow-[0_12px_32px_rgba(11,47,87,0.14)] ring-1 ring-slate-200/80 backdrop-blur-md sm:space-y-0 sm:p-4"
+              className="w-full space-y-3 rounded-2xl bg-white/95 p-4 shadow-[0_12px_32px_rgba(11,47,87,0.14)] ring-1 ring-slate-200/80 backdrop-blur-md max-sm:mx-auto max-sm:max-w-full sm:space-y-0 sm:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
                 window.location.href = "/flights";
@@ -256,7 +256,7 @@ export default function Home() {
               </select>
 
               <div className="flex min-w-0 flex-col gap-3 border-t border-slate-200 pt-3 sm:mt-2 lg:flex-row lg:items-stretch">
-                <div className={`${heroSearchBarClass} overflow-hidden rounded-xl lg:min-h-[82px]`}>
+                <div className={`${heroSearchBarClass} max-sm:mx-1 overflow-hidden rounded-xl sm:mx-0 lg:min-h-[82px]`}>
                   <HeroRouteSwap />
                   <label className={heroSearchDateCellClass}>
                     <span className={heroSearchLabelClass}>Depart</span>
