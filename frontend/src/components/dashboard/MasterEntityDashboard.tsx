@@ -8,6 +8,8 @@ import type { Airline, EntityStatus } from "@/types/airline";
 import type { Airport } from "@/types/airport";
 import {
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   FileUp,
   LoaderCircle,
@@ -20,6 +22,8 @@ import {
 } from "lucide-react";
 
 type EntityKind = "airline" | "airport";
+
+const ITEMS_PER_PAGE = 5;
 
 type SeoPreview = {
   slug: string;
@@ -81,6 +85,7 @@ export function MasterEntityDashboard({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | EntityStatus>("all");
+  const [page, setPage] = useState(0);
   const [mode, setMode] = useState<"manual" | "excel">("manual");
   const [editing, setEditing] = useState<Airline | Airport | null>(null);
   const excelInputRef = useRef<HTMLInputElement>(null);
@@ -163,6 +168,21 @@ export function MasterEntityDashboard({
     if (filter === "all") return items;
     return items.filter((item) => item.status === filter);
   }, [items, filter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+
+  const paginatedItems = useMemo(() => {
+    const start = page * ITEMS_PER_PAGE;
+    return filteredItems.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredItems, page]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [filter]);
+
+  useEffect(() => {
+    if (page > totalPages - 1) setPage(Math.max(0, totalPages - 1));
+  }, [page, totalPages]);
 
   async function handleManualSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -484,6 +504,7 @@ export function MasterEntityDashboard({
         ) : filteredItems.length === 0 ? (
           <p className="px-3 py-8 text-center text-sm text-slate-500">No {title.toLowerCase()} found.</p>
         ) : (
+          <>
           <div className="dash-table-wrap">
             <table className="dash-table w-full min-w-[760px]">
               <thead>
@@ -498,7 +519,7 @@ export function MasterEntityDashboard({
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => (
+                {paginatedItems.map((item) => (
                   <tr key={item.id} className="border-b border-slate-100">
                     <td className="font-semibold text-[#0b2f57]">{item.name}</td>
                     <td>{item.iata_code}</td>
@@ -562,6 +583,37 @@ export function MasterEntityDashboard({
               </tbody>
             </table>
           </div>
+
+          {filteredItems.length > ITEMS_PER_PAGE ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-3 py-2">
+              <p className="text-[11px] font-medium text-slate-500">
+                Showing {page * ITEMS_PER_PAGE + 1}–
+                {Math.min((page + 1) * ITEMS_PER_PAGE, filteredItems.length)} of {filteredItems.length}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={page === 0}
+                  onClick={() => setPage((current) => Math.max(0, current - 1))}
+                  className="inline-flex items-center gap-0.5 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 disabled:opacity-40"
+                >
+                  <ChevronLeft size={12} /> Prev
+                </button>
+                <span className="min-w-[3rem] text-center text-[11px] font-bold text-[#0b2f57]">
+                  {page + 1} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  disabled={page >= totalPages - 1}
+                  onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
+                  className="inline-flex items-center gap-0.5 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 disabled:opacity-40"
+                >
+                  Next <ChevronRight size={12} />
+                </button>
+              </div>
+            </div>
+          ) : null}
+          </>
         )}
       </div>
     </DashboardShell>

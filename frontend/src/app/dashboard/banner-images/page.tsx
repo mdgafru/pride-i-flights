@@ -146,6 +146,19 @@ export default function BannerImagesPage() {
     if (page > totalPages - 1) setPage(Math.max(0, totalPages - 1));
   }, [page, totalPages]);
 
+  useEffect(() => {
+    if (!editingBanner) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeEditModal();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [editingBanner]);
+
   const filterTabs: { key: "all" | BannerStatus; label: string; count: number }[] = [
     { key: "all", label: "All", count: stats.total },
     { key: "pending", label: "Pending", count: stats.pending },
@@ -609,12 +622,18 @@ export default function BannerImagesPage() {
       </div>
 
       {editingBanner ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div className="fixed inset-0 z-[70] flex justify-end">
+          <button
+            type="button"
+            aria-label="Close edit banner panel"
+            className="absolute inset-0 bg-[#0b2f57]/30 backdrop-blur-[1px]"
+            onClick={closeEditModal}
+          />
+          <aside className="relative z-10 flex h-full w-full max-w-full flex-col border-l border-slate-200 bg-white shadow-[-8px_0_30px_rgba(11,47,87,0.12)] animate-[slideInRight_0.25s_ease-out] sm:max-w-[400px]">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 sm:px-5">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#e30613]">Edit Banner</p>
-                <h3 className="text-lg font-bold text-[#0b2f57]">Update banner details</h3>
+                <h3 className="text-base font-bold text-[#0b2f57] sm:text-lg">Update banner details</h3>
               </div>
               <button
                 type="button"
@@ -625,67 +644,69 @@ export default function BannerImagesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleEditSave} className="space-y-4 p-5">
-              <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-xl border border-slate-200 bg-white">
-                <div className="relative aspect-[16/9] w-full overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={editPreviewUrl || editingBanner.image_url}
-                    alt={editAlt}
-                    className="h-full w-full object-cover"
+            <form onSubmit={handleEditSave} className="flex min-h-0 flex-1 flex-col">
+              <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+                <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={editPreviewUrl || editingBanner.image_url}
+                      alt={editAlt}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                <label className="block">
+                  <span className="text-xs font-bold uppercase tracking-wide text-slate-500">Alt Text</span>
+                  <input
+                    type="text"
+                    value={editAlt}
+                    onChange={(event) => setEditAlt(event.target.value)}
+                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-[#0b2f57] outline-none focus:border-[#e30613]"
                   />
+                </label>
+
+                <label className="block">
+                  <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Replace Image (optional)
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    onChange={(event) => setEditUploadFile(event.target.files?.[0] || null)}
+                    className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-[#0b2f57] file:mr-3 file:rounded-md file:border-0 file:bg-[#fff5f6] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#e30613]"
+                  />
+                </label>
+
+                <div className="rounded-xl border border-slate-200 bg-[#f8fafc] px-4 py-3 text-xs text-slate-600">
+                  <p className="font-bold text-[#0b2f57]">Auto SEO</p>
+                  {(() => {
+                    const seo = editFile
+                      ? buildBannerMetaFromFileName(editFile.name, bannerUrlOptions)
+                      : getBannerSeoFields(editingBanner, bannerUrlOptions);
+                    return (
+                      <>
+                        <p className="mt-2">
+                          <span className="font-semibold text-[#0b2f57]">SEO Title:</span> {seo.seoTitle}
+                        </p>
+                        <p className="mt-1">
+                          <span className="font-semibold text-[#0b2f57]">Meta Description:</span>{" "}
+                          {seo.metaDescription}
+                        </p>
+                        <p className="mt-1">
+                          <span className="font-semibold text-[#0b2f57]">H1:</span> {seo.h1Heading}
+                        </p>
+                        <p className="mt-1 break-all">
+                          <span className="font-semibold text-[#0b2f57]">Image URL:</span> {seo.imageUrl}
+                        </p>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
-              <label className="block">
-                <span className="text-xs font-bold uppercase tracking-wide text-slate-500">Alt Text</span>
-                <input
-                  type="text"
-                  value={editAlt}
-                  onChange={(event) => setEditAlt(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-[#0b2f57] outline-none focus:border-[#e30613]"
-                />
-              </label>
-
-              <label className="block">
-                <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                  Replace Image (optional)
-                </span>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/webp"
-                  onChange={(event) => setEditUploadFile(event.target.files?.[0] || null)}
-                  className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-[#0b2f57] file:mr-3 file:rounded-md file:border-0 file:bg-[#fff5f6] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#e30613]"
-                />
-              </label>
-
-              <div className="rounded-xl border border-slate-200 bg-[#f8fafc] px-4 py-3 text-xs text-slate-600">
-                <p className="font-bold text-[#0b2f57]">Auto SEO</p>
-                {(() => {
-                  const seo = editFile
-                    ? buildBannerMetaFromFileName(editFile.name, bannerUrlOptions)
-                    : getBannerSeoFields(editingBanner, bannerUrlOptions);
-                  return (
-                    <>
-                      <p className="mt-2">
-                        <span className="font-semibold text-[#0b2f57]">SEO Title:</span> {seo.seoTitle}
-                      </p>
-                      <p className="mt-1">
-                        <span className="font-semibold text-[#0b2f57]">Meta Description:</span>{" "}
-                        {seo.metaDescription}
-                      </p>
-                      <p className="mt-1">
-                        <span className="font-semibold text-[#0b2f57]">H1:</span> {seo.h1Heading}
-                      </p>
-                      <p className="mt-1">
-                        <span className="font-semibold text-[#0b2f57]">Image URL:</span> {seo.imageUrl}
-                      </p>
-                    </>
-                  );
-                })()}
-              </div>
-
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 border-t border-slate-200 p-4 sm:p-5">
                 <button
                   type="button"
                   onClick={closeEditModal}
@@ -707,7 +728,7 @@ export default function BannerImagesPage() {
                 </button>
               </div>
             </form>
-          </div>
+          </aside>
         </div>
       ) : null}
     </DashboardShell>
