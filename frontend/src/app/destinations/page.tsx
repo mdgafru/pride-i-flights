@@ -27,7 +27,7 @@ const travelTypes = [
 ];
 
 const highlights = [
-  { title: "150+ Destinations", sub: "Worldwide travel options" },
+  { title: "160 Destinations", sub: "Worldwide travel options" },
   { title: "Curated Packages", sub: "Handpicked by our experts" },
   { title: "Best Price Options", sub: "Transparent, competitive fares" },
 ];
@@ -44,11 +44,11 @@ export default function DestinationsPage() {
     <SiteShell active="Destinations">
       <ContentPageHero
         image={HERO_IMAGE}
-        eyebrow="Explore The World · REDE I FLIGHTS"
-        title="Destinations"
-        description="Discover handpicked destinations worldwide. From Dubai to Europe, Asia and beyond - plan your next journey with trusted UAE travel experts."
-        breadcrumb="Destinations"
+        description="Discover handpicked destinations worldwide. From Europe, Asia and beyond - plan your next journey with trusted travel experts worldwide."
         highlights={highlights}
+        centered
+        showBreadcrumb={false}
+        useLogo
       />
 
       <DestinationSearchSection />
@@ -144,45 +144,24 @@ export default function DestinationsPage() {
       {/* Why book */}
       <section className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-[1260px] px-4 py-12 md:py-16">
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-            <div>
-              <p className={eyebrowClass}>Why Book With Us</p>
-              <h2 className={`mt-2 ${sectionTitleClass}`}>Plan With Confidence</h2>
-              <p className={`mt-4 ${bodyClass}`}>
-                Whether it is a family holiday, honeymoon or business trip - our team finds the
-                right destination, dates and budget with honest advice and fast support.
-              </p>
-              <div className="mt-7 grid gap-4 sm:grid-cols-2">
-                {strengths.map((item) => (
-                  <div
-                    key={item.title}
-                    className="home-feature border-l-[3px] border-[#e30613]/30 py-0.5 pl-4"
-                  >
-                    <p className="text-sm font-bold text-[#e30613] sm:text-base">{item.title}</p>
-                    <p className="mt-1 text-sm text-gray-500">{item.text}</p>
-                  </div>
-                ))}
+          <div className="mx-auto max-w-3xl text-center">
+            <p className={eyebrowClass}>Why Book With Us</p>
+            <h2 className={`mt-2 ${sectionTitleClass}`}>Plan With Confidence</h2>
+            <p className={`mt-4 ${bodyClass}`}>
+              Whether it is a family holiday, honeymoon or business trip - our team finds the
+              right destination, dates and budget with honest advice and fast support.
+            </p>
+          </div>
+          <div className="mx-auto mt-7 grid max-w-4xl gap-4 sm:grid-cols-2">
+            {strengths.map((item) => (
+              <div
+                key={item.title}
+                className="home-feature border-l-[3px] border-[#e30613]/30 py-0.5 pl-4"
+              >
+                <p className="text-sm font-bold text-[#e30613] sm:text-base">{item.title}</p>
+                <p className="mt-1 text-sm text-gray-500">{item.text}</p>
               </div>
-            </div>
-
-            <div className="relative overflow-hidden rounded-xl">
-              <Image
-                src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=1000&q=80"
-                alt="Maldives tropical destination"
-                width={900}
-                height={600}
-                className="h-64 w-full object-cover sm:h-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#042448]/70 to-transparent" />
-              <div className="absolute right-4 bottom-4 left-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-white/75">
-                  Worldwide Destinations
-                </p>
-                <p className="mt-1 text-lg font-bold text-white">
-                  From UAE to the world - every journey possible
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>

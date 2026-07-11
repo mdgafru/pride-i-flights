@@ -1,11 +1,30 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getAdminSessionFromRequest } from "@/lib/auth-session-edge";
 
-export function middleware(request: NextRequest) {
-  void request;
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isDashboardRoute =
+    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const isLoginRoute = pathname === "/login";
+  const session = await getAdminSessionFromRequest(request);
+
+  if (isDashboardRoute && !session) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (isLoginRoute && session) {
+    const dashboardUrl = request.nextUrl.clone();
+    dashboardUrl.pathname = "/dashboard/enquiries";
+    dashboardUrl.search = "";
+    return NextResponse.redirect(dashboardUrl);
+  }
+
   const response = NextResponse.next();
 
-  // Block Vercel Toolbar script (vercel.live) on deployed environments.
   if (process.env.VERCEL) {
     const csp = [
       "default-src 'self'",
@@ -13,7 +32,7 @@ export function middleware(request: NextRequest) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.web3forms.com",
       "media-src 'self' https://www.pexels.com https://videos.pexels.com https://*.pexels.com",
       "frame-src 'self'",
       "object-src 'none'",

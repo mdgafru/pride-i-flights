@@ -28,42 +28,51 @@ const trustItems = [
   { title: "Student Visas", sub: "Study abroad application support" },
 ];
 
+const visaCardImageClass =
+  "h-52 w-full object-cover object-center transition duration-500 group-hover:scale-[1.03] sm:h-56";
+
 const visaCards = [
   {
     id: "usa",
     country: "USA",
     image:
-      "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?auto=format&fit=crop&w=700&h=420&q=80",
   },
   {
     id: "schengen",
     country: "Schengen",
     image:
-      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&h=420&q=80",
   },
   {
     id: "uk",
     country: "United Kingdom",
     image:
-      "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: "uae",
-    country: "UAE",
-    image:
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=700&h=420&q=80",
   },
   {
     id: "australia",
     country: "Australia",
     image:
-      "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=700&h=420&q=80",
   },
   {
     id: "canada",
     country: "Canada",
     image:
-      "https://images.unsplash.com/photo-1519832979-6fa011b87667?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1519832979-6fa011b87667?auto=format&fit=crop&w=700&h=420&q=80",
+  },
+  {
+    id: "far-east",
+    country: "Far East",
+    image:
+      "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=700&h=420&q=80",
+  },
+  {
+    id: "new-zealand",
+    country: "New Zealand",
+    image:
+      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=700&h=420&q=80",
   },
 ];
 
@@ -95,11 +104,11 @@ export default function VisaPage() {
       <ContentPageHero
         image={HERO_IMAGE}
         imagePosition="center 40%"
-        eyebrow="Hassle-Free Documentation · REDE I FLIGHTS"
-        title="Visa Services"
         description="Expert visa guidance with high success rate and end-to-end support. Tourist and business visas handled by trusted travel advisors."
-        breadcrumb="Visa Services"
         highlights={highlights}
+        centered
+        showBreadcrumb={false}
+        useLogo
       />
 
       {/* Trust strip */}
@@ -142,7 +151,7 @@ export default function VisaPage() {
                   alt={item.country}
                   width={700}
                   height={420}
-                  className="h-52 w-full object-cover transition duration-500 group-hover:scale-[1.03] sm:h-56"
+                  className={visaCardImageClass}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#042448]/90 via-[#042448]/35 to-transparent" />
                 <div className="absolute right-0 bottom-0 left-0 flex items-end justify-between gap-3 p-5">

@@ -8,6 +8,8 @@ import { HeroRouteSwap } from "@/components/HeroRouteSwap";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
+import { bannersToSlides, DEFAULT_HERO_BANNERS } from "@/lib/banner";
+import type { Banner } from "@/types/banner";
 
 const tripTypeOptions = [
   { value: "return", label: "Return trip" },
@@ -41,12 +43,6 @@ const heroSearchBarClass =
 const heroTripSelectClass =
   "mb-3 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none";
 
-const heroBanners = [
-  { src: "/promo-banner.png", alt: "REDE Flights - Dubai to Kochi" },
-  { src: "/image2.png", alt: "REDE Flights - Travel Promotion" },
-  { src: "/image3.png", alt: "REDE Flights - Special Offer" },
-];
-
 const BANNER_VISIBLE_MS = 5000;
 const BANNER_TRANSITION_S = 1.25;
 
@@ -55,6 +51,9 @@ const imageBadgeClass =
 
 const catalogImageClass =
   "h-44 w-full object-cover transition duration-500 group-hover:scale-[1.02]";
+
+const tourPackageImageClass =
+  "h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]";
 
 const catalogLinkClass =
   "mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#e30613] transition hover:gap-2";
@@ -129,25 +128,22 @@ const packages = [
     tag: "Best Seller",
     title: "Romantic Europe Getaway",
     duration: "7D / 6N",
-    price: "$1,299",
     image:
-      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&h=420&q=80",
   },
   {
     tag: "Popular",
     title: "Bali Island Escape",
     duration: "5D / 4N",
-    price: "$699",
     image:
-      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=700&h=420&q=80",
   },
   {
     tag: "Hot Deal",
     title: "Dubai City Experience",
     duration: "4D / 3N",
-    price: "$549",
     image:
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&h=420&q=80",
   },
 ];
 
@@ -180,21 +176,46 @@ export default function Home() {
   const [travelClass, setTravelClass] = useState("economy");
   const [passengers, setPassengers] = useState("1a");
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [heroBanners, setHeroBanners] = useState(DEFAULT_HERO_BANNERS);
+
+  useEffect(() => {
+    async function loadBanners() {
+      try {
+        const response = await fetch("/api/banners");
+        const result = (await response.json()) as { banners?: Banner[] };
+        const activeBanners = result.banners || [];
+
+        if (activeBanners.length > 0) {
+          setHeroBanners(bannersToSlides(activeBanners));
+          setBannerIndex(0);
+        } else {
+          setHeroBanners(DEFAULT_HERO_BANNERS);
+          setBannerIndex(0);
+        }
+      } catch {
+        setHeroBanners(DEFAULT_HERO_BANNERS);
+      }
+    }
+
+    loadBanners();
+  }, []);
 
   useEffect(() => {
     heroBanners.forEach((banner) => {
       const img = new window.Image();
       img.src = banner.src;
     });
-  }, []);
+  }, [heroBanners]);
 
   useEffect(() => {
+    if (heroBanners.length === 0) return;
+
     const timer = setInterval(() => {
       setBannerIndex((prev) => (prev + 1) % heroBanners.length);
     }, BANNER_VISIBLE_MS + BANNER_TRANSITION_S * 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [heroBanners.length]);
 
   return (
     <SiteShell active="Home">
@@ -322,8 +343,8 @@ export default function Home() {
             </form>
           </div>
 
-          <div className="hero-card-premium flex w-fit shrink-0 flex-col self-center overflow-hidden rounded-2xl leading-none lg:mt-10 xl:mt-12">
-            <div className="relative aspect-[2/3] w-[170px] overflow-hidden sm:w-[200px] md:w-[220px]">
+          <div className="hero-card-premium flex w-full max-w-none flex-col overflow-hidden rounded-2xl leading-none sm:mx-0 sm:w-[240px] sm:max-w-[240px] md:w-[270px] md:max-w-[270px] lg:mt-8 lg:shrink-0 lg:ml-auto xl:mt-10">
+            <div className="relative aspect-[3/4] w-full overflow-hidden">
               <motion.div
                 className="flex h-full will-change-transform"
                 style={{ width: `${heroBanners.length * 100}%` }}
@@ -336,17 +357,29 @@ export default function Home() {
                 }}
               >
                 {heroBanners.map((banner) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <div
                     key={banner.src}
-                    src={banner.src}
-                    alt={banner.alt}
-                    className="h-full shrink-0 object-contain object-top"
+                    className="h-full shrink-0 overflow-hidden"
                     style={{ width: `${100 / heroBanners.length}%` }}
-                    draggable={false}
-                  />
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={banner.src}
+                      alt={banner.alt}
+                      className="block h-full w-full object-cover object-[center_68%]"
+                      draggable={false}
+                    />
+                  </div>
                 ))}
               </motion.div>
+            </div>
+            <div className="flex w-full items-center justify-center border-t border-slate-200 bg-white px-2 py-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/uploads/logo/site-logo.png"
+                alt="REDE FLIGHTS"
+                className="h-6 w-auto max-w-[88%] object-contain sm:h-7"
+              />
             </div>
             <a
               href={WHATSAPP_URL}
@@ -363,8 +396,8 @@ export default function Home() {
 
       <section className="section-fade-top mx-auto max-w-[1260px] px-4 pb-14 pt-10">
         <div className="mb-6 flex justify-center">
-          <div className="flex h-28 w-28 items-center justify-center border-2 border-[#0b2f57] bg-white p-3 text-center shadow-sm">
-            <p className="text-sm font-bold uppercase leading-snug tracking-wide text-[#0b2f57]">
+          <div className="inline-flex items-center justify-center border-2 border-[#e30613] bg-white px-8 py-3 shadow-sm">
+            <p className="whitespace-nowrap text-sm font-bold uppercase tracking-wide text-[#e30613]">
               Our Services
             </p>
           </div>
@@ -434,7 +467,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {packages.map((pkg, index) => (
             <motion.article
               key={pkg.title}
@@ -442,30 +475,34 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.35, delay: index * 0.06 }}
-              className="group"
+              className="group overflow-hidden rounded-xl border border-slate-200 bg-white"
             >
-              <div className="relative overflow-hidden rounded-xl">
+              <div className="relative aspect-[5/3] overflow-hidden bg-slate-100">
                 <Image
                   src={pkg.image}
                   alt={pkg.title}
                   width={700}
                   height={420}
-                  className={catalogImageClass}
+                  className={tourPackageImageClass}
                 />
                 <span className={imageBadgeClass}>{pkg.tag}</span>
               </div>
-              <div className="pt-3">
+              <div className="p-3.5">
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
                   {pkg.duration}
                 </p>
-                <h3 className="mt-1 text-lg font-bold text-[#0b2f57]">{pkg.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
-                  <span className="font-extrabold text-[#0b2f57]">{pkg.price}</span> / person
-                </p>
-                <Link href="/packages" className={catalogLinkClass}>
-                  Details
-                  <span aria-hidden>→</span>
-                </Link>
+                <h3 className="mt-1 text-lg font-bold leading-snug text-[#0b2f57]">{pkg.title}</h3>
+                <a
+                  href={`${WHATSAPP_URL}?text=${encodeURIComponent(
+                    `Hello REDE I FLIGHTS, I would like to enquire about the ${pkg.title} tour package (${pkg.duration}).`,
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-premium mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-2 bg-[#e30613] px-4 text-sm font-semibold text-white hover:bg-[#c40010]"
+                >
+                  <WhatsAppIcon className="h-4 w-4" />
+                  Enquire Now
+                </a>
               </div>
             </motion.article>
           ))}
@@ -583,7 +620,7 @@ export default function Home() {
                 <p className="mt-1 text-sm leading-relaxed text-gray-500">{item.sub}</p>
               </div>
             ))}
-          </div>
+      </div>
         </section>
 
       </section>

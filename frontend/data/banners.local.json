@@ -1,0 +1,38 @@
+[
+  {
+    "id": "3c3283f3-f880-4f6d-aa2c-f115157919e1",
+    "alt": "Abu Dhabi to London Flights | REDE FLIGHTS",
+    "slug": "abu-dhabi-to-london",
+    "seo_title": "Abu Dhabi to London Flights | REDE FLIGHTS",
+    "meta_description": "Book cheap flights from Abu Dhabi to London with REDE FLIGHTS.",
+    "h1_heading": "Abu Dhabi to London Flights",
+    "image_url": "http://localhost:3000/abu-dhabi-to-london.jpg",
+    "storage_path": "abu-dhabi-to-london.jpg",
+    "status": "active",
+    "created_at": "2026-07-11T17:14:22.309Z"
+  },
+  {
+    "id": "dceea7ae-d26f-46b3-a877-7e1859c83ad2",
+    "alt": "Dubai to Mangalore Flights | REDE FLIGHTS",
+    "slug": "dubai-to-mangalore",
+    "seo_title": "Dubai to Mangalore Flights | REDE FLIGHTS",
+    "meta_description": "Book cheap flights from Dubai to Mangalore with REDE FLIGHTS.",
+    "h1_heading": "Dubai to Mangalore Flights",
+    "image_url": "http://localhost:3000/dubai-to-mangalore.jpg",
+    "storage_path": "dubai-to-mangalore.jpg",
+    "status": "active",
+    "created_at": "2026-07-11T17:11:22.508Z"
+  },
+  {
+    "id": "a12643f0-0a0e-4aad-8a11-0c776612e1e4",
+    "alt": "Dubai to Nairobi Flights | REDE FLIGHTS",
+    "slug": "dubai-to-nairobi",
+    "seo_title": "Dubai to Nairobi Flights | REDE FLIGHTS",
+    "meta_description": "Book cheap flights from Dubai to Nairobi with REDE FLIGHTS.",
+    "h1_heading": "Dubai to Nairobi Flights",
+    "image_url": "http://localhost:3000/dubai-to-nairobi.jpg",
+    "storage_path": "dubai-to-nairobi.jpg",
+    "status": "active",
+    "created_at": "2026-07-11T11:32:27.473Z"
+  }
+]

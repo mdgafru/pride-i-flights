@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useSyncExternalStore, useState, type ReactNode } from "react";
+import { useEffect, useSyncExternalStore, useState, type ReactNode } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { dashboardNavItems } from "@/components/dashboard/dashboard-nav";
+import type { DashboardIconKey } from "@/components/dashboard/dashboard-nav";
 import {
   BadgeCheck,
   BarChart3,
-  ChevronLeft,
   Hotel,
   ShieldCheck,
   LayoutDashboard,
   LogOut,
   MapPinned,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plane,
   Route,
   Search,
@@ -23,6 +25,7 @@ import {
   FileUp,
   Image,
   LoaderCircle,
+  X,
 } from "lucide-react";
 
 function isActive(pathname: string, href: string) {
@@ -40,6 +43,22 @@ function isValidSupabaseConfig(url?: string, key?: string) {
   }
 }
 
+const iconByKey: Record<DashboardIconKey, typeof LayoutDashboard> = {
+  layout: LayoutDashboard,
+  chart: BarChart3,
+  "map-pinned": MapPinned,
+  plane: Plane,
+  hotel: Hotel,
+  visa: BadgeCheck,
+  insurance: ShieldCheck,
+  route: Route,
+  "file-up": FileUp,
+  image: Image,
+  search: Search,
+  "file-text": FileText,
+  settings: Settings,
+};
+
 export function DashboardShell({
   title,
   breadcrumb,
@@ -53,8 +72,8 @@ export function DashboardShell({
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+
   const isDesktop = useSyncExternalStore(
     (onStoreChange) => {
       const media = window.matchMedia("(min-width: 1024px)");
@@ -64,24 +83,28 @@ export function DashboardShell({
     () => window.matchMedia("(min-width: 1024px)").matches,
     () => false,
   );
-  const navigationPending =
-    pendingHref && pathname !== pendingHref ? pendingHref : null;
 
-  const iconByKey = {
-    layout: LayoutDashboard,
-    chart: BarChart3,
-    "map-pinned": MapPinned,
-    plane: Plane,
-    hotel: Hotel,
-    visa: BadgeCheck,
-    insurance: ShieldCheck,
-    route: Route,
-    "file-up": FileUp,
-    image: Image,
-    search: Search,
-    "file-text": FileText,
-    settings: Settings,
-  };
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen || isDesktop) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [menuOpen, isDesktop]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -99,110 +122,129 @@ export function DashboardShell({
       }
     }
 
-    router.push("/");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.warn("Admin logout skipped:", error);
+    }
+
+    router.push("/login");
     router.refresh();
   }
+
+  const sidebarWidth = sidebarCollapsed ? 72 : 240;
 
   return (
     <main className="dash-shell min-h-screen text-slate-800">
       <div
-        className={`grid min-h-screen grid-cols-1 ${
-          sidebarCollapsed ? "lg:grid-cols-[84px_1fr]" : "lg:grid-cols-[220px_1fr]"
-        }`}
+        className="grid min-h-screen grid-cols-1 transition-[grid-template-columns] duration-200 ease-out"
+        style={{
+          gridTemplateColumns: isDesktop ? `${sidebarWidth}px 1fr` : "1fr",
+        }}
       >
-        {menuOpen && (
+        {menuOpen && !isDesktop ? (
           <button
             type="button"
             aria-label="Close sidebar"
-            className="fixed inset-0 z-30 bg-slate-900/45 lg:hidden"
+            className="dash-sidebar-overlay fixed inset-0 z-40 lg:hidden"
             onClick={() => setMenuOpen(false)}
           />
-        )}
+        ) : null}
 
         <aside
           id="dashboard-sidebar"
-          className={`dash-sidebar fixed inset-y-0 left-0 z-40 flex flex-col overflow-hidden transform transition-all duration-200 lg:static lg:translate-x-0 ${
-            sidebarCollapsed ? "w-[84px] lg:w-[84px]" : "w-[220px] lg:w-[220px]"
-          } ${
-            menuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`dash-sidebar fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden transition-transform duration-200 ease-out lg:static ${
+            menuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          } ${sidebarCollapsed ? "dash-sidebar-collapsed" : ""}`}
+          style={{ width: sidebarWidth }}
         >
-          <div
-            className={`dash-sidebar-brand shrink-0 border-b border-white/10 ${
-              sidebarCollapsed ? "px-2 py-2.5 text-center lg:px-2" : "px-3 py-2.5"
-            }`}
-          >
-            {sidebarCollapsed ? (
-              <p className="hidden text-sm font-extrabold text-white lg:block">
-                <span className="text-[#ff6b76]">FC</span>
-              </p>
-            ) : (
-              <>
-                <p className="truncate text-sm font-extrabold tracking-wide text-white">
-                  FLIGHT<span className="text-[#ff6b76]">CENTRE</span>
-                </p>
-                <p className="truncate text-[10px] uppercase tracking-[0.14em] text-blue-100/70">
-                  Admin Panel
-                </p>
-              </>
+          <div className="dash-sidebar-glow pointer-events-none absolute inset-0" aria-hidden />
+
+          <div className="dash-sidebar-brand relative shrink-0">
+            <div className={`flex items-center gap-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
+              <div className="dash-sidebar-logo-badge shrink-0">
+                <span className="text-[10px] font-black tracking-tight text-white">
+                  <span className="text-[#ff6b76]">R</span>F
+                </span>
+              </div>
+              {!sidebarCollapsed && (
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-extrabold tracking-wide text-white">
+                    REDE<span className="text-[#ff6b76]">FLIGHTS</span>
+                  </p>
+                  <p className="truncate text-[9px] font-semibold uppercase tracking-[0.14em] text-blue-100/60">
+                    Admin
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {!isDesktop && (
+              <button
+                type="button"
+                aria-label="Close menu"
+                className="dash-sidebar-close-btn lg:hidden"
+                onClick={() => setMenuOpen(false)}
+              >
+                <X size={16} />
+              </button>
             )}
           </div>
 
-          <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
-            {dashboardNavItems.map((item) => {
-              const active = isActive(pathname, item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={(event) => {
-                    if (item.href === pathname || navigationPending) return;
-                    event.preventDefault();
-                    setMenuOpen(false);
-                    setPendingHref(item.href);
-                    router.push(item.href);
-                  }}
-                  className={`dash-nav-link ${active ? "dash-nav-link-active" : ""} ${
-                    sidebarCollapsed ? "lg:justify-center" : ""
-                  }`}
-                >
-                  {(() => {
-                    const Icon = iconByKey[item.icon];
-                    return <Icon size={14} className="shrink-0" />;
-                  })()}
-                  <span
-                    className={`truncate ${sidebarCollapsed ? "lg:hidden" : ""}`}
-                  >
-                    {item.label}
-                  </span>
-                  {navigationPending === item.href && (
-                    <LoaderCircle size={13} className="dash-inline-spinner ml-auto" />
-                  )}
-                </Link>
-              );
-            })}
+          <nav className="dash-sidebar-nav relative flex-1 overflow-y-auto px-2 py-1.5">
+            <ul className="space-y-0.5">
+              {dashboardNavItems.map((item) => {
+                const active = isActive(pathname, item.href);
+                const Icon = iconByKey[item.icon];
+
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      title={sidebarCollapsed ? item.label : undefined}
+                      onClick={() => setMenuOpen(false)}
+                      className={`dash-nav-link group ${active ? "dash-nav-link-active" : ""} ${
+                        sidebarCollapsed ? "dash-nav-link-collapsed" : ""
+                      }`}
+                    >
+                      <span className={`dash-nav-icon-wrap ${active ? "dash-nav-icon-wrap-active" : ""}`}>
+                        <Icon size={13} className="shrink-0" />
+                      </span>
+                      {!sidebarCollapsed && (
+                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      )}
+                      {sidebarCollapsed && (
+                        <span className="dash-nav-tooltip" role="tooltip">
+                          {item.label}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
 
-          <div className="border-t border-white/10 p-2">
+          <div className="relative shrink-0 border-t border-white/10 p-2">
             <button
               type="button"
-              className="dash-signout-btn w-full"
+              className={`dash-signout-btn ${sidebarCollapsed ? "dash-signout-btn-collapsed" : ""}`}
               onClick={handleSignOut}
               disabled={signingOut}
+              title={sidebarCollapsed ? "Sign Out" : undefined}
             >
               <LogOut size={14} />
-              <span className={sidebarCollapsed ? "lg:hidden" : ""}>
-                {signingOut ? "Signing out..." : "Sign Out"}
-              </span>
+              {!sidebarCollapsed && (
+                <span>{signingOut ? "Signing out..." : "Sign Out"}</span>
+              )}
             </button>
           </div>
         </aside>
 
         <section className="flex min-h-screen min-w-0 flex-col">
           <header className="dash-topbar sticky top-0 z-20">
-            {navigationPending && <div className="dash-top-loader" />}
             <div className="flex items-center justify-between gap-2 px-2.5 py-2 sm:px-3">
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2.5">
                 <button
                   type="button"
                   className="dash-menu-btn"
@@ -217,13 +259,13 @@ export function DashboardShell({
                   aria-controls="dashboard-sidebar"
                 >
                   {!isDesktop ? (
-                    menuOpen ? <ChevronLeft size={14} /> : <Menu size={14} />
+                    menuOpen ? <X size={16} /> : <Menu size={16} />
                   ) : sidebarCollapsed ? (
-                    <Menu size={14} />
+                    <PanelLeftOpen size={16} />
                   ) : (
-                    <ChevronLeft size={14} />
+                    <PanelLeftClose size={16} />
                   )}
-                  <span>
+                  <span className="hidden sm:inline">
                     {!isDesktop
                       ? menuOpen
                         ? "Close"
@@ -234,14 +276,17 @@ export function DashboardShell({
                   </span>
                 </button>
                 <div className="min-w-0">
-                  <p className="truncate text-[11px] text-slate-500">
+                  <p className="truncate text-[11px] font-medium text-slate-500">
                     {breadcrumb ?? "Home / Dashboard"}
                   </p>
-                  <h1 className="truncate text-sm font-bold text-[#0b2f57]">{title}</h1>
+                  <h1 className="truncate text-sm font-bold text-[#0b2f57] sm:text-base">{title}</h1>
                 </div>
               </div>
 
-              <div className="dash-header-chip">Admin</div>
+              <div className="dash-header-chip shrink-0">
+                <span className="dash-header-chip-dot" aria-hidden />
+                Admin
+              </div>
             </div>
           </header>
 

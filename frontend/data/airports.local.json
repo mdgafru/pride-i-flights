@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ad405244-950d-4b80-ac2c-f327ac02089f",
+    "name": "Thiruvananthapuram Airport",
+    "iata_code": "TRV",
+    "city": "Thiruvananthapuram",
+    "country": null,
+    "slug": "thiruvananthapuram-trv",
+    "seo_title": "Thiruvananthapuram Airport (TRV) Flights | REDE FLIGHTS",
+    "meta_description": "Find cheap flights to and from Thiruvananthapuram Airport (TRV) with REDE FLIGHTS.",
+    "h1_heading": "Thiruvananthapuram Airport (TRV) Flights",
+    "page_url": "http://localhost:3000/airports/thiruvananthapuram-trv",
+    "status": "pending",
+    "created_at": "2026-07-11T18:59:36.552Z"
+  },
+  {
+    "id": "be9fed73-ddd9-4645-a9de-29d223403be2",
+    "name": "Dubai Airport",
+    "iata_code": "DXB",
+    "city": "Dubai",
+    "country": null,
+    "slug": "dubai-dxb",
+    "seo_title": "Dubai Airport (DXB) Flights | REDE FLIGHTS",
+    "meta_description": "Find cheap flights to and from Dubai Airport (DXB) with REDE FLIGHTS.",
+    "h1_heading": "Dubai Airport (DXB) Flights",
+    "page_url": "http://localhost:3000/airports/dubai-dxb",
+    "status": "pending",
+    "created_at": "2026-07-11T18:59:36.240Z"
+  }
+]

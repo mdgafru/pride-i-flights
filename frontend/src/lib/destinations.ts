@@ -64,7 +64,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Asia",
     travelStyles: ["Beach & Island", "Adventure", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 95,
   },
   {
@@ -76,7 +76,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Middle East",
     travelStyles: ["City Breaks", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 98,
   },
   {
@@ -88,7 +88,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Europe",
     travelStyles: ["City Breaks", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 92,
   },
   {
@@ -100,7 +100,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Asia",
     travelStyles: ["Beach & Island", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 90,
   },
   {
@@ -112,7 +112,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Asia",
     travelStyles: ["City Breaks", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 88,
   },
   {
@@ -124,7 +124,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Europe",
     travelStyles: ["Adventure", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 86,
   },
   {
@@ -136,7 +136,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Americas",
     travelStyles: ["City Breaks", "Adventure"],
     image:
-      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 91,
   },
   {
@@ -148,7 +148,7 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Europe",
     travelStyles: ["City Breaks", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 84,
   },
   {
@@ -160,8 +160,32 @@ export const MOCK_DESTINATIONS: Destination[] = [
     region: "Asia",
     travelStyles: ["City Breaks", "Beach & Island", "Family Holidays"],
     image:
-      "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=700&h=420&q=80",
     popularScore: 87,
+  },
+  {
+    id: "new-zealand",
+    title: "New Zealand",
+    subtitle: "Land of the Long White Cloud",
+    country: "New Zealand",
+    packages: 16,
+    region: "Asia",
+    travelStyles: ["Adventure", "Family Holidays"],
+    image:
+      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=700&h=420&q=80",
+    popularScore: 85,
+  },
+  {
+    id: "japan",
+    title: "Tokyo, Japan",
+    subtitle: "Tradition Meets Tomorrow",
+    country: "Japan",
+    packages: 21,
+    region: "Asia",
+    travelStyles: ["City Breaks", "Adventure", "Family Holidays"],
+    image:
+      "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=700&h=420&q=80",
+    popularScore: 89,
   },
 ];
 

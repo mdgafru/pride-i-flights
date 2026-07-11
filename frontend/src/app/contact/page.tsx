@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
-import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL, WHATSAPP_URL } from "@/lib/contact";
+import { CONTACT_EMAIL, MAILTO_URL, WHATSAPP_URL } from "@/lib/contact";
 
 const CONTACT_HERO_IMAGE =
   "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1800&q=85";
@@ -16,27 +17,12 @@ const blockTitleClass = "text-2xl font-bold leading-snug text-[#e30613]";
 const bodyClass = "text-base leading-relaxed text-gray-600";
 const fieldLabelClass = "text-sm font-semibold text-slate-600";
 const fieldClass =
-  "mt-2 w-full border-0 border-b-2 border-slate-200 bg-transparent px-0 py-3.5 text-base text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-[#e30613]";
+  "mt-1.5 w-full border-0 border-b-2 border-slate-200 bg-transparent px-0 py-2.5 text-sm text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-[#e30613] sm:text-base";
 
-const contactItems = [
-  {
-    title: "Phone",
-    value: CONTACT_PHONE,
-    href: TEL_URL,
-    note: "Speak with our travel advisors",
-  },
-  {
-    title: "Email",
-    value: CONTACT_EMAIL,
-    href: MAILTO_URL,
-    note: "Send your travel enquiry anytime",
-  },
-  {
-    title: "Office Hours",
-    value: "Mon - Sun: 9:00 AM - 9:00 PM",
-    note: "We respond as quickly as possible",
-  },
-];
+const fieldLabelRequiredClass = `${fieldLabelClass} after:ml-0.5 after:text-[#e30613] after:content-['*']`;
+
+const featureBoxClass =
+  "home-feature border-l-[3px] border-[#e30613]/30 pl-5 transition hover:border-[#e30613]";
 
 const trustItems = [
   { title: "24/7 Support", sub: "Always here when you need us" },
@@ -47,22 +33,73 @@ const trustItems = [
 const services = ["Flights", "Hotels", "Visa", "Tour Packages"];
 
 const quickActions = [
-  { title: "Call Us", sub: CONTACT_PHONE, href: TEL_URL },
   { title: "Email Us", sub: CONTACT_EMAIL, href: MAILTO_URL },
   { title: "WhatsApp", sub: "Chat instantly", href: WHATSAPP_URL, external: true },
 ];
 
 export default function ContactPage() {
+  const [agreedToContact, setAgreedToContact] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [service, setService] = useState(services[0]);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!agreedToContact) return;
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    setWhatsappUrl(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, email, service, message }),
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        message?: string;
+        whatsappUrl?: string;
+      };
+
+      if (!response.ok) {
+        setError(result.error || "Unable to submit enquiry.");
+        return;
+      }
+
+      setSuccess(result.message || "Your enquiry has been submitted successfully.");
+      setWhatsappUrl(result.whatsappUrl || null);
+      setName("");
+      setPhone("");
+      setEmail("");
+      setMessage("");
+      setService(services[0]);
+      setAgreedToContact(false);
+    } catch {
+      setError("Network error. Please try again or contact us on WhatsApp.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <SiteShell active="Contact Us">
       <ContentPageHero
         image={CONTACT_HERO_IMAGE}
         imagePosition="center 70%"
-        eyebrow="UAE Travel Experts · REDE I FLIGHTS"
-        title="Contact Our Travel Experts"
         description="Your trusted partner for flights, hotels and visa. Reach out today and let our team plan your next journey from Dubai to destinations worldwide."
-        breadcrumb="Contact Us"
         highlights={quickActions}
+        centered
+        showBreadcrumb={false}
+        useLogo
       />
 
       <section className="border-b border-slate-200 bg-white">
@@ -94,37 +131,61 @@ export default function ContactPage() {
             transition={{ duration: 0.35 }}
           >
             <h3 className={blockTitleClass}>Send an Enquiry</h3>
-            <p className={`mt-3 ${bodyClass}`}>
+            <p className={`mt-2 text-sm leading-relaxed text-gray-600 sm:text-base`}>
               Complete the form below and our travel team will contact you shortly.
             </p>
 
-            <form
-              className="mt-10 space-y-8 border-t border-slate-200 pt-10"
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <div className="grid gap-8 sm:grid-cols-2">
+            <form className="mt-6 space-y-5 border-t border-slate-200 pt-6" onSubmit={handleSubmit}>
+              <div className="grid gap-5 sm:grid-cols-2">
                 <label className="block">
                   <span className={fieldLabelClass}>Your Name</span>
-                  <input type="text" placeholder="Full name" className={fieldClass} />
+                  <input
+                    type="text"
+                    name="name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="Full name"
+                    className={fieldClass}
+                    required
+                  />
                 </label>
                 <label className="block">
-                  <span className={fieldLabelClass}>Phone Number</span>
-                  <input type="tel" placeholder="+971..." className={fieldClass} />
+                  <span className={fieldLabelRequiredClass}>Phone Number</span>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    placeholder="+971..."
+                    className={fieldClass}
+                    required
+                  />
                 </label>
               </div>
 
               <label className="block">
-                <span className={fieldLabelClass}>Email Address</span>
-                <input type="email" placeholder="you@email.com" className={fieldClass} />
+                <span className={fieldLabelRequiredClass}>Email Address</span>
+                <input
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@email.com"
+                  className={fieldClass}
+                  required
+                />
               </label>
 
               <label className="block">
                 <span className={fieldLabelClass}>I am interested in</span>
-                <select className={`${fieldClass} cursor-pointer`}>
-                  {services.map((service) => (
-                    <option key={service}>{service}</option>
+                <select
+                  name="service"
+                  value={service}
+                  onChange={(event) => setService(event.target.value)}
+                  className={`${fieldClass} cursor-pointer`}
+                >
+                  {services.map((item) => (
+                    <option key={item}>{item}</option>
                   ))}
                 </select>
               </label>
@@ -132,16 +193,55 @@ export default function ContactPage() {
               <label className="block">
                 <span className={fieldLabelClass}>Message</span>
                 <textarea
-                  className={`${fieldClass} min-h-[140px] resize-y`}
+                  name="message"
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  className={`${fieldClass} min-h-[96px] resize-y`}
                   placeholder="Destination, travel dates, passengers, budget or any special request..."
                 />
               </label>
 
+              <label className="flex cursor-pointer items-start gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={agreedToContact}
+                  onChange={(e) => setAgreedToContact(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[#e30613]"
+                  required
+                />
+                <span className="text-xs leading-relaxed text-gray-600 sm:text-sm">
+                  I agree to be contacted by REDE I FLIGHTS regarding my travel enquiry.
+                </span>
+              </label>
+
+              {success ? (
+                <p className="rounded-lg bg-[#ecfdf3] px-3 py-2 text-sm font-medium text-[#166534]">
+                  {success}
+                </p>
+              ) : null}
+              {error ? (
+                <p className="rounded-lg bg-[#fff5f6] px-3 py-2 text-sm font-medium text-[#e30613]">
+                  {error}
+                </p>
+              ) : null}
+              {whatsappUrl ? (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-premium inline-flex min-h-[44px] w-full items-center justify-center gap-2 border border-[#e30613] bg-white px-5 text-sm font-semibold text-[#e30613] hover:bg-[#fff5f6] sm:w-auto"
+                >
+                  <WhatsAppIcon className="h-4 w-4" />
+                  Share same details on WhatsApp
+                </a>
+              ) : null}
+
               <button
                 type="submit"
-                className="btn-premium w-full min-h-[44px] bg-[#e30613] px-10 py-4 text-base font-semibold text-white hover:bg-[#c40010] sm:w-auto"
+                disabled={!agreedToContact || loading}
+                className="btn-premium w-full bg-[#e30613] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#c40010] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
-                Submit Enquiry
+                {loading ? "Submitting..." : "Submit Enquiry"}
               </button>
             </form>
           </motion.div>
@@ -160,43 +260,42 @@ export default function ContactPage() {
             </p>
 
             <div className="mt-10 space-y-7">
-              {contactItems.map((item) => (
-                <div
-                  key={item.title}
-                  className="home-feature border-l-[3px] border-[#e30613]/30 pl-5 transition hover:border-[#e30613]"
+              <div className={featureBoxClass}>
+                <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Email</p>
+                <a
+                  href={MAILTO_URL}
+                  className="mt-2 block text-lg font-bold text-[#0b2f57] transition hover:text-[#e30613]"
                 >
-                  <p className="text-sm font-bold uppercase tracking-wide text-slate-500">
-                    {item.title}
-                  </p>
-                  {item.href ? (
-                    <a
-                      href={item.href}
-                      className="mt-2 block text-lg font-bold text-[#0b2f57] transition hover:text-[#e30613]"
-                    >
-                      {item.value}
-                    </a>
-                  ) : (
-                    <p className="mt-2 text-lg font-bold text-[#0b2f57]">{item.value}</p>
-                  )}
-                  <p className="mt-1.5 text-base text-gray-500">{item.note}</p>
-                </div>
-              ))}
-            </div>
+                  {CONTACT_EMAIL}
+                </a>
+                <p className="mt-1.5 text-base text-gray-500">Send your travel enquiry anytime</p>
+              </div>
 
-            <div className="mt-12 border-t border-slate-200 pt-10">
-              <h4 className="text-xl font-bold text-[#e30613]">Instant WhatsApp Support</h4>
-              <p className={`mt-3 ${bodyClass}`}>
-                Message us on WhatsApp for fast quotes on flights, hotels and tour packages.
-              </p>
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-premium mt-5 inline-flex w-full min-h-[44px] items-center justify-center gap-2.5 bg-[#e30613] px-7 py-4 text-base font-semibold text-white hover:bg-[#c40010] sm:w-auto"
-              >
-                <WhatsAppIcon className="h-5 w-5" />
-                Chat on WhatsApp
-              </a>
+              <div className={featureBoxClass}>
+                <p className="text-sm font-bold uppercase tracking-wide text-slate-500">
+                  Instant WhatsApp Support
+                </p>
+                <p className={`mt-2 ${bodyClass}`}>
+                  Message us on WhatsApp for fast quotes on flights, hotels and tour packages.
+                </p>
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-premium mt-4 inline-flex w-full min-h-[44px] items-center justify-center gap-2.5 bg-[#e30613] px-7 py-3.5 text-base font-semibold text-white hover:bg-[#c40010] sm:w-auto"
+                >
+                  <WhatsAppIcon className="h-5 w-5" />
+                  Chat on WhatsApp
+                </a>
+              </div>
+
+              <div className={featureBoxClass}>
+                <p className="text-sm font-bold uppercase tracking-wide text-slate-500">
+                  Office Hours
+                </p>
+                <p className="mt-2 text-lg font-bold text-[#0b2f57]">Mon - Sun: 9:00 AM - 9:00 PM</p>
+                <p className="mt-1.5 text-base text-gray-500">We respond as quickly as possible</p>
+              </div>
             </div>
 
             <p className={`mt-10 ${bodyClass}`}>

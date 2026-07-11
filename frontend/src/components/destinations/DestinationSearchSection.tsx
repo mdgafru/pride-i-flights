@@ -29,7 +29,9 @@ const fieldClass =
 const selectClass =
   "mt-1.5 w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-[15px] font-semibold text-[#0b2f57] outline-none";
 const imageBadgeClass =
-  "absolute left-3 top-3 rounded-md bg-[#e30613] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm";
+  "absolute left-2.5 top-2.5 rounded-md bg-[#e30613] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm";
+const resultCardImageClass =
+  "h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]";
 
 function hasActiveFilters(filters: DestinationSearchFilters): boolean {
   return (
@@ -199,6 +201,62 @@ export function DestinationSearchSection() {
           </div>
 
           <form onSubmit={handleSearch}>
+            <div className="mx-auto mb-5 max-w-5xl overflow-hidden rounded-xl border border-slate-200/90 bg-white px-3 py-4 shadow-[0_10px_28px_rgba(11,47,87,0.1)] sm:px-4">
+              <div>
+                <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-[#e30613]">
+                  All Regions
+                </p>
+                <div className="-mx-1 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-1 pb-1 snap-x snap-mandatory">
+                  {DESTINATION_REGIONS.map((region) => (
+                    <button
+                      key={region}
+                      type="button"
+                      onClick={() =>
+                        setDraftFilters((prev) => ({
+                          ...prev,
+                          region: region as DestinationRegion,
+                        }))
+                      }
+                      className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
+                        draftFilters.region === region
+                          ? "bg-[#e30613] text-white shadow-sm"
+                          : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"
+                      }`}
+                    >
+                      {region}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 border-t border-slate-100 pt-4">
+                <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-[#e30613]">
+                  All Styles
+                </p>
+                <div className="-mx-1 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-1 pb-1 snap-x snap-mandatory">
+                  {DESTINATION_TRAVEL_STYLES.map((style) => (
+                    <button
+                      key={style}
+                      type="button"
+                      onClick={() =>
+                        setDraftFilters((prev) => ({
+                          ...prev,
+                          travelStyle: style as DestinationTravelStyle,
+                        }))
+                      }
+                      className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
+                        draftFilters.travelStyle === style
+                          ? "bg-[#e30613] text-white shadow-sm"
+                          : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"
+                      }`}
+                    >
+                      {style}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <div className="mx-auto max-w-5xl overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-[0_10px_28px_rgba(11,47,87,0.1)]">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <div
@@ -232,16 +290,11 @@ export function DestinationSearchSection() {
                           <button
                             type="button"
                             onClick={() => handleSuggestionSelect(place)}
-                            className="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition hover:bg-slate-50"
+                            className="flex w-full px-4 py-3 text-left text-sm transition hover:bg-slate-50"
                           >
-                            <span>
-                              <span className="font-semibold text-[#0b2f57]">{place.title}</span>
-                              <span className="mt-0.5 block text-xs text-gray-500">
-                                {place.subtitle} · {place.region}
-                              </span>
-                            </span>
-                            <span className="text-xs font-semibold text-[#e30613]">
-                              {place.packages} packages
+                            <span className="font-semibold text-[#0b2f57]">{place.title}</span>
+                            <span className="mt-0.5 block text-xs text-gray-500">
+                              {place.subtitle} · {place.region}
                             </span>
                           </button>
                         </li>
@@ -301,60 +354,6 @@ export function DestinationSearchSection() {
                 </div>
               </div>
             </div>
-
-            <div className="mt-4">
-              <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
-                Region
-              </p>
-              <div className="-mx-4 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-4 pb-1 snap-x snap-mandatory">
-                {DESTINATION_REGIONS.map((region) => (
-                  <button
-                    key={region}
-                    type="button"
-                    onClick={() =>
-                      setDraftFilters((prev) => ({
-                        ...prev,
-                        region: region as DestinationRegion,
-                      }))
-                    }
-                    className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
-                      draftFilters.region === region
-                        ? "bg-[#e30613] text-white shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"
-                    }`}
-                  >
-                    {region}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
-                Travel Style
-              </p>
-              <div className="-mx-4 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-4 pb-1 snap-x snap-mandatory">
-                {DESTINATION_TRAVEL_STYLES.map((style) => (
-                  <button
-                    key={style}
-                    type="button"
-                    onClick={() =>
-                      setDraftFilters((prev) => ({
-                        ...prev,
-                        travelStyle: style as DestinationTravelStyle,
-                      }))
-                    }
-                    className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
-                      draftFilters.travelStyle === style
-                        ? "bg-[#0b2f57] text-white shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-600 hover:border-[#0b2f57] hover:text-[#0b2f57]"
-                    }`}
-                  >
-                    {style}
-                  </button>
-                ))}
-              </div>
-            </div>
           </form>
         </div>
       </section>
@@ -410,13 +409,15 @@ export function DestinationSearchSection() {
         )}
 
         {isSearching ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="h-52 rounded-xl bg-slate-200 sm:h-56" />
-                <div className="mt-4 h-3 w-24 rounded bg-slate-200" />
-                <div className="mt-2 h-5 w-40 rounded bg-slate-200" />
-                <div className="mt-2 h-4 w-28 rounded bg-slate-200" />
+              <div key={index} className="animate-pulse overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="aspect-[5/3] bg-slate-200" />
+                <div className="space-y-2 p-3.5">
+                  <div className="h-3 w-20 rounded bg-slate-200" />
+                  <div className="h-4 w-36 rounded bg-slate-200" />
+                  <div className="h-3 w-24 rounded bg-slate-200" />
+                </div>
               </div>
             ))}
           </div>
@@ -436,7 +437,7 @@ export function DestinationSearchSection() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((place, index) => (
               <motion.article
                 key={place.id}
@@ -444,32 +445,30 @@ export function DestinationSearchSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.35, delay: index * 0.04 }}
-                className="group"
+                className="group overflow-hidden rounded-xl border border-slate-200 bg-white"
               >
-                <div className="relative overflow-hidden rounded-xl">
+                <div className="relative aspect-[5/3] overflow-hidden bg-slate-100">
                   <Image
                     src={place.image}
                     alt={place.title}
                     width={700}
                     height={420}
-                    className="h-52 w-full object-cover transition duration-500 group-hover:scale-[1.03] sm:h-56"
+                    className={resultCardImageClass}
                   />
                   <span className={imageBadgeClass}>{place.region}</span>
                 </div>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-[#e30613]">
-                  {place.subtitle}
-                </p>
-                <h3 className="mt-1 text-xl font-bold text-[#0b2f57]">{place.title}</h3>
-                <p className="mt-2 text-sm text-gray-500">{place.packages} Packages</p>
-                <p className="mt-1 text-xs text-gray-400">
-                  {place.travelStyles.join(" · ")}
-                </p>
-                <Link
-                  href="/contact"
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#e30613] transition group-hover:gap-2"
-                >
-                  Explore Now <span aria-hidden>→</span>
-                </Link>
+                <div className="p-3.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[#e30613]">
+                    {place.subtitle}
+                  </p>
+                  <h3 className="mt-1 text-lg font-bold leading-snug text-[#0b2f57]">{place.title}</h3>
+                  <Link
+                    href="/contact"
+                    className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-[#e30613] transition group-hover:gap-2"
+                  >
+                    Explore Now <span aria-hidden>→</span>
+                  </Link>
+                </div>
               </motion.article>
             ))}
           </div>

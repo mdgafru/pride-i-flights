@@ -4,12 +4,10 @@ import { dashboardNavItems } from "@/components/dashboard/dashboard-nav";
 import { FileText, Save, Sparkles, X } from "lucide-react";
 
 const sectionMeta: Record<string, { title: string; category: string }> = {
-  analytics: { title: "Analytics", category: "Insights" },
   airports: { title: "Airports", category: "Master Data" },
   airlines: { title: "Airlines", category: "Master Data" },
   hotels: { title: "Hotels", category: "Products" },
   visa: { title: "Visa", category: "Products" },
-  insurance: { title: "Insurance", category: "Products" },
   routes: { title: "Routes", category: "Operations" },
   "excel-import": { title: "Excel Import", category: "Operations" },
   "banner-images": { title: "Banner Images", category: "Content" },
@@ -20,7 +18,11 @@ const sectionMeta: Record<string, { title: string; category: string }> = {
 
 export function generateStaticParams() {
   return dashboardNavItems
-    .filter((item) => item.href !== "/dashboard")
+    .filter(
+      (item) =>
+        item.href !== "/dashboard" &&
+        !["enquiries", "banner-images", "settings", "routes", "airlines", "airports"].includes(item.key),
+    )
     .map((item) => ({ section: item.key }));
 }
 
