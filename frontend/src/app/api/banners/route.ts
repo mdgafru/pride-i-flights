@@ -16,20 +16,28 @@ import {
   updateLocalBannerStatus,
 } from "@/lib/banner-local";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { withQueryTimeout } from "@/lib/supabase-query";
 import type { Banner, BannerStatus } from "@/types/banner";
 
 async function loadBanners(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
-  const supabase = createAdminClient();
-  let query = supabase.from("banners").select("*").order("created_at", { ascending: false });
+  let banners: Banner[] = [];
 
-  if (activeOnly) {
-    query = query.eq("status", "active");
-  }
+  try {
+    const supabase = createAdminClient();
+    let query = supabase.from("banners").select("*").order("created_at", { ascending: false });
 
-  const { data, error } = await query;
-  let banners = data ?? [];
+    if (activeOnly) {
+      query = query.eq("status", "active");
+    }
 
-  if (error) {
+    const { data, error } = await withQueryTimeout(query, 5000, "banners fetch");
+    banners = data ?? [];
+
+    if (error) {
+      console.error("banners fetch error:", error);
+      banners = [];
+    }
+  } catch (error) {
     console.error("banners fetch error:", error);
     banners = [];
   }
@@ -64,7 +72,13 @@ function buildStats(banners: Banner[]) {
 
 export async function GET(request: Request) {
   try {
-    const session = getAdminSessionFromRequest(request);
+    let session = null;
+    try {
+      session = getAdminSessionFromRequest(request);
+    } catch (error) {
+      console.error("banners session parse error:", error);
+    }
+
     const siteOrigin = getSiteOrigin(new URL(request.url).origin);
     const banners = await loadBanners(!session, siteOrigin);
 
