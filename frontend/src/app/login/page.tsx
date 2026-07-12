@@ -132,10 +132,7 @@ export default function LoginPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-br from-[#042448]/88 via-[#0b2f57]/72 to-[#042448]/55" />
                 <div className="relative z-10 flex h-full flex-col justify-between p-6 sm:p-8 lg:p-10">
-                  <BrandLogo
-                    variant="hero"
-                    className="drop-shadow-[0_2px_8px_rgba(255,255,255,0.85)]"
-                  />
+                  <BrandLogo variant="hero" />
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#ffb3b8]">
                       Admin Portal

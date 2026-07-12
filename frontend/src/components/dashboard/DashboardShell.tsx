@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, useState, type ReactNode } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { dashboardNavItems } from "@/components/dashboard/dashboard-nav";
+import { dashboardNavSections } from "@/components/dashboard/dashboard-nav";
 import type { DashboardIconKey } from "@/components/dashboard/dashboard-nav";
 import {
   BadgeCheck,
@@ -192,37 +192,46 @@ export function DashboardShell({
           </div>
 
           <nav className="dash-sidebar-nav relative flex-1 overflow-y-auto px-2 py-1.5">
-            <ul className="space-y-0.5">
-              {dashboardNavItems.map((item) => {
-                const active = isActive(pathname, item.href);
-                const Icon = iconByKey[item.icon];
+            <div className="space-y-3">
+              {dashboardNavSections.map((section) => (
+                <div key={section.title}>
+                  {!sidebarCollapsed ? (
+                    <p className="dash-nav-section-label px-1">{section.title}</p>
+                  ) : null}
+                  <ul className="space-y-0.5">
+                    {section.items.map((item) => {
+                      const active = isActive(pathname, item.href);
+                      const Icon = iconByKey[item.icon];
 
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      title={sidebarCollapsed ? item.label : undefined}
-                      onClick={() => setMenuOpen(false)}
-                      className={`dash-nav-link group ${active ? "dash-nav-link-active" : ""} ${
-                        sidebarCollapsed ? "dash-nav-link-collapsed" : ""
-                      }`}
-                    >
-                      <span className={`dash-nav-icon-wrap ${active ? "dash-nav-icon-wrap-active" : ""}`}>
-                        <Icon size={13} className="shrink-0" />
-                      </span>
-                      {!sidebarCollapsed && (
-                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                      )}
-                      {sidebarCollapsed && (
-                        <span className="dash-nav-tooltip" role="tooltip">
-                          {item.label}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            title={sidebarCollapsed ? item.label : item.description}
+                            onClick={() => setMenuOpen(false)}
+                            className={`dash-nav-link group ${active ? "dash-nav-link-active" : ""} ${
+                              sidebarCollapsed ? "dash-nav-link-collapsed" : ""
+                            }`}
+                          >
+                            <span className={`dash-nav-icon-wrap ${active ? "dash-nav-icon-wrap-active" : ""}`}>
+                              <Icon size={13} className="shrink-0" />
+                            </span>
+                            {!sidebarCollapsed && (
+                              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                            )}
+                            {sidebarCollapsed && (
+                              <span className="dash-nav-tooltip" role="tooltip">
+                                {item.label}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </nav>
 
           <div className="relative shrink-0 border-t border-white/10 p-2">

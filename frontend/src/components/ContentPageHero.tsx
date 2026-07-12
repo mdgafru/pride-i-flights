@@ -22,6 +22,8 @@ type ContentPageHeroProps = {
   centered?: boolean;
   showBreadcrumb?: boolean;
   useLogo?: boolean;
+  compact?: boolean;
+  theme?: "dark" | "light";
 };
 
 export function ContentPageHero({
@@ -35,22 +37,46 @@ export function ContentPageHero({
   centered = false,
   showBreadcrumb = true,
   useLogo = false,
+  compact = false,
+  theme = "dark",
 }: ContentPageHeroProps) {
+  const contentPaddingClass = compact
+    ? "pt-5 pb-4 sm:pt-10 sm:pb-6 md:pt-14 md:pb-8"
+    : "pt-8 pb-6 sm:pt-12 sm:pb-8 md:pt-16 md:pb-10";
+  const highlightPaddingClass = compact
+    ? "px-4 py-3 sm:px-6 sm:py-5 md:px-8 md:py-6"
+    : "px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6";
+
+  const isLight = theme === "light";
+
   return (
-    <section className="content-page-hero relative flex flex-col overflow-hidden">
+    <section className="content-page-hero relative flex w-full flex-col overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={image}
         alt=""
         aria-hidden
-        className="absolute inset-0 z-0 h-full min-h-full w-full object-cover brightness-[1.08] saturate-[1.1] contrast-[1.04]"
+        className={`absolute inset-0 z-0 h-full min-h-full w-full object-cover ${
+          isLight
+            ? "brightness-[1.02] saturate-[1.05]"
+            : "brightness-[1.08] saturate-[1.1] contrast-[1.04]"
+        }`}
         style={{ objectPosition: imagePosition }}
       />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#042448]/92 via-[#0b2f57]/68 to-[#0b2f57]/35" />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[#042448]/50 via-transparent to-transparent" />
+      {isLight ? (
+        <>
+          <div className="absolute inset-0 z-[1] bg-gradient-to-b from-sky-50/55 via-white/35 to-white/70" />
+          <div className="absolute inset-0 z-[1] bg-gradient-to-r from-white/25 via-transparent to-sky-100/20" />
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#042448]/92 via-[#0b2f57]/68 to-[#0b2f57]/35" />
+          <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[#042448]/50 via-transparent to-transparent" />
+        </>
+      )}
 
       <div className="relative z-[2] flex flex-col">
-        <div className="mx-auto w-full max-w-[1260px] px-4 pt-8 pb-6 sm:px-4 sm:pt-12 sm:pb-8 md:pt-16 md:pb-10">
+        <div className={`mx-auto w-full max-w-[1260px] px-4 sm:px-4 ${contentPaddingClass}`}>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -59,10 +85,15 @@ export function ContentPageHero({
           >
             {useLogo ? (
               <div className={`${centered ? "flex justify-center" : ""}`}>
-                <BrandLogo
-                  variant="hero"
-                  className="drop-shadow-[0_2px_10px_rgba(255,255,255,0.95)]"
-                />
+                <div
+                  className={
+                    isLight
+                      ? "drop-shadow-[0_2px_14px_rgba(255,255,255,0.95)]"
+                      : "drop-shadow-[0_4px_18px_rgba(0,0,0,0.35)]"
+                  }
+                >
+                  <BrandLogo variant="hero" />
+                </div>
               </div>
             ) : (
               <>
@@ -80,20 +111,25 @@ export function ContentPageHero({
             )}
             {description ? (
               <p
-                className={`max-w-2xl text-sm leading-relaxed text-white sm:text-base md:text-lg ${
-                  useLogo ? "mt-4 sm:mt-5" : "mt-3 sm:mt-4"
-                } ${centered ? "mx-auto" : ""}`}
+                className={`max-w-2xl text-sm leading-relaxed sm:text-base md:text-lg ${
+                  isLight ? "text-[#0b2f57]/85" : "text-white/95"
+                } ${useLogo ? "mt-4 sm:mt-5" : "mt-3 sm:mt-4"} ${centered ? "mx-auto" : ""} ${
+                  isLight ? "" : "drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
+                }`}
               >
                 {description}
               </p>
             ) : null}
             {showBreadcrumb ? (
-              <p className="mt-4 text-sm text-white/90 sm:mt-5 sm:text-base">
-                <Link href="/" className="font-medium transition hover:text-white">
+              <p className={`mt-4 text-sm sm:mt-5 sm:text-base ${isLight ? "text-slate-500" : "text-white/90"}`}>
+                <Link
+                  href="/"
+                  className={`font-medium transition ${isLight ? "hover:text-[#0b2f57]" : "hover:text-white"}`}
+                >
                   Home
                 </Link>
-                <span className="mx-2 text-[#ff6b75]">&gt;</span>
-                <span className="font-semibold text-white">{breadcrumb}</span>
+                <span className={`mx-2 ${isLight ? "text-[#e30613]" : "text-[#ff6b75]"}`}>&gt;</span>
+                <span className={`font-semibold ${isLight ? "text-[#0b2f57]" : "text-white"}`}>{breadcrumb}</span>
               </p>
             ) : null}
           </motion.div>
@@ -138,7 +174,7 @@ export function ContentPageHero({
                 return (
                   <div
                     key={item.title}
-                    className="px-4 py-4 text-center sm:px-6 sm:py-5 md:px-8 md:py-6"
+                    className={`text-center ${highlightPaddingClass}`}
                   >
                     {inner}
                   </div>

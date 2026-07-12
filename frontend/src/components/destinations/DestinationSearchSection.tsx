@@ -7,21 +7,14 @@ import { motion } from "framer-motion";
 import {
   DEFAULT_DESTINATION_FILTERS,
   DESTINATION_MONTHS,
-  DESTINATION_REGIONS,
   DESTINATION_SORT_OPTIONS,
-  DESTINATION_TRAVEL_STYLES,
   DESTINATION_TRAVELERS,
+  fetchDestinationsFromApi,
   filterDestinations,
   getDestinationSuggestions,
-  MOCK_DESTINATIONS,
   searchDestinations,
 } from "@/lib/destinations";
-import type {
-  Destination,
-  DestinationRegion,
-  DestinationSearchFilters,
-  DestinationTravelStyle,
-} from "@/types/destination";
+import type { Destination, DestinationSearchFilters } from "@/types/destination";
 
 const fieldLabelClass = "text-xs font-bold uppercase tracking-wide text-slate-600";
 const fieldClass =
@@ -70,22 +63,34 @@ export function DestinationSearchSection() {
   const [appliedFilters, setAppliedFilters] = useState<DestinationSearchFilters>(
     DEFAULT_DESTINATION_FILTERS,
   );
-  const [results, setResults] = useState<Destination[]>(() =>
-    filterDestinations(MOCK_DESTINATIONS, DEFAULT_DESTINATION_FILTERS),
-  );
+  const [allDestinations, setAllDestinations] = useState<Destination[]>([]);
+  const [results, setResults] = useState<Destination[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  useEffect(() => {
+    async function loadDestinations() {
+      const destinations = await fetchDestinationsFromApi();
+      setAllDestinations(destinations);
+      setResults(filterDestinations(destinations, DEFAULT_DESTINATION_FILTERS));
+    }
+
+    loadDestinations();
+  }, []);
+
   const suggestions = useMemo(
-    () => getDestinationSuggestions(draftFilters.query),
-    [draftFilters.query],
+    () => getDestinationSuggestions(draftFilters.query, allDestinations),
+    [draftFilters.query, allDestinations],
   );
 
-  const applyFilters = useCallback((filters: DestinationSearchFilters) => {
-    setResults(filterDestinations(MOCK_DESTINATIONS, filters));
-    setAppliedFilters(filters);
-    setShowSuggestions(false);
-  }, []);
+  const applyFilters = useCallback(
+    (filters: DestinationSearchFilters) => {
+      setResults(filterDestinations(allDestinations, filters));
+      setAppliedFilters(filters);
+      setShowSuggestions(false);
+    },
+    [allDestinations],
+  );
 
   const runSearch = useCallback(async (filters: DestinationSearchFilters) => {
     setIsSearching(true);
@@ -196,67 +201,7 @@ export function DestinationSearchSection() {
     <>
       <section className="border-y border-slate-200 bg-[#f8fafc]">
         <div className="mx-auto max-w-[1260px] px-4 py-6 md:py-8">
-          <div className="mb-5 text-center">
-            <h2 className="text-2xl font-extrabold text-[#e30613] md:text-3xl">Search Destinations</h2>
-          </div>
-
           <form onSubmit={handleSearch}>
-            <div className="mx-auto mb-5 max-w-5xl overflow-hidden rounded-xl border border-slate-200/90 bg-white px-3 py-4 shadow-[0_10px_28px_rgba(11,47,87,0.1)] sm:px-4">
-              <div>
-                <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-[#e30613]">
-                  All Regions
-                </p>
-                <div className="-mx-1 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-1 pb-1 snap-x snap-mandatory">
-                  {DESTINATION_REGIONS.map((region) => (
-                    <button
-                      key={region}
-                      type="button"
-                      onClick={() =>
-                        setDraftFilters((prev) => ({
-                          ...prev,
-                          region: region as DestinationRegion,
-                        }))
-                      }
-                      className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
-                        draftFilters.region === region
-                          ? "bg-[#e30613] text-white shadow-sm"
-                          : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"
-                      }`}
-                    >
-                      {region}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-4 border-t border-slate-100 pt-4">
-                <p className="mb-2 text-center text-xs font-bold uppercase tracking-wide text-[#e30613]">
-                  All Styles
-                </p>
-                <div className="-mx-1 flex flex-nowrap justify-center gap-1.5 overflow-x-auto px-1 pb-1 snap-x snap-mandatory">
-                  {DESTINATION_TRAVEL_STYLES.map((style) => (
-                    <button
-                      key={style}
-                      type="button"
-                      onClick={() =>
-                        setDraftFilters((prev) => ({
-                          ...prev,
-                          travelStyle: style as DestinationTravelStyle,
-                        }))
-                      }
-                      className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition min-h-[44px] ${
-                        draftFilters.travelStyle === style
-                          ? "bg-[#e30613] text-white shadow-sm"
-                          : "border border-slate-200 bg-white text-slate-600 hover:border-[#e30613] hover:text-[#e30613]"
-                      }`}
-                    >
-                      {style}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
             <div className="mx-auto max-w-5xl overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-[0_10px_28px_rgba(11,47,87,0.1)]">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <div
@@ -409,8 +354,8 @@ export function DestinationSearchSection() {
         )}
 
         {isSearching ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="animate-pulse overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <div className="aspect-[5/3] bg-slate-200" />
                 <div className="space-y-2 p-3.5">
@@ -437,7 +382,7 @@ export function DestinationSearchSection() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {results.map((place, index) => (
               <motion.article
                 key={place.id}

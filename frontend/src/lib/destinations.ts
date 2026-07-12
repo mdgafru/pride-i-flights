@@ -227,22 +227,60 @@ export function filterDestinations(
   return sortDestinations(filtered, filters.sortBy);
 }
 
-export function getDestinationSuggestions(query: string, limit = 6): Destination[] {
+export function getDestinationSuggestions(query: string, items: Destination[], limit = 6): Destination[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return [];
 
-  return MOCK_DESTINATIONS.filter(
-    (place) =>
-      place.title.toLowerCase().includes(normalized) ||
-      place.country.toLowerCase().includes(normalized) ||
-      place.subtitle.toLowerCase().includes(normalized),
-  ).slice(0, limit);
+  return items
+    .filter(
+      (place) =>
+        place.title.toLowerCase().includes(normalized) ||
+        place.country.toLowerCase().includes(normalized) ||
+        place.subtitle.toLowerCase().includes(normalized),
+    )
+    .slice(0, limit);
 }
 
-/** Simulates API call — swap this function when backend is ready. */
+export async function fetchDestinationsFromApi(): Promise<Destination[]> {
+  try {
+    const response = await fetch("/api/destinations", { cache: "no-store" });
+    const result = (await response.json()) as { destinations?: Destination[] };
+    if (response.ok && result.destinations?.length) {
+      return result.destinations;
+    }
+  } catch {
+    // Fall back to mock data when API is unavailable.
+  }
+
+  return MOCK_DESTINATIONS;
+}
+
+export async function fetchDestinationOptionsFromApi() {
+  try {
+    const response = await fetch("/api/destinations?dropdown=1", { cache: "no-store" });
+    const result = (await response.json()) as {
+      options?: { label: string; value: string }[];
+    };
+    if (response.ok && result.options) {
+      return [
+        { label: "All Destinations", value: "" },
+        ...result.options.map((option) => ({
+          label: option.label,
+          value: option.value,
+        })),
+      ];
+    }
+  } catch {
+    // Fall back below.
+  }
+
+  return [{ label: "All Destinations", value: "" }];
+}
+
+/** Loads destinations from API and applies client filters. */
 export async function searchDestinations(
   filters: DestinationSearchFilters,
 ): Promise<Destination[]> {
-  await new Promise((resolve) => setTimeout(resolve, 450));
-  return filterDestinations(MOCK_DESTINATIONS, filters);
+  const items = await fetchDestinationsFromApi();
+  return filterDestinations(items, filters);
 }

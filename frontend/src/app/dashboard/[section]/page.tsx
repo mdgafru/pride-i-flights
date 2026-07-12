@@ -7,6 +7,7 @@ const sectionMeta: Record<string, { title: string; category: string }> = {
   airports: { title: "Airports", category: "Master Data" },
   airlines: { title: "Airlines", category: "Master Data" },
   hotels: { title: "Hotels", category: "Products" },
+  destinations: { title: "Destinations", category: "Products" },
   visa: { title: "Visa", category: "Products" },
   routes: { title: "Routes", category: "Operations" },
   "excel-import": { title: "Excel Import", category: "Operations" },
@@ -21,7 +22,7 @@ export function generateStaticParams() {
     .filter(
       (item) =>
         item.href !== "/dashboard" &&
-        !["enquiries", "banner-images", "settings", "routes", "airlines", "airports"].includes(item.key),
+        !["enquiries", "banner-images", "settings", "routes", "flights", "airlines", "airports", "destinations", "hotels", "visa"].includes(item.key),
     )
     .map((item) => ({ section: item.key }));
 }

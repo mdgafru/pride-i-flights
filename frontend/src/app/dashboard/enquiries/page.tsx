@@ -6,7 +6,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { buildEnquiryWhatsAppMessage } from "@/lib/enquiry";
 import { WHATSAPP_URL } from "@/lib/contact";
 import type { Enquiry, EnquiryStatus } from "@/types/enquiry";
-import { CheckCheck, Inbox, LoaderCircle, MessageCircle, RefreshCw } from "lucide-react";
+import { CheckCheck, Inbox, LoaderCircle, MessageCircle, RefreshCw, Trash2 } from "lucide-react";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -29,6 +29,7 @@ export default function EnquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | EnquiryStatus>("all");
 
   async function loadEnquiries() {
@@ -98,6 +99,28 @@ export default function EnquiriesPage() {
       setError("Network error while updating enquiry.");
     } finally {
       setUpdatingId(null);
+    }
+  }
+
+  async function deleteEnquiry(id: string, name: string) {
+    const confirmed = window.confirm(`Delete enquiry from ${name}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeletingId(id);
+    try {
+      const response = await fetch(`/api/enquiries/${id}`, { method: "DELETE" });
+      const result = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        setError(result.error || "Unable to delete enquiry.");
+        return;
+      }
+
+      setEnquiries((current) => current.filter((item) => item.id !== id));
+    } catch {
+      setError("Network error while deleting enquiry.");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -297,6 +320,16 @@ export default function EnquiriesPage() {
                               Mark replied
                             </button>
                           ) : null}
+
+                          <button
+                            type="button"
+                            disabled={deletingId === item.id || updatingId === item.id}
+                            onClick={() => deleteEnquiry(item.id, item.name)}
+                            className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg border border-[#fecdd3] bg-[#fff5f6] px-3 text-[11px] font-semibold text-[#e30613] hover:border-[#e30613]/40 disabled:opacity-60"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            {deletingId === item.id ? "Deleting..." : "Delete"}
+                          </button>
                         </div>
                       </td>
                     </tr>

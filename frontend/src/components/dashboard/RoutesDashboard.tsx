@@ -29,6 +29,72 @@ import {
 
 const ROUTES_PER_PAGE = 5;
 
+type DashboardVariant = "routes" | "flights";
+
+type DashboardCopy = {
+  title: string;
+  breadcrumb: string;
+  entity: string;
+  entityPlural: string;
+  addManual: string;
+  addForm: string;
+  editForm: string;
+  submitAdd: string;
+  allFilter: string;
+  activeFilter: string;
+  emptyAll: string;
+  emptyActive: string;
+  emptyPending: string;
+  loadError: string;
+  saveError: string;
+  savedMessage: string;
+  deleteConfirm: (from: string, to: string) => string;
+  closePanel: string;
+};
+
+const COPY: Record<DashboardVariant, DashboardCopy> = {
+  routes: {
+    title: "Routes",
+    breadcrumb: "Home / Dashboard / Routes",
+    entity: "Route",
+    entityPlural: "Routes",
+    addManual: "Add Route",
+    addForm: "Add Route",
+    editForm: "Edit Route",
+    submitAdd: "Add Route",
+    allFilter: "All Routes",
+    activeFilter: "Active Routes",
+    emptyAll: "No routes yet. Upload Excel or add manually.",
+    emptyActive: "No active routes yet.",
+    emptyPending: "No pending routes.",
+    loadError: "Unable to load routes.",
+    saveError: "Unable to save route.",
+    savedMessage: "Route saved. Airline & airports auto-linked.",
+    deleteConfirm: (from, to) => `Delete route ${from} to ${to}?`,
+    closePanel: "Close add route panel",
+  },
+  flights: {
+    title: "Flights",
+    breadcrumb: "Home / Dashboard / Flights",
+    entity: "Flight",
+    entityPlural: "Flights",
+    addManual: "Add Flight",
+    addForm: "Add Flight",
+    editForm: "Edit Flight",
+    submitAdd: "Add Flight",
+    allFilter: "All Flights",
+    activeFilter: "Active Flights",
+    emptyAll: "No flights yet. Upload Excel or add manually.",
+    emptyActive: "No active flights yet.",
+    emptyPending: "No pending flights.",
+    loadError: "Unable to load flights.",
+    saveError: "Unable to save flight.",
+    savedMessage: "Flight saved with auto SEO. Airline & airports auto-linked.",
+    deleteConfirm: (from, to) => `Delete flight ${from} to ${to}?`,
+    closePanel: "Close add flight panel",
+  },
+};
+
 const siteOrigin =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (typeof window !== "undefined" ? window.location.origin : "");
@@ -49,7 +115,8 @@ function statusStyle(status: EntityStatus) {
     : "bg-[#fff7ed] text-[#c2410c]";
 }
 
-export function RoutesDashboard() {
+export function RoutesDashboard({ variant = "routes" }: { variant?: DashboardVariant }) {
+  const copy = COPY[variant];
   const [routes, setRoutes] = useState<Route[]>([]);
   const [airlines, setAirlines] = useState<Airline[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
@@ -86,7 +153,7 @@ export function RoutesDashboard() {
       const airportsJson = (await airportsRes.json()) as { airports?: Airport[] };
 
       if (!routesRes.ok) {
-        setError(routesJson.error || "Unable to load routes.");
+        setError(routesJson.error || copy.loadError);
         return;
       }
 
@@ -98,7 +165,7 @@ export function RoutesDashboard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [copy.loadError]);
 
   useEffect(() => {
     loadData();
@@ -231,7 +298,7 @@ export function RoutesDashboard() {
       };
 
       if (!response.ok || !result.route) {
-        setError(result.error || "Unable to save route.");
+        setError(result.error || copy.saveError);
         return;
       }
 
@@ -240,7 +307,7 @@ export function RoutesDashboard() {
           ? current.map((item) => (item.id === result.route!.id ? result.route! : item))
           : [result.route!, ...current],
       );
-      setMessage(result.message || "Route saved. Airline & airports auto-linked.");
+      setMessage(result.message || copy.savedMessage);
       resetForm();
       await loadData();
     } catch {
@@ -273,7 +340,7 @@ export function RoutesDashboard() {
   }
 
   async function deleteRoute(route: Route) {
-    if (!confirm(`Delete route ${route.from_city} to ${route.to_city}?`)) return;
+    if (!confirm(copy.deleteConfirm(route.from_city, route.to_city))) return;
     setUpdatingId(route.id);
     try {
       const response = await fetch(`/api/routes/${route.id}`, { method: "DELETE" });
@@ -292,7 +359,7 @@ export function RoutesDashboard() {
   }
 
   return (
-    <DashboardShell title="Routes" breadcrumb="Home / Dashboard / Routes">
+    <DashboardShell title={copy.title} breadcrumb={copy.breadcrumb}>
       <div className={`transition-all duration-300 ${manualFormOpen ? "pointer-events-none scale-[0.98] opacity-60" : ""}`}>
       <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
         <div className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm">
@@ -301,7 +368,7 @@ export function RoutesDashboard() {
               <RouteIcon size={13} />
             </span>
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Routes</p>
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">{copy.entityPlural}</p>
               <p className="text-base font-bold leading-none text-[#0b2f57]">{routes.length}</p>
             </div>
           </div>
@@ -366,7 +433,7 @@ export function RoutesDashboard() {
             </span>
             <div>
               <p className="text-[9px] font-bold uppercase tracking-wide text-[#e30613]">Manual</p>
-              <p className="text-[11px] font-semibold text-[#0b2f57]">Add Route</p>
+              <p className="text-[11px] font-semibold text-[#0b2f57]">{copy.addManual}</p>
             </div>
           </div>
         </button>
@@ -395,7 +462,7 @@ export function RoutesDashboard() {
               }`}
             >
               <MapPin size={11} />
-              All Routes
+              All {copy.entityPlural}
               <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${filter === "all" ? "bg-white/20" : "bg-slate-100"}`}>
                 {routes.length}
               </span>
@@ -425,7 +492,7 @@ export function RoutesDashboard() {
               }`}
             >
               <CheckCircle2 size={11} />
-              Active Routes
+              Active {copy.entityPlural}
               <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${filter === "active" ? "bg-[#dcfce7]" : "bg-slate-100"}`}>
                 {activeCount}
               </span>
@@ -442,19 +509,20 @@ export function RoutesDashboard() {
           </div>
         ) : filteredRoutes.length === 0 ? (
           <p className="px-3 py-8 text-center text-sm text-slate-500">
-            {filter === "active" ? "No active routes yet." : filter === "pending" ? "No pending routes." : "No routes yet. Upload Excel or add manually."}
+            {filter === "active" ? copy.emptyActive : filter === "pending" ? copy.emptyPending : copy.emptyAll}
           </p>
         ) : (
           <>
           <div className="dash-table-wrap">
-            <table className="dash-table w-full min-w-[800px]">
+            <table className="dash-table w-full min-w-[960px]">
               <thead>
                 <tr className="border-b border-slate-200 bg-[#fafbfd]">
                   <th>From</th>
                   <th>To</th>
                   <th>Airline</th>
                   <th>Airports</th>
-                  <th>Page URL</th>
+                  <th>H1</th>
+                  <th>Meta</th>
                   <th>Status</th>
                   <th>Added</th>
                   <th>Actions</th>
@@ -469,7 +537,29 @@ export function RoutesDashboard() {
                     <td className="text-[11px] text-slate-600">
                       {route.from_airport_code || "-"} → {route.to_airport_code || "-"}
                     </td>
-                    <td className="max-w-[200px] break-all text-[11px] text-slate-500">{route.page_url}</td>
+                    <td className="max-w-[180px] text-[11px] text-slate-600">
+                      {route.status === "active" && route.slug ? (
+                        <Link
+                          href={`/flights/${route.slug}`}
+                          target="_blank"
+                          className="font-semibold text-[#0b2f57] hover:text-[#e30613]"
+                        >
+                          {route.h1_heading || `${route.from_city} to ${route.to_city}`}
+                        </Link>
+                      ) : (
+                        <span>{route.h1_heading || "-"}</span>
+                      )}
+                      {route.page_url ? (
+                        <p className="mt-0.5 break-all text-[10px] text-slate-400">{route.page_url}</p>
+                      ) : null}
+                    </td>
+                    <td className="max-w-[200px] text-[11px] text-slate-500">
+                      {route.meta_description
+                        ? route.meta_description.length > 72
+                          ? `${route.meta_description.slice(0, 72)}…`
+                          : route.meta_description
+                        : "-"}
+                    </td>
                     <td>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusStyle(route.status)}`}>
                         {route.status}
@@ -479,7 +569,13 @@ export function RoutesDashboard() {
                     <td>
                       <div className="flex items-center gap-1">
                         <button type="button" onClick={() => fillForm(route)} className="rounded-md border border-slate-200 p-1.5 text-slate-600 hover:text-[#e30613]"><Pencil size={13} /></button>
-                        <button type="button" disabled={updatingId === route.id} onClick={() => toggleStatus(route)} className="rounded-md border border-slate-200 p-1.5 text-slate-600 hover:text-[#166534]">
+                        <button
+                          type="button"
+                          disabled={updatingId === route.id}
+                          onClick={() => toggleStatus(route)}
+                          title={route.status === "active" ? "Set pending" : "Set active"}
+                          className="rounded-md border border-slate-200 p-1.5 text-slate-600 hover:text-[#166534]"
+                        >
                           {updatingId === route.id ? <LoaderCircle size={13} className="animate-spin" /> : route.status === "active" ? <Clock3 size={13} /> : <CheckCircle2 size={13} />}
                         </button>
                         <button type="button" disabled={updatingId === route.id} onClick={() => deleteRoute(route)} className="rounded-md border border-[#fecdd3] bg-[#fff5f6] p-1.5 text-[#e30613]"><Trash2 size={13} /></button>
@@ -529,7 +625,7 @@ export function RoutesDashboard() {
         <div className="fixed inset-0 z-[70] flex justify-end">
           <button
             type="button"
-            aria-label="Close add route panel"
+            aria-label={copy.closePanel}
             className="absolute inset-0 bg-[#0b2f57]/30 backdrop-blur-[1px]"
             onClick={() => resetForm()}
           />
@@ -537,7 +633,7 @@ export function RoutesDashboard() {
             <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
               <div>
                 <p className="text-sm font-bold text-[#0b2f57]">
-                  {editing ? "Edit Route" : "Add Route"}
+                  {editing ? copy.editForm : copy.addForm}
                 </p>
                 <p className="text-[11px] text-slate-500">Step {formStep} of 2</p>
               </div>
@@ -618,10 +714,22 @@ export function RoutesDashboard() {
 
                     {seoPreview ? (
                       <div className="rounded-lg border border-slate-200 bg-[#fafbfd] p-2.5 text-[10px] leading-relaxed text-slate-600">
-                        <p className="font-bold text-[#e30613]">Auto SEO</p>
-                        <p className="mt-1 break-all"><span className="font-semibold text-[#0b2f57]">URL:</span> {seoPreview.page_url}</p>
-                        <p className="mt-0.5"><span className="font-semibold text-[#0b2f57]">OG:</span> {seoPreview.og_title}</p>
-                        <p className="mt-0.5 break-words"><span className="font-semibold text-[#0b2f57]">Keywords:</span> {seoPreview.seo_keywords}</p>
+                        <p className="font-bold text-[#e30613]">Auto SEO (generated on save)</p>
+                        <p className="mt-1 break-words">
+                          <span className="font-semibold text-[#0b2f57]">H1:</span> {seoPreview.h1_heading}
+                        </p>
+                        <p className="mt-0.5 break-words">
+                          <span className="font-semibold text-[#0b2f57]">Title:</span> {seoPreview.seo_title}
+                        </p>
+                        <p className="mt-0.5 break-words">
+                          <span className="font-semibold text-[#0b2f57]">Meta:</span> {seoPreview.meta_description}
+                        </p>
+                        <p className="mt-0.5 break-all">
+                          <span className="font-semibold text-[#0b2f57]">URL:</span> {seoPreview.page_url}
+                        </p>
+                        <p className="mt-0.5 break-words">
+                          <span className="font-semibold text-[#0b2f57]">Keywords:</span> {seoPreview.seo_keywords}
+                        </p>
                       </div>
                     ) : null}
                   </>
@@ -663,7 +771,7 @@ export function RoutesDashboard() {
                     className="inline-flex items-center gap-1 rounded-md bg-[#e30613] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-70"
                   >
                     {saving ? <LoaderCircle size={13} className="animate-spin" /> : <Plus size={13} />}
-                    {editing ? "Update" : "Add Route"}
+                    {editing ? "Update" : copy.submitAdd}
                   </button>
                 )}
               </div>

@@ -1,5 +1,5 @@
-import { createAdminClient } from "@/lib/supabase-admin";
-import { deleteLocalRoute, getLocalRoute, updateLocalRoute } from "@/lib/route-local";
+import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
+import { deleteLocalRoute, findLocalRouteBySlug, getLocalRoute, updateLocalRoute } from "@/lib/route-local";
 import type { Route } from "@/types/route";
 
 function withRouteDefaults(route: Partial<Route> & Pick<Route, "id" | "from_city" | "to_city" | "slug">): Route {
@@ -19,6 +19,23 @@ function withRouteDefaults(route: Partial<Route> & Pick<Route, "id" | "from_city
     created_at: new Date().toISOString(),
     ...route,
   };
+}
+
+export async function getRouteBySlug(slug: string) {
+  if (hasSupabaseConfig()) {
+    const supabase = createAdminClient();
+    const { data, error } = await supabase.from("routes").select("*").eq("slug", slug).maybeSingle();
+
+    if (!error && data) {
+      return data as Route;
+    }
+
+    if (error) {
+      console.error("route slug fetch error:", error);
+    }
+  }
+
+  return findLocalRouteBySlug(slug);
 }
 
 export async function getRouteById(id: string) {

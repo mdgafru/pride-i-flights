@@ -15,37 +15,39 @@ import {
   saveBannerLocally,
   updateLocalBannerStatus,
 } from "@/lib/banner-local";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import type { Banner, BannerStatus } from "@/types/banner";
 
 async function loadBanners(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
-  let banners: Banner[] = [];
-
-  try {
-    const supabase = createAdminClient();
-    let query = supabase.from("banners").select("*").order("created_at", { ascending: false });
-
-    if (activeOnly) {
-      query = query.eq("status", "active");
-    }
-
-    const { data, error } = await withQueryTimeout(query, 5000, "banners fetch");
-    banners = data ?? [];
-
-    if (error) {
-      console.error("banners fetch error:", error);
-      banners = [];
-    }
-  } catch (error) {
-    console.error("banners fetch error:", error);
-    banners = [];
-  }
-
   const localBanners = await readLocalBanners();
   const filteredLocal = activeOnly
     ? localBanners.filter((item) => item.status === "active")
     : localBanners;
+
+  let banners: Banner[] = [];
+
+  if (hasSupabaseConfig()) {
+    try {
+      const supabase = createAdminClient();
+      let query = supabase.from("banners").select("*").order("created_at", { ascending: false });
+
+      if (activeOnly) {
+        query = query.eq("status", "active");
+      }
+
+      const { data, error } = await withQueryTimeout(query, 4000, "banners fetch");
+      banners = data ?? [];
+
+      if (error) {
+        console.error("banners fetch error:", error);
+        banners = [];
+      }
+    } catch (error) {
+      console.error("banners fetch error:", error);
+      banners = [];
+    }
+  }
 
   const seen = new Set(banners.map((item) => item.id));
   for (const item of filteredLocal) {
@@ -89,7 +91,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ banners });
   } catch (error) {
     console.error("banners GET error:", error);
-    return NextResponse.json({ error: "Unable to load banners." }, { status: 500 });
+    return NextResponse.json({ banners: [] });
   }
 }
 

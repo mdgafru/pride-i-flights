@@ -46,7 +46,7 @@ export function HeroRouteSwap() {
           autoComplete="off"
           value={route.from}
           onChange={(e) => dispatch({ type: "setFrom", value: e.target.value })}
-          placeholder="Country, city or airport"
+          placeholder="City"
           className={fieldInputClass}
         />
       </label>
@@ -72,7 +72,7 @@ export function HeroRouteSwap() {
           autoComplete="off"
           value={route.to}
           onChange={(e) => dispatch({ type: "setTo", value: e.target.value })}
-          placeholder="Country, city or airport"
+          placeholder="City"
           className={fieldInputClass}
         />
       </label>

@@ -2,11 +2,27 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  outputFileTracingIncludes: {
+    "/api/banners": ["./data/banners.local.json"],
+    "/api/banners/[id]": ["./data/banners.local.json"],
+    "/api/visas": ["./data/visas.local.json"],
+    "/api/visas/[id]": ["./data/visas.local.json"],
+    "/api/visas/slug/[slug]": ["./data/visas.local.json"],
+    "/api/hotels": ["./data/hotels.local.json"],
+    "/api/hotels/[id]": ["./data/hotels.local.json"],
+    "/api/hotels/slug/[slug]": ["./data/hotels.local.json"],
+    "/api/destinations": ["./data/destinations.local.json"],
+    "/api/destinations/[id]": ["./data/destinations.local.json"],
+  },
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "rede-i-flights.vercel.app",
       },
     ],
   },

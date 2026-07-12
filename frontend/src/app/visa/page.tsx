@@ -1,11 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
+import { VisaImage } from "@/components/VisaImage";
 import { WHATSAPP_URL } from "@/lib/contact";
+import { DEFAULT_VISA_IMAGE, resolveVisaImageUrl } from "@/lib/visa-display";
+import type { Visa } from "@/types/visa";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=2000&q=90";
@@ -25,56 +28,12 @@ const highlights = [
 const trustItems = [
   { title: "Tourist Visas", sub: "Holiday and leisure travel worldwide" },
   { title: "Business Visas", sub: "Meetings, conferences and work trips" },
-  { title: "Student Visas", sub: "Study abroad application support" },
 ];
 
 const visaCardImageClass =
-  "h-52 w-full object-cover object-center transition duration-500 group-hover:scale-[1.03] sm:h-56";
+  "object-cover object-center transition duration-500 group-hover:scale-[1.03]";
 
-const visaCards = [
-  {
-    id: "usa",
-    country: "USA",
-    image:
-      "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    id: "schengen",
-    country: "Schengen",
-    image:
-      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    id: "uk",
-    country: "United Kingdom",
-    image:
-      "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    id: "australia",
-    country: "Australia",
-    image:
-      "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    id: "canada",
-    country: "Canada",
-    image:
-      "https://images.unsplash.com/photo-1519832979-6fa011b87667?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    id: "far-east",
-    country: "Far East",
-    image:
-      "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    id: "new-zealand",
-    country: "New Zealand",
-    image:
-      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-];
+const visaCardAspectClass = "aspect-[5/3] w-full";
 
 const strengths = [
   { title: "Profile Assessment", text: "We review your travel history and documents before submission." },
@@ -99,6 +58,37 @@ const steps = [
 ];
 
 export default function VisaPage() {
+  const [visas, setVisas] = useState<Visa[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadVisas() {
+      try {
+        const response = await fetch("/api/visas", { cache: "no-store" });
+        const result = (await response.json()) as { visas?: Visa[] };
+        if (response.ok) setVisas(result.visas || []);
+      } catch {
+        setVisas([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadVisas();
+  }, []);
+
+  const displayCards = useMemo(
+    () =>
+      visas.map((visa) => ({
+        id: visa.id,
+        country: visa.country,
+        subtitle: visa.visa_type || "Visa Service",
+        image: resolveVisaImageUrl(visa.image_url, DEFAULT_VISA_IMAGE),
+        href: `/visa/${visa.slug}`,
+      })),
+    [visas],
+  );
+
   return (
     <SiteShell active="Visa">
       <ContentPageHero
@@ -113,7 +103,7 @@ export default function VisaPage() {
 
       {/* Trust strip */}
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-slate-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           {trustItems.map((item) => (
             <div key={item.title} className="px-6 py-7 text-center sm:py-8">
               <p className="text-lg font-bold text-[#e30613]">{item.title}</p>
@@ -129,33 +119,46 @@ export default function VisaPage() {
           <p className={eyebrowClass}>Visa Destinations</p>
           <h2 className={`mt-2 ${sectionTitleClass}`}>Our Visa Services</h2>
           <p className={`mx-auto mt-3 max-w-2xl ${bodyClass}`}>
-            Choose your destination and start your application with expert support.
+            {loading
+              ? "Loading visa services..."
+              : displayCards.length > 0
+                ? "Choose your destination and start your application with expert support."
+                : "Visa services will appear here once added from the admin dashboard."}
           </p>
         </div>
 
+        {displayCards.length === 0 && !loading ? (
+          <p className="rounded-xl border border-dashed border-slate-200 bg-[#f8fafc] px-6 py-12 text-center text-sm text-slate-500">
+            No visa services available yet. Add and activate them from the admin panel.
+          </p>
+        ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {visaCards.map((item, index) => (
+          {displayCards.map((item, index) => (
             <motion.div
               key={item.id}
+              className="h-full"
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.05 }}
             >
               <Link
-                href="/contact"
-                className="group relative block overflow-hidden rounded-xl"
+                href={item.href}
+                className={`group relative block overflow-hidden rounded-xl ${visaCardAspectClass}`}
               >
-                <Image
+                <VisaImage
                   src={item.image}
                   alt={item.country}
-                  width={700}
-                  height={420}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className={visaCardImageClass}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#042448]/90 via-[#042448]/35 to-transparent" />
                 <div className="absolute right-0 bottom-0 left-0 flex items-end justify-between gap-3 p-5">
-                  <h3 className="text-xl font-bold text-white sm:text-2xl">{item.country}</h3>
+                  <div>
+                    <h3 className="text-xl font-bold text-white sm:text-2xl">{item.country}</h3>
+                    <p className="mt-1 text-sm text-white/80">{item.subtitle}</p>
+                  </div>
                   <span className="btn-premium shrink-0 bg-[#e30613] px-4 py-2.5 text-sm font-semibold text-white group-hover:bg-[#c40010]">
                     Apply Now
                   </span>
@@ -164,6 +167,7 @@ export default function VisaPage() {
             </motion.div>
           ))}
         </div>
+        )}
       </section>
 
       {/* Why choose us */}

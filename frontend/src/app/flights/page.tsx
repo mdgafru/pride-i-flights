@@ -1,108 +1,423 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { FlightLocationAutocomplete } from "@/components/FlightLocationAutocomplete";
 import { PageHero } from "@/components/PageHero";
 import { SiteShell } from "@/components/SiteShell";
+import { WhatsAppIcon } from "@/components/icons";
+import {
+  buildFlightDeal,
+  buildFlightEnquiryUrl,
+  sortFlightDeals,
+  type FlightDeal,
+} from "@/lib/flight-deal-display";
+import {
+  buildFlightSearchLocations,
+  matchesFlightLocation,
+} from "@/lib/flight-search-locations";
+import type { Airport } from "@/types/airport";
+import type { Route } from "@/types/route";
 
-const flights = [
-  {
-    airline: "Emirates",
-    route: "Dubai → London",
-    time: "08:20 - 13:45",
-    duration: "7h 25m",
-    price: "$420",
-    type: "Non-stop",
-  },
-  {
-    airline: "Qatar Airways",
-    route: "Doha → Paris",
-    time: "10:15 - 15:40",
-    duration: "6h 55m",
-    price: "$389",
-    type: "Non-stop",
-  },
-  {
-    airline: "Singapore Airlines",
-    route: "Singapore → Tokyo",
-    time: "01:10 - 09:00",
-    duration: "6h 50m",
-    price: "$355",
-    type: "Non-stop",
-  },
-  {
-    airline: "Air India",
-    route: "Delhi → New York",
-    time: "02:30 - 08:15",
-    duration: "15h 45m",
-    price: "$690",
-    type: "1 Stop",
-  },
+type SortOption = "newest" | "route" | "airline";
+
+const tripTypeOptions = [
+  { value: "return", label: "Return" },
+  { value: "oneway", label: "One way" },
 ];
 
+const flightsLabelClass =
+  "mb-0.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-white/90";
+const flightsFieldClass =
+  "min-h-[40px] w-full rounded-lg border border-white/25 bg-white px-2.5 py-2 text-sm font-semibold text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-white focus:ring-2 focus:ring-white/30";
+const flightsTripPillClass = "rounded-md px-3 py-1.5 text-xs font-bold transition sm:text-sm";
+
+function DealCardSkeleton() {
+  return (
+    <div className="animate-pulse rounded-xl border border-slate-200/80 bg-white p-3.5">
+      <div className="flex items-center gap-2.5">
+        <div className="h-8 w-8 rounded-md bg-slate-100" />
+        <div className="flex-1 space-y-1.5">
+          <div className="h-2.5 w-20 rounded bg-slate-100" />
+          <div className="h-3.5 w-36 rounded bg-slate-100" />
+        </div>
+      </div>
+      <div className="mt-3 h-9 rounded-md bg-slate-50" />
+      <div className="mt-2.5 h-9 rounded-md bg-slate-100" />
+    </div>
+  );
+}
+
+function FlightDealCard({ deal }: { deal: FlightDeal }) {
+  const enquiryUrl = buildFlightEnquiryUrl(deal.fromCity, deal.toCity, deal.airline);
+
+  return (
+    <article className="group rounded-xl border border-slate-200/90 bg-white p-3.5 transition duration-200 hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(11,47,87,0.07)]">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[#0b2f57] text-[10px] font-bold text-white">
+            {deal.airlineCode}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-[#0b2f57]">{deal.airline}</p>
+            <h3 className="truncate text-sm font-bold text-[#0b2f57]">
+              {deal.fromCity}
+              <span className="mx-1.5 font-normal text-slate-300">→</span>
+              {deal.toCity}
+            </h3>
+          </div>
+        </div>
+        <span
+          className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
+            deal.stopType === "Non-stop"
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-amber-50 text-amber-700"
+          }`}
+        >
+          {deal.stopType}
+        </span>
+      </div>
+
+      <div className="mt-2.5 flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2">
+        <div>
+          <p className="text-sm font-bold text-[#0b2f57]">{deal.departure}</p>
+          <p className="text-[9px] font-semibold uppercase text-slate-500">{deal.fromCode}</p>
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col items-center px-1">
+          <p className="text-[10px] font-medium text-slate-500">{deal.duration}</p>
+          <div className="mt-0.5 flex w-full items-center gap-1.5">
+            <span className="h-px flex-1 bg-slate-300" />
+            <span className="h-1 w-1 rounded-full bg-[#e30613]" />
+            <span className="h-px flex-1 bg-slate-300" />
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-bold text-[#0b2f57]">{deal.arrival}</p>
+          <p className="text-[9px] font-semibold uppercase text-slate-500">{deal.toCode}</p>
+        </div>
+      </div>
+
+      <a
+        href={enquiryUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="btn-premium mt-2.5 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-[#e30613] text-xs font-semibold text-white transition hover:bg-[#c40010]"
+      >
+        <WhatsAppIcon className="h-3.5 w-3.5" />
+        Enquire Now
+      </a>
+    </article>
+  );
+}
+
 export default function FlightsPage() {
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [airports, setAirports] = useState<Airport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [tripType, setTripType] = useState("return");
+  const [fromQuery, setFromQuery] = useState("");
+  const [toQuery, setToQuery] = useState("");
+  const [departDate, setDepartDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+
+  const loadRoutes = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
+    try {
+      const [routesResponse, airportsResponse] = await Promise.all([
+        fetch("/api/routes", { cache: "no-store" }),
+        fetch("/api/airports", { cache: "no-store" }),
+      ]);
+
+      const routesResult = (await routesResponse.json()) as { routes?: Route[]; error?: string };
+      const airportsResult = (await airportsResponse.json()) as {
+        airports?: Airport[];
+        error?: string;
+      };
+
+      if (!routesResponse.ok) {
+        setError(routesResult.error || "Unable to load flight routes.");
+        setRoutes([]);
+        setAirports([]);
+        return;
+      }
+
+      setRoutes(routesResult.routes || []);
+      setAirports(airportsResponse.ok ? airportsResult.airports || [] : []);
+      setError(null);
+    } catch {
+      if (!silent) {
+        setError("Network error while loading flight routes.");
+        setRoutes([]);
+        setAirports([]);
+      }
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadRoutes();
+  }, [loadRoutes]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get("from");
+    const to = params.get("to");
+    const trip = params.get("trip");
+    const depart = params.get("depart");
+    const returnParam = params.get("return");
+    if (from) setFromQuery(from);
+    if (to) setToQuery(to);
+    if (trip === "oneway" || trip === "return") setTripType(trip);
+    if (depart) setDepartDate(depart);
+    if (returnParam) setReturnDate(returnParam);
+  }, []);
+
+  useEffect(() => {
+    if (tripType === "oneway") setReturnDate("");
+  }, [tripType]);
+
+  useEffect(() => {
+    const onFocus = () => loadRoutes(true);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") loadRoutes(true);
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") loadRoutes(true);
+    }, 45000);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.clearInterval(interval);
+    };
+  }, [loadRoutes]);
+
+  const locationOptions = useMemo(
+    () => buildFlightSearchLocations(routes, airports),
+    [routes, airports],
+  );
+
+  const deals = useMemo(() => {
+    const built = routes.map(buildFlightDeal);
+    const filtered = built.filter((deal) => {
+      const fromMatch = matchesFlightLocation(fromQuery, deal.fromCity, deal.fromCode);
+      const toMatch = matchesFlightLocation(toQuery, deal.toCity, deal.toCode);
+      return fromMatch && toMatch;
+    });
+
+    if (sortBy === "newest") {
+      const order = new Map(routes.map((route, index) => [route.id, index]));
+      return [...filtered].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+    }
+
+    return sortFlightDeals(filtered, sortBy);
+  }, [routes, sortBy, fromQuery, toQuery]);
+
   return (
     <SiteShell active="Flights">
       <PageHero
         eyebrow="Fly Anywhere, Anytime"
-        title="Book Your Flights"
-        description="Compare top airlines and get the best fares for domestic and international destinations."
         breadcrumb="Flights"
+        brandLogo
+        centered
+        compact
+        eyebrowVariant="badge"
+        showBreadcrumb={false}
         image="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1800&q=80"
       >
-        <div className="mx-auto mt-0 max-w-[1260px] px-4 pb-6 sm:mt-[-24px] lg:mt-[-40px]">
-          <div className="soft-section premium-shadow grid grid-cols-1 gap-3 rounded-xl p-4 md:grid-cols-2 xl:grid-cols-5">
-            {["From", "To", "Departure", "Return", "Travel Class"].map((item) => (
-              <button
-                key={item}
-                className="min-h-[44px] rounded-lg border border-gray-200 px-4 py-3 text-left text-sm text-gray-600"
+        <div className="mx-auto max-w-[1260px] px-4 pb-4 sm:mt-[-6px]">
+          <div className="overflow-visible rounded-xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] shadow-[0_16px_36px_rgba(179,0,15,0.3)] ring-1 ring-white/20">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/15 px-3 py-2 sm:px-3.5">
+              <div className="inline-flex rounded-lg border border-white/20 bg-white/10 p-0.5">
+                {tripTypeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setTripType(option.value)}
+                    className={`${flightsTripPillClass} ${
+                      tripType === option.value
+                        ? "bg-white text-[#e30613] shadow-sm"
+                        : "text-white hover:bg-white/15"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] font-medium text-white/70">
+                {locationOptions.length} cities
+              </p>
+            </div>
+
+            <div className="p-3 sm:p-3.5">
+              <div
+                className={`grid grid-cols-1 gap-2 sm:grid-cols-2 lg:items-center lg:gap-2 ${
+                  tripType === "return"
+                    ? "lg:grid-cols-[1fr_auto_1fr_1fr_1fr_1fr_auto]"
+                    : "lg:grid-cols-[1fr_auto_1fr_1fr_1fr_auto]"
+                }`}
               >
-                {item}
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button className="btn-premium min-h-[44px] w-full rounded-lg bg-[#e30613] px-6 py-3 text-sm font-semibold text-white sm:w-auto">
-              Search Flights
-            </button>
+                <FlightLocationAutocomplete
+                  label="From"
+                  value={fromQuery}
+                  onChange={setFromQuery}
+                  options={locationOptions}
+                  placeholder="City"
+                  labelClassName={flightsLabelClass}
+                  inputClassName={flightsFieldClass}
+                />
+
+                <button
+                  type="button"
+                  aria-label="Swap from and to"
+                  onClick={() => {
+                    setFromQuery(toQuery);
+                    setToQuery(fromQuery);
+                  }}
+                  className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/30 bg-white/10 text-white transition hover:bg-white/20 lg:grid"
+                >
+                  ⇄
+                </button>
+
+                <FlightLocationAutocomplete
+                  label="To"
+                  value={toQuery}
+                  onChange={setToQuery}
+                  options={locationOptions}
+                  placeholder="City"
+                  labelClassName={flightsLabelClass}
+                  inputClassName={flightsFieldClass}
+                />
+
+                <label className="flight-date-field block">
+                  <span className={flightsLabelClass}>Departure</span>
+                  <input
+                    type="date"
+                    value={departDate}
+                    onChange={(e) => setDepartDate(e.target.value)}
+                    className={`${flightsFieldClass} flight-date-input`}
+                  />
+                </label>
+
+                {tripType === "return" ? (
+                  <label className="flight-date-field block">
+                    <span className={flightsLabelClass}>Return</span>
+                    <input
+                      type="date"
+                      value={returnDate}
+                      onChange={(e) => setReturnDate(e.target.value)}
+                      min={departDate || undefined}
+                      className={`${flightsFieldClass} flight-date-input`}
+                    />
+                  </label>
+                ) : null}
+
+                <label className="block">
+                  <span className={flightsLabelClass}>Class</span>
+                  <select className={flightsFieldClass}>
+                    <option>Economy</option>
+                    <option>Premium Economy</option>
+                    <option>Business</option>
+                    <option>First</option>
+                  </select>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => loadRoutes()}
+                  className="btn-premium inline-flex h-10 min-h-[40px] w-full items-center justify-center rounded-lg bg-[#0b2f57] px-5 text-sm font-bold tracking-wide text-white shadow-[0_6px_16px_rgba(11,47,87,0.3)] transition hover:bg-[#092847] active:scale-[0.98] lg:w-auto lg:min-w-[100px]"
+                >
+                  Search
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </PageHero>
 
-      <section className="mx-auto max-w-[1260px] px-4 py-12">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-extrabold text-[#111827] sm:text-3xl">Top Flight Deals</h2>
-            <p className="text-sm text-gray-500">Popular routes travelers book most.</p>
-          </div>
-          <p className="rounded-lg bg-white px-3 py-2 text-sm text-gray-500 shadow-sm">Sort by: Lowest Price</p>
-        </div>
+      <section className="border-t border-slate-200/80 bg-[#f8fafc]">
+        <div className="mx-auto max-w-[1260px] px-4 py-8 md:py-10">
+          <div className="mb-5 border-b border-slate-200/80 pb-4 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#e30613]">
+              Popular Routes
+            </p>
+            <h2 className="mt-1 text-xl font-bold tracking-tight text-[#e30613] sm:text-2xl">
+              Routes Travelers Book Most
+            </h2>
+            <p className="mt-1 text-xs text-slate-500">
+              {loading
+                ? "Loading available routes..."
+                : `${deals.length} active route${deals.length === 1 ? "" : "s"} · updated automatically`}
+            </p>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {flights.map((flight) => (
-            <article key={flight.route} className="premium-shadow rounded-2xl bg-white p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#e30613]">{flight.airline}</p>
-                  <h3 className="mt-1 text-xl font-bold text-[#0b2f57]">{flight.route}</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {flight.time} · {flight.duration} · {flight.type}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-extrabold text-[#e30613]">{flight.price}</p>
-                  <p className="text-xs text-gray-500">per adult</p>
-                </div>
-              </div>
-              <div className="mt-4 flex justify-end">
-                <Link
-                  href="/contact"
-                  className="min-h-[44px] rounded-lg border border-[#e30613] px-5 py-2.5 text-sm font-semibold text-[#e30613] transition hover:bg-[#e30613] hover:text-white"
-                >
-                  Book Now
-                </Link>
-              </div>
-            </article>
-          ))}
+            <label className="mt-3 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-white px-3 py-2 text-xs">
+              <span className="text-slate-500">Sort</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="cursor-pointer bg-transparent font-semibold text-[#0b2f57] outline-none"
+              >
+                <option value="newest">Newest</option>
+                <option value="route">Route A-Z</option>
+                <option value="airline">Airline A-Z</option>
+              </select>
+            </label>
+          </div>
+
+          {error ? (
+            <div className="rounded-xl border border-red-100 bg-white px-4 py-6 text-center">
+              <p className="text-sm font-medium text-red-600">{error}</p>
+              <button
+                type="button"
+                onClick={() => loadRoutes()}
+                className="mt-2 text-sm font-semibold text-[#e30613]"
+              >
+                Try again
+              </button>
+            </div>
+          ) : null}
+
+          {loading ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <DealCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : null}
+
+          {!loading && !error && deals.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center">
+              <p className="text-base font-semibold text-[#0b2f57]">No active routes yet</p>
+              <p className="mx-auto mt-1.5 max-w-md text-sm text-slate-500">
+                Add a route in dashboard and set status to Active — it will appear here
+                automatically.
+              </p>
+              <Link
+                href="/contact"
+                className="btn-premium mt-4 inline-flex min-h-[40px] items-center rounded-lg bg-[#e30613] px-5 text-sm font-semibold text-white"
+              >
+                Contact for Custom Quote
+              </Link>
+            </div>
+          ) : null}
+
+          {!loading && !error && deals.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {deals.map((deal) => (
+                <FlightDealCard key={deal.id} deal={deal} />
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
     </SiteShell>

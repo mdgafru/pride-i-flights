@@ -47,7 +47,8 @@
     "created_at": "2026-07-11T13:39:54.632Z",
     "og_title": "Dubai to Thiruvananthapuram Flights | REDE FLIGHTS",
     "og_description": "Book cheap flights from Dubai to Thiruvananthapuram with REDE FLIGHTS. Compare fares and enquire now.",
-    "seo_keywords": "dubai to thiruvananthapuram flights, cheap flights dubai, thiruvananthapuram flights, book flights online, rede flights, emarites flights"
+    "seo_keywords": "dubai to thiruvananthapuram flights, cheap flights dubai, thiruvananthapuram flights, book flights online, rede flights, emarites flights",
+    "status": "active"
   },
   {
     "id": "7bb891ec-af56-4a32-9be6-f65151512c8b",
@@ -59,11 +60,14 @@
     "airline_iata_code": null,
     "slug": "dubai-to-kozhikode",
     "seo_title": "Dubai to Kozhikode Flights | REDE FLIGHTS",
-    "meta_description": "Book cheap flights from Dubai to Kozhikode with REDE FLIGHTS.",
+    "meta_description": "Book cheap flights from Dubai to Kozhikode with REDE FLIGHTS. Compare fares and enquire now.",
     "h1_heading": "Dubai to Kozhikode Flights",
     "page_url": "http://localhost:3000/flights/dubai-to-kozhikode",
-    "status": "pending",
-    "created_at": "2026-07-11T13:39:54.632Z"
+    "status": "active",
+    "created_at": "2026-07-11T13:39:54.632Z",
+    "og_title": "Dubai to Kozhikode Flights | REDE FLIGHTS",
+    "og_description": "Book cheap flights from Dubai to Kozhikode with REDE FLIGHTS. Compare fares and enquire now.",
+    "seo_keywords": "dubai to kozhikode flights, cheap flights dubai, kozhikode flights, book flights online, rede flights"
   },
   {
     "id": "fdb464ed-2b9a-4445-910a-b2982c70b46a",
@@ -78,7 +82,7 @@
     "meta_description": "Book cheap flights from Dubai to Mumbai with REDE FLIGHTS.",
     "h1_heading": "Dubai to Mumbai Flights",
     "page_url": "http://localhost:3000/flights/dubai-to-mumbai",
-    "status": "pending",
+    "status": "active",
     "created_at": "2026-07-11T13:39:54.632Z"
   },
   {

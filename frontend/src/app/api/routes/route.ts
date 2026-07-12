@@ -5,21 +5,31 @@ import { upsertLinkedEntities } from "@/lib/link-route-entities";
 import { buildRouteSeo, sanitizeAirportIataCode } from "@/lib/route-meta";
 import { findLocalRouteBySlug, insertLocalRoute, readLocalRoutes } from "@/lib/route-local";
 import { saveRouteById } from "@/lib/route-store";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
+import { withQueryTimeout } from "@/lib/supabase-query";
 import type { EntityStatus } from "@/types/airline";
 import type { Route } from "@/types/route";
 
 async function loadRoutes(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
-  const supabase = createAdminClient();
-  let query = supabase.from("routes").select("*").order("created_at", { ascending: false });
-  if (activeOnly) query = query.eq("status", "active");
+  let routes: Route[] = [];
 
-  const { data, error } = await query;
-  let routes = (data ?? []) as Route[];
+  if (hasSupabaseConfig()) {
+    try {
+      const supabase = createAdminClient();
+      let query = supabase.from("routes").select("*").order("created_at", { ascending: false });
+      if (activeOnly) query = query.eq("status", "active");
 
-  if (error) {
-    console.error("routes fetch error:", error);
-    routes = [];
+      const { data, error } = await withQueryTimeout(query, 5000, "routes fetch");
+      routes = (data ?? []) as Route[];
+
+      if (error) {
+        console.error("routes fetch error:", error);
+        routes = [];
+      }
+    } catch (error) {
+      console.error("routes fetch error:", error);
+      routes = [];
+    }
   }
 
   const localRoutes = await readLocalRoutes();
@@ -50,7 +60,13 @@ function buildStats(routes: Route[]) {
 
 export async function GET(request: Request) {
   try {
-    const session = getAdminSessionFromRequest(request);
+    let session = null;
+    try {
+      session = getAdminSessionFromRequest(request);
+    } catch (error) {
+      console.error("routes session parse error:", error);
+    }
+
     const siteOrigin = getSiteOrigin(new URL(request.url).origin);
     const routes = await loadRoutes(!session, siteOrigin);
 
@@ -61,7 +77,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ routes });
   } catch (error) {
     console.error("routes GET error:", error);
-    return NextResponse.json({ error: "Unable to load routes." }, { status: 500 });
+    return NextResponse.json({ routes: [] });
   }
 }
 

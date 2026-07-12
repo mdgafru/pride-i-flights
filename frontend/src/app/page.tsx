@@ -3,17 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { HeroRouteSwap } from "@/components/HeroRouteSwap";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { FlightLocationAutocomplete } from "@/components/FlightLocationAutocomplete";
+import { BrandLogo } from "@/components/BrandLogo";
 import { SiteShell } from "@/components/SiteShell";
-import { WhatsAppIcon } from "@/components/icons";
+import { SwapRoutesIcon, WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { bannersToSlides } from "@/lib/banner";
+import { buildFlightSearchLocations } from "@/lib/flight-search-locations";
 import { SITE_BACKGROUND_VIDEO_SRC } from "@/lib/site-media";
+import type { Airport } from "@/types/airport";
 import type { Banner, BannerSlide } from "@/types/banner";
+import type { Route } from "@/types/route";
 
 const tripTypeOptions = [
-  { value: "return", label: "Return trip" },
+  { value: "return", label: "Return" },
   { value: "oneway", label: "One way" },
 ];
 
@@ -31,18 +35,24 @@ const passengerOptions = [
   { value: "2a1c", label: "2 Adults, 1 Child" },
 ];
 
-const heroSearchLabelClass = "text-[11px] font-extrabold uppercase tracking-wide text-[#0b2f57]";
+const heroSearchLabelClass = "text-[11px] font-extrabold uppercase tracking-wide text-white/90";
 const heroSearchCellClass =
-  "flex min-h-[56px] min-w-0 flex-col justify-center overflow-hidden border-b border-slate-200 bg-white px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 sm:py-3 lg:px-4 lg:last:border-r-0";
+  "flex min-h-[56px] min-w-0 flex-col justify-center overflow-visible border-b border-white/15 bg-white/10 px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 sm:py-3 lg:px-4 lg:last:border-r-0";
 const heroSearchDateCellClass =
-  "flex min-h-[56px] min-w-0 flex-col justify-center border-b border-slate-200 bg-white px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 sm:py-3 lg:px-3.5 lg:pr-4";
+  "flex min-h-[56px] min-w-0 flex-col justify-center border-b border-white/15 bg-white/10 px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 sm:py-3 lg:px-3.5 lg:pr-4";
 const heroSearchTravellerCellClass = heroSearchCellClass;
 const heroSearchSelectClass =
-  "hero-search-select w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-sm font-semibold text-[#0b2f57] outline-none sm:text-[15px]";
+  "hero-search-select w-full min-w-0 cursor-pointer rounded-md border border-white/25 bg-white px-2 py-1.5 pr-6 text-sm font-semibold text-[#0b2f57] outline-none sm:text-[15px]";
+const heroLocationInputClass =
+  "mt-0.5 w-full min-w-0 rounded-md border border-white/25 bg-white px-2.5 py-2 text-sm font-semibold text-[#0b2f57] outline-none placeholder:font-medium placeholder:text-slate-400 focus:border-white focus:ring-2 focus:ring-white/30 sm:mt-1 sm:text-[15px]";
+const heroSearchDateInputClass =
+  "hero-search-date mt-0.5 w-full min-w-0 rounded-md border border-white/25 bg-white px-2.5 py-2 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none disabled:opacity-45 sm:mt-1";
 const heroSearchBarClass =
-  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 border border-slate-200 bg-white shadow-[0_8px_24px_rgba(11,47,87,0.1)] sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)]";
-const heroTripSelectClass =
-  "min-h-[40px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[#0b2f57] shadow-sm outline-none sm:mb-2 sm:min-h-0 sm:w-fit sm:min-w-[9.5rem]";
+  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 overflow-visible rounded-xl border border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)_auto]";
+const heroSearchSubmitCellClass =
+  "flex min-h-[56px] items-center justify-center border-b border-white/15 bg-white/10 px-3 py-3 sm:col-span-2 sm:border-b-0 lg:col-span-1 lg:min-h-[82px] lg:border-l lg:border-white/15 lg:px-4";
+const heroTripPillClass =
+  "rounded-lg px-4 py-2 text-sm font-bold transition sm:px-5";
 
 const BANNER_VISIBLE_MS = 5000;
 const BANNER_TRANSITION_S = 1.25;
@@ -176,8 +186,50 @@ export default function Home() {
   const [tripType, setTripType] = useState("return");
   const [travelClass, setTravelClass] = useState("economy");
   const [passengers, setPassengers] = useState("1a");
+  const [fromQuery, setFromQuery] = useState("");
+  const [toQuery, setToQuery] = useState("");
+  const [departDate, setDepartDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [swapRotation, setSwapRotation] = useState(0);
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [airports, setAirports] = useState<Airport[]>([]);
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [bannerTransitionEnabled, setBannerTransitionEnabled] = useState(true);
   const [heroBanners, setHeroBanners] = useState<BannerSlide[]>([]);
+
+  const loopBanners = useMemo(
+    () => (heroBanners.length > 1 ? [...heroBanners, ...heroBanners] : heroBanners),
+    [heroBanners],
+  );
+
+  const locationOptions = useMemo(
+    () => buildFlightSearchLocations(routes, airports),
+    [routes, airports],
+  );
+
+  const loadFlightLocations = useCallback(async () => {
+    try {
+      const [routesResponse, airportsResponse] = await Promise.all([
+        fetch("/api/routes", { cache: "no-store" }),
+        fetch("/api/airports", { cache: "no-store" }),
+      ]);
+      const routesResult = (await routesResponse.json()) as { routes?: Route[] };
+      const airportsResult = (await airportsResponse.json()) as { airports?: Airport[] };
+
+      if (routesResponse.ok) setRoutes(routesResult.routes || []);
+      if (airportsResponse.ok) setAirports(airportsResult.airports || []);
+    } catch {
+      // Keep search usable with manual input when data is unavailable.
+    }
+  }, []);
+
+  useEffect(() => {
+    loadFlightLocations();
+  }, [loadFlightLocations]);
+
+  useEffect(() => {
+    if (tripType === "oneway") setReturnDate("");
+  }, [tripType]);
 
   useEffect(() => {
     async function loadBanners() {
@@ -209,10 +261,10 @@ export default function Home() {
   }, [heroBanners]);
 
   useEffect(() => {
-    if (heroBanners.length === 0) return;
+    if (heroBanners.length <= 1) return;
 
     const timer = setInterval(() => {
-      setBannerIndex((prev) => (prev + 1) % heroBanners.length);
+      setBannerIndex((prev) => (prev >= heroBanners.length ? prev : prev + 1));
     }, BANNER_VISIBLE_MS + BANNER_TRANSITION_S * 1000);
 
     return () => clearInterval(timer);
@@ -220,7 +272,7 @@ export default function Home() {
 
   return (
     <SiteShell active="Home">
-      <section className="relative w-full overflow-visible pb-32 pt-28 sm:overflow-hidden sm:py-6">
+      <section className="relative z-0 w-full overflow-hidden pb-24 pt-20 sm:pb-28 sm:pt-8 md:pb-32">
         <video
           className="footer-video-animate absolute inset-0 z-0 h-full w-full object-cover object-[center_30%] brightness-[1.24] saturate-[1.15] contrast-[1.08]"
           src={SITE_BACKGROUND_VIDEO_SRC}
@@ -236,32 +288,91 @@ export default function Home() {
         <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-6 px-8 sm:gap-5 sm:px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
           <div className="flex w-full min-w-0 flex-1 flex-col max-sm:mt-4 max-sm:px-1 sm:mt-0 sm:px-0 lg:max-w-none">
             <form
-              action="/flights"
-              className="w-full space-y-3 rounded-2xl bg-white/95 p-4 shadow-[0_12px_32px_rgba(11,47,87,0.14)] ring-1 ring-slate-200/80 backdrop-blur-md max-sm:mx-auto max-sm:max-w-full sm:space-y-0 sm:p-4"
+              className="relative z-20 w-full space-y-3 overflow-visible rounded-2xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] p-4 shadow-[0_20px_48px_rgba(179,0,15,0.35)] ring-1 ring-white/20 max-sm:mx-auto max-sm:max-w-full sm:space-y-0 sm:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                window.location.href = "/flights";
+                const params = new URLSearchParams();
+                if (fromQuery.trim()) params.set("from", fromQuery.trim());
+                if (toQuery.trim()) params.set("to", toQuery.trim());
+                if (departDate) params.set("depart", departDate);
+                if (tripType === "return" && returnDate) params.set("return", returnDate);
+                params.set("trip", tripType);
+                params.set("class", travelClass);
+                params.set("passengers", passengers);
+                const query = params.toString();
+                window.location.href = query ? `/flights?${query}` : "/flights";
               }}
             >
-              <select
-                value={tripType}
-                onChange={(e) => setTripType(e.target.value)}
-                className={heroTripSelectClass}
-              >
+              <div className="inline-flex rounded-xl border border-white/20 bg-white/10 p-1 backdrop-blur-sm">
                 {tripTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setTripType(option.value)}
+                    className={`${heroTripPillClass} ${
+                      tripType === option.value
+                        ? "bg-white text-[#e30613] shadow-sm"
+                        : "text-white hover:bg-white/15"
+                    }`}
+                  >
                     {option.label}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
 
-              <div className="flex min-w-0 flex-col gap-3 border-t border-slate-200 pt-3 sm:mt-2 lg:flex-row lg:items-stretch">
-                <div className={`${heroSearchBarClass} max-sm:mx-1 overflow-hidden rounded-xl sm:mx-0 lg:min-h-[82px]`}>
-                  <HeroRouteSwap />
+              <div className="border-t border-white/15 pt-3 sm:mt-2">
+                <div className={`${heroSearchBarClass} max-sm:mx-1 sm:mx-0`}>
+                  <div className="flex min-h-[56px] min-w-0 flex-row items-stretch gap-1 overflow-visible border-b border-white/15 bg-white/10 sm:min-h-[82px] sm:col-span-2 sm:gap-0 sm:border-r sm:border-b-0 lg:col-span-1">
+                    <div className="flex min-w-0 flex-1 flex-col justify-center overflow-visible px-2.5 py-2.5 sm:px-4 sm:py-4">
+                      <FlightLocationAutocomplete
+                        label="From"
+                        value={fromQuery}
+                        onChange={setFromQuery}
+                        options={locationOptions}
+                        placeholder="City"
+                        labelClassName={heroSearchLabelClass}
+                        inputClassName={heroLocationInputClass}
+                      />
+                    </div>
+
+                    <div className="flex w-10 shrink-0 items-center justify-center sm:w-16">
+                      <button
+                        type="button"
+                        aria-label="Swap departure and destination"
+                        title="Swap From and To"
+                        className="hero-route-swap flex h-9 w-9 min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-full border-2 border-white/40 bg-white/10 text-white shadow-sm hover:border-white hover:bg-white/20 sm:h-11 sm:w-11 sm:min-h-[44px] sm:min-w-[44px]"
+                        style={{ transform: `rotate(${swapRotation}deg)` }}
+                        onClick={() => {
+                          setFromQuery(toQuery);
+                          setToQuery(fromQuery);
+                          setSwapRotation((prev) => prev + 180);
+                        }}
+                      >
+                        <SwapRoutesIcon className="pointer-events-none h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex min-w-0 flex-1 flex-col justify-center overflow-visible border-l border-white/15 px-2.5 py-2.5 sm:border-l-0 sm:px-4 sm:py-4">
+                      <FlightLocationAutocomplete
+                        label="To"
+                        value={toQuery}
+                        onChange={setToQuery}
+                        options={locationOptions}
+                        placeholder="City"
+                        labelClassName={heroSearchLabelClass}
+                        inputClassName={heroLocationInputClass}
+                      />
+                    </div>
+                  </div>
                   <label className={heroSearchDateCellClass}>
                     <span className={heroSearchLabelClass}>Depart</span>
                     <div className="hero-search-date-wrap">
-                      <input type="date" className="hero-search-date mt-0 w-full min-w-0 border-0 bg-transparent p-0 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none" />
+                      <input
+                        type="date"
+                        value={departDate}
+                        onChange={(e) => setDepartDate(e.target.value)}
+                        className={heroSearchDateInputClass}
+                      />
                     </div>
                   </label>
                   <label className={heroSearchDateCellClass}>
@@ -269,8 +380,11 @@ export default function Home() {
                     <div className="hero-search-date-wrap">
                       <input
                         type="date"
-                        className="hero-search-date mt-0 w-full min-w-0 border-0 bg-transparent p-0 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none disabled:opacity-45"
+                        value={returnDate}
+                        onChange={(e) => setReturnDate(e.target.value)}
+                        className={heroSearchDateInputClass}
                         disabled={tripType === "oneway"}
+                        min={departDate || undefined}
                       />
                     </div>
                   </label>
@@ -301,22 +415,18 @@ export default function Home() {
                       </select>
                     </div>
                   </div>
+
+                  <div className={heroSearchSubmitCellClass}>
+                    <button
+                      type="submit"
+                      className="btn-premium inline-flex h-11 min-h-[44px] w-full max-w-[220px] items-center justify-center rounded-lg bg-[#0b2f57] px-6 text-sm font-bold tracking-wide text-white shadow-[0_8px_20px_rgba(11,47,87,0.35)] transition hover:bg-[#092847] active:scale-[0.98] sm:max-w-none lg:min-w-[112px]"
+                    >
+                      Search
+                    </button>
+                  </div>
                 </div>
-
-                <button
-                  type="submit"
-                  className="btn-premium w-full min-h-[44px] shrink-0 rounded-xl bg-[#e30613] px-8 py-4 text-base font-bold text-white shadow-md hover:bg-[#c40010] sm:w-auto lg:min-h-[82px] lg:min-w-[128px] lg:self-stretch"
-                >
-                  Search
-                </button>
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-[#0b2f57] sm:text-sm">
-                <label className="inline-flex items-center gap-2">
-                  <input type="checkbox" className="accent-[#e30613]" />
-                  Direct flights
-                </label>
-              </div>
             </form>
           </div>
 
@@ -325,20 +435,35 @@ export default function Home() {
             <div className="relative aspect-[3/4] w-full overflow-hidden">
               <motion.div
                 className="flex h-full will-change-transform"
-                style={{ width: `${heroBanners.length * 100}%` }}
+                style={{ width: `${loopBanners.length * 100}%` }}
                 animate={{
-                  x: `-${bannerIndex * (100 / heroBanners.length)}%`,
+                  x: loopBanners.length
+                    ? `-${bannerIndex * (100 / loopBanners.length)}%`
+                    : "0%",
                 }}
-                transition={{
-                  duration: BANNER_TRANSITION_S,
-                  ease: [0.45, 0, 0.25, 1],
+                transition={
+                  bannerTransitionEnabled
+                    ? {
+                        duration: BANNER_TRANSITION_S,
+                        ease: [0.45, 0, 0.25, 1],
+                      }
+                    : { duration: 0 }
+                }
+                onAnimationComplete={() => {
+                  if (heroBanners.length <= 1 || bannerIndex < heroBanners.length) return;
+
+                  setBannerTransitionEnabled(false);
+                  setBannerIndex(0);
+                  requestAnimationFrame(() => {
+                    requestAnimationFrame(() => setBannerTransitionEnabled(true));
+                  });
                 }}
               >
-                {heroBanners.map((banner) => (
+                {loopBanners.map((banner, index) => (
                   <div
-                    key={banner.src}
+                    key={`${banner.src}-${index}`}
                     className="h-full shrink-0 overflow-hidden"
-                    style={{ width: `${100 / heroBanners.length}%` }}
+                    style={{ width: `${100 / loopBanners.length}%` }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -352,12 +477,7 @@ export default function Home() {
               </motion.div>
             </div>
             <div className="flex w-full items-center justify-center border-t border-slate-200 bg-white px-2 py-1.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/uploads/logo/site-logo.png"
-                alt="REDE FLIGHTS"
-                className="h-6 w-auto max-w-[88%] object-contain sm:h-7"
-              />
+              <BrandLogo variant="banner" />
             </div>
             <a
               href={WHATSAPP_URL}
@@ -373,10 +493,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section-fade-top mx-auto max-w-[1260px] px-4 pb-14 pt-10">
+      <section className="relative z-10 w-full bg-[var(--surface-muted)]">
+        <div className="mx-auto max-w-[1260px] px-4 pb-14 pt-10 sm:pt-14 md:pt-16">
         <div className="mb-6 flex justify-center">
           <div className="inline-flex items-center justify-center bg-[#e30613] px-8 py-3 shadow-sm">
-            <p className="whitespace-nowrap text-sm font-bold uppercase tracking-wide text-white">
+            <p className="whitespace-nowrap text-sm font-bold uppercase tracking-wide text-white antialiased">
               Our Services
             </p>
           </div>
@@ -599,9 +720,9 @@ export default function Home() {
                 <p className="mt-1 text-sm leading-relaxed text-gray-500">{item.sub}</p>
               </div>
             ))}
-      </div>
+          </div>
         </section>
-
+        </div>
       </section>
     </SiteShell>
   );

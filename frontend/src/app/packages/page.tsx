@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { ContactSelect } from "@/components/ContactSelect";
 import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
+import { fetchDestinationOptionsFromApi } from "@/lib/destinations";
 import { WHATSAPP_URL } from "@/lib/contact";
 
 const packages = [
@@ -211,6 +213,18 @@ export default function PackagesPage() {
   const [travelers, setTravelers] = useState("2 Travelers");
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
+  const [destinationOptions, setDestinationOptions] = useState([
+    { label: "All Destinations", value: "" },
+  ]);
+
+  useEffect(() => {
+    async function loadDestinationOptions() {
+      const options = await fetchDestinationOptionsFromApi();
+      setDestinationOptions(options);
+    }
+
+    loadDestinationOptions();
+  }, []);
 
   const visiblePackages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -292,18 +306,27 @@ export default function PackagesPage() {
             className="mx-auto max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_14px_36px_rgba(11,47,87,0.12)]"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_auto]">
-              <label className="border-b border-slate-200 px-4 py-3 sm:border-r lg:border-b-0">
+              <div className="border-b border-slate-200 px-4 py-3 sm:border-r lg:border-b-0">
                 <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
                   Destination
                 </span>
-                <input
-                  type="text"
+                <ContactSelect
                   value={destination}
-                  onChange={(event) => setDestination(event.target.value)}
-                  placeholder="Where do you want to go?"
-                  className="mt-1.5 w-full border-0 bg-transparent p-0 text-sm font-semibold text-[#0b2f57] outline-none placeholder:font-normal placeholder:text-slate-400"
+                  onChange={(value) => {
+                    setDestination(value);
+                    setSearchQuery(value);
+                  }}
+                  options={destinationOptions}
+                  ariaLabel="Select package destination"
+                  selectedLabel={
+                    destination
+                      ? destinationOptions.find((option) => option.value === destination)?.label
+                      : "All Destinations"
+                  }
+                  className="mt-1"
+                  listClassName="z-50 max-h-72"
                 />
-              </label>
+              </div>
 
               <label className="border-b border-slate-200 px-4 py-3 sm:border-b-0 sm:border-r">
                 <span className="text-xs font-bold uppercase tracking-wide text-slate-500">

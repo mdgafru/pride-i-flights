@@ -1,5 +1,5 @@
 type BrandLogoProps = {
-  variant?: "navbar" | "hero";
+  variant?: "navbar" | "hero" | "banner";
   className?: string;
   mainClassName?: string;
   taglineClassName?: string;
@@ -13,27 +13,38 @@ export function BrandLogo({
 }: BrandLogoProps) {
   const mainTextClass =
     variant === "hero"
-      ? "text-[22px] sm:text-[26px] md:text-[28px]"
-      : "text-[19px] sm:text-[21px]";
+      ? "text-[18px] sm:text-[21px] md:text-[23px]"
+      : variant === "banner"
+        ? "text-[11px] sm:text-[12px]"
+        : "text-[15px] sm:text-[17px]";
   const taglineTextClass =
     variant === "hero"
-      ? "text-[6px] sm:text-[7px] sm:tracking-[0.16em]"
-      : "text-[5px] sm:text-[6px] sm:tracking-[0.14em]";
-  const taglineColorClass = variant === "hero" ? "text-white/90" : "text-[#111827]";
+      ? "text-[5px] sm:text-[6px] sm:tracking-[0.14em]"
+      : variant === "banner"
+        ? "text-[4px] sm:text-[4.5px] tracking-[0.1em]"
+        : "text-[4.5px] sm:text-[5px] sm:tracking-[0.12em]";
+  const taglineColorClass = "text-[#0b2f57]";
 
   return (
-    <span className={`inline-flex flex-col items-center gap-2 leading-none ${className}`}>
+    <span
+      className={`inline-flex flex-col items-center leading-none ${variant === "banner" ? "gap-0.5" : "gap-1.5"} ${className}`}
+    >
       <span className="inline-flex w-fit flex-col items-stretch leading-none">
-        <span className="h-[2px] shrink-0 bg-[#0b2f57]" aria-hidden />
+        <span className="h-px shrink-0 bg-[#0b2f57]" aria-hidden />
         <span
-          className={`whitespace-nowrap px-1 py-1 text-center font-black italic tracking-tight text-[#e30613] sm:px-1.5 ${mainTextClass} ${mainClassName}`}
+          className={`inline-flex items-center justify-center gap-[0.34em] whitespace-nowrap py-0.5 font-bold italic tracking-tight text-[#e30613] ${mainTextClass} ${mainClassName}`}
         >
-          REDE<span className="mx-0.5 font-black not-italic text-[#0b2f57]">/</span>FLIGHTS
+          <span>REDE</span>
+          <span
+            className="inline-block h-[0.95em] w-[0.11em] shrink-0 -skew-x-[18deg] bg-[#0b2f57] not-italic"
+            aria-hidden
+          />
+          <span>FLIGHTS</span>
         </span>
-        <span className="h-[2px] shrink-0 bg-[#0b2f57]" aria-hidden />
+        <span className="h-px shrink-0 bg-[#0b2f57]" aria-hidden />
       </span>
       <span
-        className={`block w-full text-center font-black uppercase tracking-[0.12em] ${taglineColorClass} ${taglineTextClass} ${taglineClassName}`}
+        className={`block w-full text-center font-semibold uppercase tracking-[0.1em] ${taglineColorClass} ${taglineTextClass} ${taglineClassName}`}
       >
         YOUR JOURNEY, OUR PRIORITY
       </span>

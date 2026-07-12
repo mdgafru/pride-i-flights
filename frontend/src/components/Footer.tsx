@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL } from "@/lib/contact";
-import { SITE_BACKGROUND_VIDEO_SRC } from "@/lib/site-media";
 
+const FOOTER_SKY_IMAGE = "/background.png";
 const quickLinks = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
@@ -20,30 +20,29 @@ const serviceLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
-      <video
-        className="footer-video-animate absolute inset-0 h-full w-full object-cover opacity-35"
-        src={SITE_BACKGROUND_VIDEO_SRC}
-        autoPlay
-        muted
-        loop
-        playsInline
-      />
-      <div className="footer-overlay absolute inset-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.12),transparent_34%),radial-gradient(circle_at_85%_0%,rgba(227,6,19,0.16),transparent_36%)]" />
-      <div className="relative mx-auto max-w-[1260px] px-4 py-10 sm:py-16 md:py-20">
-        <div className="grid gap-8 border-b border-white/15 pb-10 md:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2">
-            <p className="text-xl font-extrabold text-[#ff4d5a] sm:text-2xl">REDE I FLIGHTS</p>
-            <p className="mt-3 max-w-md text-sm leading-6 text-blue-50/95">
+    <footer className="relative w-full overflow-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={FOOTER_SKY_IMAGE}
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-40"
+      />      <div className="footer-overlay pointer-events-none absolute inset-0" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.12),transparent_34%),radial-gradient(circle_at_85%_0%,rgba(227,6,19,0.16),transparent_36%)]" />
+
+      <div className="relative z-10 mx-auto w-full max-w-[1260px] px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
+        <div className="grid w-full gap-6 border-b border-white/15 pb-6 sm:gap-7 sm:pb-8 md:grid-cols-2 lg:grid-cols-4 lg:items-start lg:gap-8">
+          <div className="text-center lg:text-left">
+            <p className="text-lg font-extrabold text-[#ff4d5a] sm:text-xl">REDE I FLIGHTS</p>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-blue-50/95 lg:mx-0">
               We are passionate about travel and committed to providing exceptional service and
               unforgettable experiences.
             </p>
           </div>
 
-          <div>
-            <p className="mb-3 text-lg font-semibold text-[#ff4d5a]">Quick Links</p>
-            <ul className="space-y-2 text-sm text-blue-50/90">
+          <div className="min-w-0">
+            <p className="mb-2 text-sm font-semibold text-[#ff4d5a] sm:text-base">Quick Links</p>
+            <ul className="space-y-0.5 text-sm text-blue-50/90">
               {quickLinks.map((item) => (
                 <li key={item.href} className="footer-link">
                   <Link href={item.href}>{item.label}</Link>
@@ -52,9 +51,9 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <p className="mb-3 text-lg font-semibold text-[#ff4d5a]">Our Services</p>
-            <ul className="space-y-2 text-sm text-blue-50/90">
+          <div className="min-w-0">
+            <p className="mb-2 text-sm font-semibold text-[#ff4d5a] sm:text-base">Our Services</p>
+            <ul className="space-y-0.5 text-sm text-blue-50/90">
               {serviceLinks.map((item) => (
                 <li key={item.label} className="footer-link">
                   {item.href ? <Link href={item.href}>{item.label}</Link> : item.label}
@@ -63,24 +62,26 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <p className="mb-3 text-lg font-semibold text-[#ff4d5a]">Contact Us</p>
-            <ul className="space-y-2 text-sm text-blue-50/90">
+          <div className="min-w-0">
+            <p className="mb-2 text-sm font-semibold text-[#ff4d5a] sm:text-base">Contact Us</p>
+            <ul className="space-y-0.5 text-sm text-blue-50/90">
               <li className="footer-link">
                 <a href={TEL_URL}>{CONTACT_PHONE}</a>
               </li>
               <li className="footer-link">
-                <a href={MAILTO_URL}>{CONTACT_EMAIL}</a>
+                <a href={MAILTO_URL} className="break-all lg:break-normal">
+                  {CONTACT_EMAIL}
+                </a>
               </li>
-              <li className="footer-link">123 Travel Street, City</li>
-              <li className="footer-link">Country - 00000</li>
+              <li className="footer-link py-1">123 Travel Street, City</li>
+              <li className="footer-link py-1">Country - 00000</li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col flex-wrap gap-3 text-xs text-blue-100/90 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex w-full flex-col items-center gap-2 text-center text-xs text-blue-100/90 sm:mt-5 sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <p>© 2026 REDE I FLIGHTS. All Rights Reserved.</p>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
             <Link href="#" className="footer-link">
               Terms & Conditions
             </Link>

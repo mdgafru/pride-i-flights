@@ -1,5 +1,5 @@
-import { RoutesDashboard } from "@/components/dashboard/RoutesDashboard";
+import { redirect } from "next/navigation";
 
 export default function RoutesPage() {
-  return <RoutesDashboard />;
+  redirect("/dashboard/flights");
 }

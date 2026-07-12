@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { ContactSelect } from "@/components/ContactSelect";
 import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { CONTACT_EMAIL, MAILTO_URL, WHATSAPP_URL } from "@/lib/contact";
+import {
+  DEFAULT_PHONE_COUNTRY_CODE,
+  formatPhoneWithCountryCode,
+  PHONE_COUNTRY_CODES,
+} from "@/lib/phone-country-codes";
 
 const CONTACT_HERO_IMAGE =
   "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1800&q=85";
@@ -16,8 +22,13 @@ const sectionTitleClass = "text-2xl font-extrabold leading-tight text-[#e30613] 
 const blockTitleClass = "text-2xl font-bold leading-snug text-[#e30613]";
 const bodyClass = "text-base leading-relaxed text-gray-600";
 const fieldLabelClass = "text-sm font-semibold text-slate-600";
+const phoneFieldWrapClass =
+  "mt-1.5 flex flex-col gap-2 border-0 border-b-2 border-slate-200 pb-1 transition focus-within:border-[#e30613] sm:flex-row sm:items-center sm:gap-2";
+const phoneCodeWrapClass = "w-full shrink-0 sm:w-[8.5rem]";
+const phoneInputClass =
+  "min-w-0 w-full flex-1 border-0 bg-transparent py-2.5 text-base text-[#0b2f57] outline-none placeholder:text-slate-400";
 const fieldClass =
-  "mt-1.5 w-full border-0 border-b-2 border-slate-200 bg-transparent px-0 py-2.5 text-sm text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-[#e30613] sm:text-base";
+  "mt-1.5 w-full border-0 border-b-2 border-slate-200 bg-transparent px-0 py-2.5 text-base text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-[#e30613]";
 
 const fieldLabelRequiredClass = `${fieldLabelClass} after:ml-0.5 after:text-[#e30613] after:content-['*']`;
 
@@ -37,9 +48,20 @@ const quickActions = [
   { title: "WhatsApp", sub: "Chat instantly", href: WHATSAPP_URL, external: true },
 ];
 
+const countryCodeOptions = PHONE_COUNTRY_CODES.map((item) => ({
+  label: `${item.country} (${item.code})`,
+  value: item.code,
+}));
+
+const serviceOptions = services.map((item) => ({
+  label: item,
+  value: item,
+}));
+
 export default function ContactPage() {
   const [agreedToContact, setAgreedToContact] = useState(false);
   const [name, setName] = useState("");
+  const [countryCode, setCountryCode] = useState(DEFAULT_PHONE_COUNTRY_CODE);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [service, setService] = useState(services[0]);
@@ -58,11 +80,18 @@ export default function ContactPage() {
     setSuccess(null);
     setWhatsappUrl(null);
 
+    const fullPhone = formatPhoneWithCountryCode(countryCode, phone);
+    if (!fullPhone) {
+      setError("Please enter a valid phone number.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, email, service, message }),
+        body: JSON.stringify({ name, phone: fullPhone, email, service, message }),
       });
       const result = (await response.json()) as {
         error?: string;
@@ -78,6 +107,7 @@ export default function ContactPage() {
       setSuccess(result.message || "Your enquiry has been submitted successfully.");
       setWhatsappUrl(result.whatsappUrl || null);
       setName("");
+      setCountryCode(DEFAULT_PHONE_COUNTRY_CODE);
       setPhone("");
       setEmail("");
       setMessage("");
@@ -136,7 +166,7 @@ export default function ContactPage() {
             </p>
 
             <form className="mt-6 space-y-5 border-t border-slate-200 pt-6" onSubmit={handleSubmit}>
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid gap-5">
                 <label className="block">
                   <span className={fieldLabelClass}>Your Name</span>
                   <input
@@ -146,21 +176,36 @@ export default function ContactPage() {
                     onChange={(event) => setName(event.target.value)}
                     placeholder="Full name"
                     className={fieldClass}
+                    autoComplete="name"
                     required
                   />
                 </label>
-                <label className="block">
+                <div className="block">
                   <span className={fieldLabelRequiredClass}>Phone Number</span>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={phone}
-                    onChange={(event) => setPhone(event.target.value)}
-                    placeholder="+971..."
-                    className={fieldClass}
-                    required
-                  />
-                </label>
+                  <div className={phoneFieldWrapClass}>
+                    <div className={phoneCodeWrapClass}>
+                      <ContactSelect
+                        value={countryCode}
+                        onChange={setCountryCode}
+                        options={countryCodeOptions}
+                        ariaLabel="Country code"
+                        selectedLabel={countryCode}
+                        listClassName="sm:min-w-[14rem]"
+                      />
+                    </div>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value.replace(/[^\d\s-]/g, ""))}
+                      placeholder="501234567"
+                      className={phoneInputClass}
+                      inputMode="numeric"
+                      autoComplete="tel-national"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
 
               <label className="block">
@@ -176,19 +221,17 @@ export default function ContactPage() {
                 />
               </label>
 
-              <label className="block">
+              <div className="block">
                 <span className={fieldLabelClass}>I am interested in</span>
-                <select
-                  name="service"
-                  value={service}
-                  onChange={(event) => setService(event.target.value)}
-                  className={`${fieldClass} cursor-pointer`}
-                >
-                  {services.map((item) => (
-                    <option key={item}>{item}</option>
-                  ))}
-                </select>
-              </label>
+                <div className="mt-1.5 border-b-2 border-slate-200 transition focus-within:border-[#e30613]">
+                  <ContactSelect
+                    value={service}
+                    onChange={setService}
+                    options={serviceOptions}
+                    ariaLabel="Service type"
+                  />
+                </div>
+              </div>
 
               <label className="block">
                 <span className={fieldLabelClass}>Message</span>

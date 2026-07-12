@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ContentPageHero } from "@/components/ContentPageHero";
@@ -10,8 +9,6 @@ import { WHATSAPP_URL } from "@/lib/contact";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=85";
-const FEATURED_IMAGE =
-  "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85";
 const CTA_IMAGE =
   "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1800&q=85";
 
@@ -66,53 +63,6 @@ export default function DestinationsPage() {
               <p className="mt-2 text-base text-gray-500">{item.sub}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Featured destination */}
-      <section className="mx-auto max-w-[1260px] px-4 py-12 md:py-16">
-        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
-          <div className="relative order-2 overflow-hidden rounded-xl lg:order-1">
-            <Image
-              src={FEATURED_IMAGE}
-              alt="Dubai skyline"
-              width={900}
-              height={600}
-              className="h-64 w-full object-cover sm:h-80"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#042448]/75 to-transparent" />
-            <div className="absolute right-4 bottom-4 left-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-white/80">Featured</p>
-              <p className="mt-1 text-xl font-bold text-white sm:text-2xl">Dubai, UAE</p>
-            </div>
-          </div>
-
-          <div className="order-1 lg:order-2">
-            <p className={eyebrowClass}>Top Pick</p>
-            <h2 className={`mt-2 ${sectionTitleClass}`}>City of Dreams</h2>
-            <p className={`mt-4 ${bodyClass}`}>
-              Dubai remains one of our most requested destinations - luxury stays, family holidays,
-              shopping breaks and seamless flight connections from the UAE.
-            </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {["28 Curated Packages", "Flights & Hotels", "Visa Guidance", "Family Friendly"].map(
-                (item) => (
-                  <div
-                    key={item}
-                    className="home-feature border-l-[3px] border-[#e30613]/30 py-1 pl-4"
-                  >
-                    <p className="text-sm font-semibold text-[#0b2f57] sm:text-base">{item}</p>
-                  </div>
-                ),
-              )}
-            </div>
-            <Link
-              href="/contact"
-              className="btn-premium mt-7 inline-block bg-[#e30613] px-7 py-3.5 text-base font-semibold text-white hover:bg-[#c40010]"
-            >
-              Plan Dubai Trip
-            </Link>
-          </div>
         </div>
       </section>
 
