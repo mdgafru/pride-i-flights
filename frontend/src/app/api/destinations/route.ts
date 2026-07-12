@@ -3,10 +3,10 @@ import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import {
   buildDestinationAggregate,
-  buildDestinationOptions,
   buildManagedDestinationPayload,
-  buildSearchDestinations,
   loadManagedDestinations,
+  managedRecordsToDestinations,
+  managedRecordsToOptions,
 } from "@/lib/destination-aggregate";
 import { findLocalDestinationBySlug, insertLocalDestination } from "@/lib/destination-local";
 import { saveDestinationById } from "@/lib/destination-store";
@@ -45,21 +45,21 @@ export async function GET(request: Request) {
 
     const url = new URL(request.url);
     const dropdownOnly = url.searchParams.get("dropdown") === "1";
-    const activeOnly = !session;
-
-    const aggregate = await buildDestinationAggregate({
-      activeOnly,
-      includeAllProducts: dropdownOnly || !session,
-    });
-    const options = buildDestinationOptions(aggregate.entries);
-    const destinations = buildSearchDestinations(aggregate.entries);
-
-    if (dropdownOnly) {
-      return NextResponse.json({ options });
-    }
 
     if (session) {
+      const aggregate = await buildDestinationAggregate({
+        activeOnly: false,
+        includeAllProducts: true,
+      });
       const records = await loadManagedDestinations(false);
+      const managedActive = records.filter((item) => item.status === "active");
+      const destinations = managedRecordsToDestinations(managedActive);
+      const options = managedRecordsToOptions(managedActive);
+
+      if (dropdownOnly) {
+        return NextResponse.json({ options });
+      }
+
       return NextResponse.json({
         destinations,
         options,
@@ -67,6 +67,14 @@ export async function GET(request: Request) {
         stats: buildStats(records),
         aggregatedCount: aggregate.entries.length,
       });
+    }
+
+    const managed = await loadManagedDestinations(true);
+    const destinations = managedRecordsToDestinations(managed);
+    const options = managedRecordsToOptions(managed);
+
+    if (dropdownOnly) {
+      return NextResponse.json({ options });
     }
 
     return NextResponse.json({ destinations, options });

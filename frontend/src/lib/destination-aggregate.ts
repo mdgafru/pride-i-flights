@@ -205,6 +205,30 @@ export function buildSearchDestinations(entries: AggregatedEntry[]): Destination
   });
 }
 
+export function managedRecordsToDestinations(records: DestinationRecord[]): Destination[] {
+  return records.map((record) => ({
+    id: record.id,
+    title: record.title,
+    subtitle: record.subtitle || `Explore ${record.title}`,
+    country: record.country,
+    packages: record.packages_count,
+    region: record.region,
+    travelStyles: record.travel_styles,
+    image: record.image_url || FALLBACK_DESTINATION_IMAGE,
+    popularScore: record.popular_score || 70,
+    sources: ["manual"],
+  }));
+}
+
+export function managedRecordsToOptions(records: DestinationRecord[]): DestinationOption[] {
+  return records.map((record) => ({
+    label: record.title,
+    value: record.title,
+    sources: ["manual"],
+    country: record.country,
+  }));
+}
+
 export function buildManagedDestinationPayload(
   input: {
     title: string;

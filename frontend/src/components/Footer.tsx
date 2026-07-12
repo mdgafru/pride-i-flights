@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
 import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL } from "@/lib/contact";
 
 const FOOTER_SKY_IMAGE = "/background.png";
@@ -11,30 +12,27 @@ const quickLinks = [
   { label: "Destinations", href: "/destinations" },
 ];
 
-const serviceLinks = [
-  { label: "Visa Services", href: "/visa" },
-  { label: "Honeymoon Packages" },
-  { label: "Group Tours" },
-  { label: "Corporate Travel" },
-];
+const serviceLinks = [{ label: "Visa Services", href: "/visa" }];
 
 export function Footer() {
   return (
-    <footer className="relative w-full max-w-full overflow-x-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={FOOTER_SKY_IMAGE}
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-40"
-      />      <div className="footer-overlay pointer-events-none absolute inset-0" />
+    <footer className="relative isolate w-full max-w-full overflow-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={FOOTER_SKY_IMAGE}
+          alt=""
+          className="h-full w-full object-cover object-center opacity-40"
+        />
+      </div>
+      <div className="footer-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.12),transparent_34%),radial-gradient(circle_at_85%_0%,rgba(227,6,19,0.16),transparent_36%)]" />
 
       <div className="relative z-10 mx-auto w-full max-w-[1260px] px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
         <div className="grid w-full gap-6 border-b border-white/15 pb-6 sm:gap-7 sm:pb-8 md:grid-cols-2 lg:grid-cols-4 lg:items-start lg:gap-8">
           <div className="text-center lg:text-left">
-            <p className="text-lg font-extrabold text-[#ff4d5a] sm:text-xl">REDE I FLIGHTS</p>
-            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-blue-50/95 lg:mx-0">
+            <BrandLogo variant="navbar" tone="onDark" className="mx-auto lg:mx-0" />
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-blue-50/95 lg:mx-0">
               We are passionate about travel and committed to providing exceptional service and
               unforgettable experiences.
             </p>
@@ -73,8 +71,6 @@ export function Footer() {
                   {CONTACT_EMAIL}
                 </a>
               </li>
-              <li className="footer-link py-1">123 Travel Street, City</li>
-              <li className="footer-link py-1">Country - 00000</li>
             </ul>
           </div>
         </div>

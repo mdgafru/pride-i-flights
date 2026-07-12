@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { ContactSelect } from "@/components/ContactSelect";
+import { WhatsAppIcon } from "@/components/icons";
 import {
   DEFAULT_DESTINATION_FILTERS,
   DESTINATION_MONTHS,
@@ -13,6 +13,7 @@ import {
   fetchDestinationOptionsFromApi,
   fetchDestinationsFromApi,
   filterDestinations,
+  openDestinationEnquiry,
   searchDestinations,
 } from "@/lib/destinations";
 import type { Destination, DestinationSearchFilters } from "@/types/destination";
@@ -165,9 +166,36 @@ export function DestinationSearchSection() {
     return chips;
   }, [appliedFilters, applyFilters]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    runSearch(draftFilters);
+    setIsSearching(true);
+    try {
+      const data = await searchDestinations(draftFilters);
+      setResults(data);
+      setAppliedFilters(draftFilters);
+
+      const selected = data.find((place) => place.title === draftFilters.query.trim());
+      if (selected) {
+        openDestinationEnquiry(selected, draftFilters);
+      } else if (draftFilters.query.trim()) {
+        openDestinationEnquiry(
+          {
+            id: "search",
+            title: draftFilters.query.trim(),
+            subtitle: `Explore ${draftFilters.query.trim()}`,
+            country: "",
+            packages: 0,
+            region: "Asia",
+            travelStyles: [],
+            image: "",
+            popularScore: 0,
+          },
+          draftFilters,
+        );
+      }
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleClearAll = () => {
@@ -247,9 +275,10 @@ export function DestinationSearchSection() {
                   <button
                     type="submit"
                     disabled={isSearching}
-                    className="btn-premium flex w-full min-w-[100px] items-center justify-center bg-[#e30613] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c40010] disabled:cursor-wait disabled:opacity-80 lg:w-auto"
+                    className="btn-premium flex w-full min-w-[100px] items-center justify-center gap-2 bg-[#e30613] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c40010] disabled:cursor-wait disabled:opacity-80 lg:w-auto"
                   >
-                    {isSearching ? "Searching..." : "Search"}
+                    <WhatsAppIcon className="h-4 w-4" />
+                    {isSearching ? "Searching..." : "Enquiry Now"}
                   </button>
                 </div>
               </div>
@@ -325,8 +354,7 @@ export function DestinationSearchSection() {
           <div className="rounded-xl border border-dashed border-slate-300 bg-[#f8fafc] px-6 py-14 text-center">
             <p className="text-lg font-bold text-[#0b2f57]">No destinations found</p>
             <p className="mx-auto mt-2 max-w-md text-base text-gray-500">
-              Try a different search term, region or travel style. You can also contact us for a
-              custom travel plan.
+              Add destinations from the admin dashboard, or contact us for a custom travel plan.
             </p>
             <button
               type="button"
@@ -362,12 +390,19 @@ export function DestinationSearchSection() {
                     {place.subtitle}
                   </p>
                   <h3 className="mt-1 text-lg font-bold leading-snug text-[#0b2f57]">{place.title}</h3>
-                  <Link
-                    href="/contact"
-                    className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-[#e30613] transition group-hover:gap-2"
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openDestinationEnquiry(place, {
+                        travelMonth: appliedFilters.travelMonth,
+                        travelers: appliedFilters.travelers,
+                      })
+                    }
+                    className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-[#e30613] transition hover:gap-2"
                   >
-                    Explore Now <span aria-hidden>→</span>
-                  </Link>
+                    <WhatsAppIcon className="h-4 w-4" />
+                    Enquiry Now <span aria-hidden>→</span>
+                  </button>
                 </div>
               </motion.article>
             ))}

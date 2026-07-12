@@ -92,7 +92,7 @@ export function ContentPageHero({
                       : "drop-shadow-[0_4px_18px_rgba(0,0,0,0.35)]"
                   }
                 >
-                  <BrandLogo variant="hero" tone={isLight ? "onLight" : "onDark"} />
+                  <BrandLogo variant="navbar" tone={isLight ? "onLight" : "onDark"} />
                 </div>
               </div>
             ) : (

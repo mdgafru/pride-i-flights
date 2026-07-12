@@ -3,6 +3,7 @@ import type {
   DestinationSearchFilters,
   DestinationSortBy,
 } from "@/types/destination";
+import { WHATSAPP_URL } from "@/lib/contact";
 
 export { DEFAULT_DESTINATION_FILTERS } from "@/types/destination";
 
@@ -53,7 +54,7 @@ export const DESTINATION_SORT_OPTIONS: { value: DestinationSortBy; label: string
   { value: "name", label: "A to Z" },
 ];
 
-/** Mock data — replace with API response when backend is ready. */
+/** @deprecated Mock data kept for type reference only — public pages use /api/destinations. */
 export const MOCK_DESTINATIONS: Destination[] = [
   {
     id: "bali",
@@ -245,14 +246,14 @@ export async function fetchDestinationsFromApi(): Promise<Destination[]> {
   try {
     const response = await fetch("/api/destinations", { cache: "no-store" });
     const result = (await response.json()) as { destinations?: Destination[] };
-    if (response.ok && result.destinations?.length) {
+    if (response.ok && Array.isArray(result.destinations)) {
       return result.destinations;
     }
   } catch {
-    // Fall back to mock data when API is unavailable.
+    // Return empty when API is unavailable.
   }
 
-  return MOCK_DESTINATIONS;
+  return [];
 }
 
 export async function fetchDestinationOptionsFromApi() {
@@ -283,4 +284,51 @@ export async function searchDestinations(
 ): Promise<Destination[]> {
   const items = await fetchDestinationsFromApi();
   return filterDestinations(items, filters);
+}
+
+const travelerLabels: Record<string, string> = {
+  "1a": "1 Adult",
+  "2a": "2 Adults",
+  "1a1c": "1 Adult, 1 Child",
+  "2a1c": "2 Adults, 1 Child",
+  "2a2c": "2 Adults, 2 Children",
+  "3a": "3 Adults",
+};
+
+export function buildDestinationEnquiryMessage(
+  destination: Destination,
+  filters?: Partial<DestinationSearchFilters>,
+) {
+  const lines = ["Hi REDE FLIGHTS, I would like to enquire about a destination."];
+  lines.push(`Destination: ${destination.title}`);
+  if (destination.country) lines.push(`Country: ${destination.country}`);
+  if (destination.region) lines.push(`Region: ${destination.region}`);
+
+  if (filters?.travelMonth) {
+    const monthLabel =
+      DESTINATION_MONTHS.find((month) => month.value === filters.travelMonth)?.label || "";
+    if (monthLabel) lines.push(`Travel month: ${monthLabel}`);
+  }
+
+  if (filters?.travelers) {
+    lines.push(`Travelers: ${travelerLabels[filters.travelers] || filters.travelers}`);
+  }
+
+  lines.push("Please share the best packages and travel options.");
+  return lines.join("\n");
+}
+
+export function buildDestinationEnquiryUrl(
+  destination: Destination,
+  filters?: Partial<DestinationSearchFilters>,
+) {
+  const text = encodeURIComponent(buildDestinationEnquiryMessage(destination, filters));
+  return `${WHATSAPP_URL}?text=${text}`;
+}
+
+export function openDestinationEnquiry(
+  destination: Destination,
+  filters?: Partial<DestinationSearchFilters>,
+) {
+  window.open(buildDestinationEnquiryUrl(destination, filters), "_blank", "noopener,noreferrer");
 }
