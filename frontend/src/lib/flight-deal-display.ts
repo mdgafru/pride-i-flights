@@ -110,6 +110,7 @@ const travelClassLabels: Record<string, string> = {
 export type FlightSearchEnquiryInput = {
   from?: string;
   to?: string;
+  tripType?: "one-way" | "return";
   departDate?: string;
   returnDate?: string;
   travelClass?: string;
@@ -146,6 +147,10 @@ export function buildFlightSearchEnquiryMessage(input: FlightSearchEnquiryInput)
   if (from && to) lines.push(`Route: ${from} → ${to}`);
   else if (from) lines.push(`From: ${from}`);
   else if (to) lines.push(`To: ${to}`);
+
+  if (input.tripType) {
+    lines.push(`Trip type: ${input.tripType === "return" ? "Return" : "One Way"}`);
+  }
 
   if (input.departDate) lines.push(`Departure date: ${formatEnquiryDate(input.departDate)}`);
   if (input.returnDate) lines.push(`Return date: ${formatEnquiryDate(input.returnDate)}`);

@@ -75,7 +75,9 @@ export default function FlightsPage() {
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [fromQuery, setFromQuery] = useState("");
   const [toQuery, setToQuery] = useState("");
+  const [tripType, setTripType] = useState<"one-way" | "return">("one-way");
   const [departDate, setDepartDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
   const [travelClass, setTravelClass] = useState("economy");
 
   const loadRoutes = useCallback(async (silent = false) => {
@@ -186,7 +188,34 @@ export default function FlightsPage() {
       >
         <div className="mx-auto max-w-[1260px] px-4 pb-4 sm:mt-[-6px]">
           <div className="overflow-x-hidden rounded-xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] shadow-[0_16px_36px_rgba(179,0,15,0.3)] ring-1 ring-white/20">
-            <div className="flex flex-wrap items-center justify-end gap-2 border-b border-white/15 px-3 py-2 sm:px-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/15 px-3 py-2 sm:px-3.5">
+              <div className="inline-flex gap-1 rounded-full border border-white/20 bg-white/10 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTripType("one-way");
+                    setReturnDate("");
+                  }}
+                  className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition ${
+                    tripType === "one-way"
+                      ? "bg-white text-[#e30613] shadow-sm"
+                      : "text-white/75 hover:text-white"
+                  }`}
+                >
+                  One Way
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTripType("return")}
+                  className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide transition ${
+                    tripType === "return"
+                      ? "bg-white text-[#e30613] shadow-sm"
+                      : "text-white/75 hover:text-white"
+                  }`}
+                >
+                  Return
+                </button>
+              </div>
               <p className="text-[10px] font-medium text-white/70">
                 {locationOptions.length} cities
               </p>
@@ -231,9 +260,27 @@ export default function FlightsPage() {
                   <input
                     type="date"
                     value={departDate}
-                    onChange={(e) => setDepartDate(e.target.value)}
+                    onChange={(e) => {
+                      const nextDepartDate = e.target.value;
+                      setDepartDate(nextDepartDate);
+                      if (returnDate && nextDepartDate && returnDate < nextDepartDate) {
+                        setReturnDate("");
+                      }
+                    }}
                     className={`${flightsFieldClass} flight-date-input`}
                   />
+                  {tripType === "return" ? (
+                    <>
+                      <span className={`${flightsLabelClass} mt-2`}>Return</span>
+                      <input
+                        type="date"
+                        value={returnDate}
+                        min={departDate || undefined}
+                        onChange={(e) => setReturnDate(e.target.value)}
+                        className={`${flightsFieldClass} flight-date-input`}
+                      />
+                    </>
+                  ) : null}
                 </label>
 
                 <label className="block">
@@ -257,7 +304,9 @@ export default function FlightsPage() {
                     openFlightSearchEnquiry({
                       from: fromQuery,
                       to: toQuery,
+                      tripType,
                       departDate,
+                      returnDate: tripType === "return" ? returnDate : undefined,
                       travelClass,
                       airline,
                     });

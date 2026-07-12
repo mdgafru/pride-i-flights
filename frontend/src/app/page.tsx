@@ -51,7 +51,7 @@ const heroSearchBarClass =
 const heroSearchSubmitCellClass =
   "flex min-h-[56px] items-center justify-center border-b border-white/15 bg-white/10 px-3 py-3 sm:col-span-2 sm:border-b-0 lg:col-span-1 lg:min-h-[82px] lg:border-l lg:border-white/15 lg:px-4";
 
-const BANNER_VISIBLE_MS = 5000;
+const BANNER_VISIBLE_MS = 3000;
 const BANNER_TRANSITION_S = 1.25;
 
 const imageBadgeClass =
@@ -71,9 +71,7 @@ const services = [
     title: "Flights",
     desc: "We deal with international Flights worldwide",
     href: "/flights",
-    badge: "Best Fares",
-    image:
-      "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=80",
+    image: "/aboutus.jpeg",
   },
   {
     title: "Hotels",
@@ -184,7 +182,9 @@ export default function Home() {
   const [passengers, setPassengers] = useState("1a");
   const [fromQuery, setFromQuery] = useState("");
   const [toQuery, setToQuery] = useState("");
+  const [tripType, setTripType] = useState<"one-way" | "return">("one-way");
   const [departDate, setDepartDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
   const [swapRotation, setSwapRotation] = useState(0);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
@@ -286,13 +286,47 @@ export default function Home() {
                 openFlightSearchEnquiry({
                   from: fromQuery,
                   to: toQuery,
+                  tripType,
                   departDate,
+                  returnDate: tripType === "return" ? returnDate : undefined,
                   travelClass,
                   passengers,
                   airline,
                 });
               }}
             >
+              <div className="mb-3 flex flex-wrap items-center gap-2 px-0.5 sm:mb-2.5">
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/70">
+                  Trip
+                </span>
+                <div className="inline-flex gap-1 rounded-full border border-white/20 bg-white/10 p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTripType("one-way");
+                      setReturnDate("");
+                    }}
+                    className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide transition ${
+                      tripType === "one-way"
+                        ? "bg-white text-[#e30613] shadow-sm"
+                        : "text-white/75 hover:text-white"
+                    }`}
+                  >
+                    One Way
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTripType("return")}
+                    className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide transition ${
+                      tripType === "return"
+                        ? "bg-white text-[#e30613] shadow-sm"
+                        : "text-white/75 hover:text-white"
+                    }`}
+                  >
+                    Return
+                  </button>
+                </div>
+              </div>
               <div className="w-full">
                 <div className={`${heroSearchBarClass} max-sm:mx-0 sm:mx-0`}>
                   <div className="flex min-h-[56px] min-w-0 flex-row items-stretch gap-1 overflow-x-hidden border-b border-white/15 bg-white/10 sm:min-h-[82px] sm:col-span-2 sm:gap-0 sm:border-r sm:border-b-0 lg:col-span-1">
@@ -337,16 +371,40 @@ export default function Home() {
                       />
                     </div>
                   </div>
-                  <label className={heroSearchDateCellClass}>
+                  <label
+                    className={`${heroSearchDateCellClass} ${
+                      tripType === "return" ? "min-h-[104px] sm:min-h-[128px]" : ""
+                    }`}
+                  >
                     <span className={heroSearchLabelClass}>Depart</span>
                     <div className="hero-search-date-wrap">
                       <input
                         type="date"
                         value={departDate}
-                        onChange={(e) => setDepartDate(e.target.value)}
+                        onChange={(e) => {
+                          const nextDepartDate = e.target.value;
+                          setDepartDate(nextDepartDate);
+                          if (returnDate && nextDepartDate && returnDate < nextDepartDate) {
+                            setReturnDate("");
+                          }
+                        }}
                         className={heroSearchDateInputClass}
                       />
                     </div>
+                    {tripType === "return" ? (
+                      <>
+                        <span className={`${heroSearchLabelClass} mt-2`}>Return</span>
+                        <div className="hero-search-date-wrap">
+                          <input
+                            type="date"
+                            value={returnDate}
+                            min={departDate || undefined}
+                            onChange={(e) => setReturnDate(e.target.value)}
+                            className={heroSearchDateInputClass}
+                          />
+                        </div>
+                      </>
+                    ) : null}
                   </label>
                   <div className={heroSearchTravellerCellClass}>
                     <span className={heroSearchLabelClass}>Travellers &amp; class</span>
@@ -482,7 +540,7 @@ export default function Home() {
                   height={360}
                   className={catalogImageClass}
                 />
-                <span className={imageBadgeClass}>{item.badge}</span>
+                {item.badge ? <span className={imageBadgeClass}>{item.badge}</span> : null}
               </div>
               <div className="pt-3">
                 <h3 className="text-lg font-bold text-[#0b2f57]">{item.title}</h3>
