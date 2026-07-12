@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { buildAirportSeo } from "@/lib/airport-meta";
-import { findLocalAirportByIata, insertLocalAirport, readLocalAirports, updateLocalAirportStatus } from "@/lib/airport-local";
+import { findLocalAirportByIata, insertLocalAirport, readDeletedAirportCodes, readLocalAirports, updateLocalAirportStatus } from "@/lib/airport-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { createAdminClient } from "@/lib/supabase-admin";
 import type { EntityStatus } from "@/types/airline";
@@ -31,6 +31,9 @@ async function loadAirports(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
   }
 
   airports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const deletedCodes = new Set((await readDeletedAirportCodes()).map((code) => code.toUpperCase()));
+  airports = airports.filter((item) => !deletedCodes.has(item.iata_code.toUpperCase()));
 
   return airports.map((item) => {
     const seo = buildAirportSeo(item.name, item.iata_code, item.city, item.country || "", siteOrigin);

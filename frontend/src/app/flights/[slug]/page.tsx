@@ -102,15 +102,11 @@ export default async function FlightRoutePage({ params }: FlightRoutePageProps) 
               </span>
             </div>
 
-            <div className="mt-5 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-3">
+            <div className="mt-5 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Departure</p>
                 <p className="mt-1 text-lg font-bold text-[#0b2f57]">{deal.departure}</p>
                 <p className="text-xs font-semibold text-slate-500">{deal.fromCode}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Duration</p>
-                <p className="mt-1 text-sm font-semibold text-slate-600">{deal.duration}</p>
               </div>
               <div className="sm:text-right">
                 <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Arrival</p>

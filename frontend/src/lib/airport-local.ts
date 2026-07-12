@@ -56,6 +56,33 @@ export async function deleteLocalAirport(id: string) {
   return target;
 }
 
+export async function readDeletedAirportCodes() {
+  const deletedPath = path.join(process.cwd(), "data", "airports.deleted-iata.json");
+  try {
+    const raw = await readFile(deletedPath, "utf8");
+    return JSON.parse(raw) as string[];
+  } catch {
+    return [];
+  }
+}
+
+async function writeDeletedAirportCodes(codes: string[]) {
+  const deletedPath = path.join(process.cwd(), "data", "airports.deleted-iata.json");
+  await ensureDataDir();
+  await writeFile(deletedPath, JSON.stringify(codes, null, 2), "utf8");
+}
+
+export async function markAirportDeleted(iataCode: string) {
+  const code = iataCode.trim().toUpperCase();
+  if (!code) return;
+
+  const codes = await readDeletedAirportCodes();
+  if (codes.includes(code)) return;
+
+  codes.push(code);
+  await writeDeletedAirportCodes(codes);
+}
+
 export async function getLocalAirport(id: string) {
   const airports = await readLocalAirports();
   return airports.find((item) => item.id === id) ?? null;

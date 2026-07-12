@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
     "/api/hotels/slug/[slug]": ["./data/hotels.local.json"],
     "/api/destinations": ["./data/destinations.local.json"],
     "/api/destinations/[id]": ["./data/destinations.local.json"],
+    "/api/airlines": ["./data/airlines.local.json", "./data/airlines.deleted-iata.json"],
+    "/api/airlines/[id]": ["./data/airlines.local.json", "./data/airlines.deleted-iata.json"],
+    "/api/airports": ["./data/airports.local.json", "./data/airports.deleted-iata.json"],
+    "/api/airports/[id]": ["./data/airports.local.json", "./data/airports.deleted-iata.json"],
   },
   images: {
     remotePatterns: [

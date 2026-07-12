@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { buildAirportSeo } from "@/lib/airport-meta";
-import { deleteLocalAirport, updateLocalAirport } from "@/lib/airport-local";
+import {
+  deleteLocalAirport,
+  markAirportDeleted,
+  updateLocalAirport,
+} from "@/lib/airport-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { createAdminClient, hasSupabaseConfig, logSupabaseError } from "@/lib/supabase-admin";
 import type { EntityStatus } from "@/types/airline";
 
 export async function PATCH(
@@ -51,16 +55,22 @@ export async function PATCH(
       status: body.status,
     };
 
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("airports")
-      .update(patch)
-      .eq("id", id)
-      .select("*")
-      .single();
+    if (hasSupabaseConfig()) {
+      const supabase = createAdminClient();
+      const { data, error } = await supabase
+        .from("airports")
+        .update(patch)
+        .eq("id", id)
+        .select("*")
+        .single();
 
-    if (!error && data) {
-      return NextResponse.json({ airport: data });
+      if (!error && data) {
+        return NextResponse.json({ airport: data });
+      }
+
+      if (error) {
+        logSupabaseError("airport update error:", error);
+      }
     }
 
     const localAirport = await updateLocalAirport(id, patch);
@@ -76,26 +86,61 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = getAdminSessionFromRequest(request);
+  const session = getAdminSessionFromRequest(_request);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
   try {
     const { id } = await params;
-    const supabase = createAdminClient();
-    const { error } = await supabase.from("airports").delete().eq("id", id);
+    let deleted = false;
+    let iataCode: string | null = null;
 
-    if (!error) {
-      return NextResponse.json({ success: true });
+    if (hasSupabaseConfig()) {
+      try {
+        const supabase = createAdminClient();
+        const { data, error } = await supabase
+          .from("airports")
+          .delete()
+          .eq("id", id)
+          .select("iata_code")
+          .maybeSingle();
+
+        if (!error && data) {
+          deleted = true;
+          iataCode = data.iata_code;
+        } else if (error) {
+          logSupabaseError("airport delete error:", error);
+        }
+      } catch (error) {
+        logSupabaseError("airport delete error:", error);
+      }
     }
 
     const localAirport = await deleteLocalAirport(id);
-    if (!localAirport) {
+    if (localAirport) {
+      deleted = true;
+      iataCode = localAirport.iata_code;
+    }
+
+    if (!deleted) {
       return NextResponse.json({ error: "Airport not found." }, { status: 404 });
+    }
+
+    if (iataCode) {
+      await markAirportDeleted(iataCode);
+
+      if (hasSupabaseConfig()) {
+        try {
+          const supabase = createAdminClient();
+          await supabase.from("airports").delete().eq("iata_code", iataCode);
+        } catch (error) {
+          logSupabaseError("airport delete by iata error:", error);
+        }
+      }
     }
 
     return NextResponse.json({ success: true });

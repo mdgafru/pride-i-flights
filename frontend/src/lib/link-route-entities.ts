@@ -1,13 +1,14 @@
 import { buildAirlineSeo } from "@/lib/airline-meta";
-import { findLocalAirlineByIata, insertLocalAirline } from "@/lib/airline-local";
+import { findLocalAirlineByIata, insertLocalAirline, readDeletedAirlineCodes } from "@/lib/airline-local";
 import { buildAirportSeo } from "@/lib/airport-meta";
-import { findLocalAirportByIata, insertLocalAirport } from "@/lib/airport-local";
+import { findLocalAirportByIata, insertLocalAirport, readDeletedAirportCodes } from "@/lib/airport-local";
 import { resolveAirlineIata } from "@/lib/route-meta";
 import { readLocalRoutes } from "@/lib/route-local";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function syncLocalAirlinesFromRoutes(siteOrigin: string) {
   const routes = await readLocalRoutes();
+  const deletedCodes = new Set(await readDeletedAirlineCodes());
   const seen = new Set<string>();
 
   for (const route of routes) {
@@ -15,7 +16,7 @@ export async function syncLocalAirlinesFromRoutes(siteOrigin: string) {
     if (!name) continue;
 
     const code = resolveAirlineIata(name, route.airline_iata_code || undefined);
-    if (!code || seen.has(code)) continue;
+    if (!code || seen.has(code) || deletedCodes.has(code)) continue;
 
     const existing = await findLocalAirlineByIata(code);
     if (existing) {
@@ -52,10 +53,12 @@ export async function upsertLinkedEntities(
   siteOrigin: string,
 ) {
   const supabase = createAdminClient();
+  const deletedAirlineCodes = new Set((await readDeletedAirlineCodes()).map((code) => code.toUpperCase()));
+  const deletedAirportCodes = new Set((await readDeletedAirportCodes()).map((code) => code.toUpperCase()));
 
   if (input.airline_name?.trim()) {
     const code = resolveAirlineIata(input.airline_name, input.airline_iata_code);
-    if (code) {
+    if (code && !deletedAirlineCodes.has(code)) {
       const seo = buildAirlineSeo(input.airline_name, code, "", siteOrigin);
       const payload = {
         name: input.airline_name.trim(),
@@ -87,7 +90,7 @@ export async function upsertLinkedEntities(
 
   for (const pair of airportPairs) {
     const code = pair.code?.trim().toUpperCase();
-    if (!code || code.length !== 3) continue;
+    if (!code || code.length !== 3 || deletedAirportCodes.has(code)) continue;
     const seo = buildAirportSeo(`${pair.city} Airport`, code, pair.city, "", siteOrigin);
     const payload = {
       name: `${pair.city} Airport`,

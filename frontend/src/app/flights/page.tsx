@@ -84,8 +84,7 @@ function FlightDealCard({ deal }: { deal: FlightDeal }) {
           <p className="text-[9px] font-semibold uppercase text-slate-500">{deal.fromCode}</p>
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-center px-1">
-          <p className="text-[10px] font-medium text-slate-500">{deal.duration}</p>
-          <div className="mt-0.5 flex w-full items-center gap-1.5">
+          <div className="flex w-full items-center gap-1.5">
             <span className="h-px flex-1 bg-slate-300" />
             <span className="h-1 w-1 rounded-full bg-[#e30613]" />
             <span className="h-px flex-1 bg-slate-300" />
