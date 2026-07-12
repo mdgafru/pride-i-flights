@@ -27,8 +27,8 @@ export function BrandLogo({
         : "text-[4.5px] sm:text-[5px] sm:tracking-[0.12em]";
 
   const onDark = tone === "onDark";
-  const lineClass = onDark ? "bg-white/95" : "bg-[#0b2f57]";
-  const dividerClass = onDark ? "bg-white/95" : "bg-[#0b2f57]";
+  const lineClass = "bg-[#0b2f57]";
+  const dividerClass = "bg-[#0b2f57]";
   const taglineColorClass = onDark ? "text-white/92" : "text-[#0b2f57]";
   const mainShadowClass = onDark ? "drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]" : "";
 
