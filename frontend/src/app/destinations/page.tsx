@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { ContentPageHero } from "@/components/ContentPageHero";
 import { DestinationSearchSection } from "@/components/destinations/DestinationSearchSection";
 import { SiteShell } from "@/components/SiteShell";
@@ -15,13 +14,6 @@ const CTA_IMAGE =
 const eyebrowClass = "text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]";
 const sectionTitleClass = "text-2xl font-extrabold leading-tight text-[#e30613] sm:text-3xl md:text-4xl";
 const bodyClass = "text-base leading-relaxed text-gray-600";
-
-const travelTypes = [
-  { title: "Beach & Island", sub: "Relax by the sea" },
-  { title: "City Breaks", sub: "Urban culture & shopping" },
-  { title: "Adventure", sub: "Thrills & outdoor trips" },
-  { title: "Family Holidays", sub: "Comfort for all ages" },
-];
 
 const highlights = [
   { title: "160 Destinations", sub: "Worldwide travel options" },
@@ -41,11 +33,12 @@ export default function DestinationsPage() {
     <SiteShell active="Destinations">
       <ContentPageHero
         image={HERO_IMAGE}
+        eyebrow="Explore The World"
+        title="Destinations"
         description="Discover handpicked destinations worldwide. From Europe, Asia and beyond - plan your next journey with trusted travel experts worldwide."
         highlights={highlights}
         centered
         showBreadcrumb={false}
-        useLogo
       />
 
       <DestinationSearchSection />
@@ -63,31 +56,6 @@ export default function DestinationsPage() {
               <p className="mt-2 text-base text-gray-500">{item.sub}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Travel types */}
-      <section className="border-t border-slate-200 bg-[#f8fafc]">
-        <div className="mx-auto max-w-[1260px] px-4 py-12 md:py-14">
-          <div className="mb-8 text-center">
-            <p className={eyebrowClass}>Travel Styles</p>
-            <h2 className={`mt-2 ${sectionTitleClass}`}>Every Kind of Journey</h2>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {travelTypes.map((type, index) => (
-              <motion.div
-                key={type.title}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="home-feature border-l-[3px] border-[#e30613]/30 bg-white px-5 py-5"
-              >
-                <p className="text-base font-bold text-[#e30613]">{type.title}</p>
-                <p className="mt-2 text-sm text-gray-500">{type.sub}</p>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 

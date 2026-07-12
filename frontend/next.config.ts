@@ -26,7 +26,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "rede-i-flights.vercel.app",
+        hostname: "images.trvl-media.com",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.hyatt.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
       },
     ],
   },

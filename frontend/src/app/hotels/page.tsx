@@ -341,10 +341,10 @@ export default function HotelsPage() {
       <ContentPageHero
         image={HOTELS_HERO_IMAGE}
         imagePosition="center 55%"
+        title="Hotels"
         description="Discover trusted hotels and resorts worldwide. Search your stay and enquire directly with our travel experts."
         centered
         showBreadcrumb={false}
-        useLogo
       />
 
       <section className="border-b border-slate-200 bg-white">

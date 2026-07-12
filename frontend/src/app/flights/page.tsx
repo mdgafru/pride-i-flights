@@ -175,8 +175,9 @@ export default function FlightsPage() {
     <SiteShell active="Flights">
       <PageHero
         eyebrow="Fly Anywhere, Anytime"
+        title="Flights"
+        description="Your Journey, Our Priority"
         breadcrumb="Flights"
-        brandLogo
         centered
         compact
         eyebrowVariant="badge"

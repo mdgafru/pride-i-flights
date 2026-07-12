@@ -302,7 +302,6 @@ export function buildDestinationEnquiryMessage(
   const lines = ["Hi REDE FLIGHTS, I would like to enquire about a destination."];
   lines.push(`Destination: ${destination.title}`);
   if (destination.country) lines.push(`Country: ${destination.country}`);
-  if (destination.region) lines.push(`Region: ${destination.region}`);
 
   if (filters?.travelMonth) {
     const monthLabel =

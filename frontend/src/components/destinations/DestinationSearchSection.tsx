@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { ContactSelect } from "@/components/ContactSelect";
+import { VisaImage } from "@/components/VisaImage";
 import { WhatsAppIcon } from "@/components/icons";
 import {
   DEFAULT_DESTINATION_FILTERS,
@@ -21,8 +21,6 @@ import type { Destination, DestinationSearchFilters } from "@/types/destination"
 const fieldLabelClass = "text-xs font-bold uppercase tracking-wide text-slate-600";
 const selectClass =
   "mt-1.5 w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-[15px] font-semibold text-[#0b2f57] outline-none";
-const imageBadgeClass =
-  "absolute left-2.5 top-2.5 rounded-md bg-[#e30613] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm";
 const resultCardImageClass =
   "h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]";
 
@@ -227,7 +225,7 @@ export function DestinationSearchSection() {
                         : "All Destinations"
                     }
                     className="mt-1"
-                    listClassName="z-50 max-h-72 min-w-full"
+                    listClassName="max-h-72"
                   />
                 </div>
 
@@ -376,20 +374,18 @@ export function DestinationSearchSection() {
                 className="group overflow-hidden rounded-xl border border-slate-200 bg-white"
               >
                 <div className="relative aspect-[5/3] overflow-hidden bg-slate-100">
-                  <Image
+                  <VisaImage
                     src={place.image}
                     alt={place.title}
                     width={700}
                     height={420}
                     className={resultCardImageClass}
                   />
-                  <span className={imageBadgeClass}>{place.region}</span>
                 </div>
                 <div className="p-3.5">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[#e30613]">
-                    {place.subtitle}
-                  </p>
-                  <h3 className="mt-1 text-lg font-bold leading-snug text-[#0b2f57]">{place.title}</h3>
+                  {place.country ? (
+                    <p className="text-lg font-bold text-[#e30613]">{place.country}</p>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() =>
@@ -398,7 +394,7 @@ export function DestinationSearchSection() {
                         travelers: appliedFilters.travelers,
                       })
                     }
-                    className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-[#e30613] transition hover:gap-2"
+                    className={`inline-flex items-center gap-1.5 text-sm font-semibold text-[#e30613] transition hover:gap-2 ${place.country ? "mt-2" : ""}`}
                   >
                     <WhatsAppIcon className="h-4 w-4" />
                     Enquiry Now <span aria-hidden>→</span>

@@ -6,10 +6,6 @@ import { buildDestinationSeo } from "@/lib/destination-meta";
 import type { EntityStatus } from "@/types/airline";
 import type { DestinationRecord } from "@/types/destination";
 import {
-  DESTINATION_REGION_VALUES,
-  DESTINATION_TRAVEL_STYLE_VALUES,
-} from "@/types/destination";
-import {
   CheckCircle2,
   Clock3,
   FileText,
@@ -41,17 +37,6 @@ function statusStyle(status: EntityStatus) {
     : "bg-[#fff7ed] text-[#c2410c]";
 }
 
-function stylesToText(styles: string[]) {
-  return styles.join(", ");
-}
-
-function textToStyles(value: string) {
-  return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 export function DestinationDashboard() {
   const [records, setRecords] = useState<DestinationRecord[]>([]);
   const [aggregatedCount, setAggregatedCount] = useState(0);
@@ -66,9 +51,6 @@ export function DestinationDashboard() {
 
   const [title, setTitle] = useState("");
   const [country, setCountry] = useState("");
-  const [subtitle, setSubtitle] = useState("");
-  const [region, setRegion] = useState<DestinationRecord["region"]>("Asia");
-  const [travelStyles, setTravelStyles] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [packagesCount, setPackagesCount] = useState("0");
   const [popularScore, setPopularScore] = useState("70");
@@ -131,9 +113,6 @@ export function DestinationDashboard() {
   function resetForm(closeForm = true) {
     setTitle("");
     setCountry("");
-    setSubtitle("");
-    setRegion("Asia");
-    setTravelStyles("");
     setImageUrl("");
     setPackagesCount("0");
     setPopularScore("70");
@@ -149,9 +128,6 @@ export function DestinationDashboard() {
   function fillForm(record: DestinationRecord) {
     setTitle(record.title);
     setCountry(record.country);
-    setSubtitle(record.subtitle);
-    setRegion(record.region);
-    setTravelStyles(stylesToText(record.travel_styles || []));
     setImageUrl(record.image_url || "");
     setPackagesCount(String(record.packages_count || 0));
     setPopularScore(String(record.popular_score || 0));
@@ -168,9 +144,7 @@ export function DestinationDashboard() {
     const payload = {
       title,
       country,
-      subtitle,
-      region,
-      travel_styles: textToStyles(travelStyles),
+      travel_styles: [],
       image_url: imageUrl,
       packages_count: packagesCount,
       popular_score: popularScore,
@@ -342,12 +316,11 @@ export function DestinationDashboard() {
             </p>
           ) : (
             <div className="dash-table-wrap">
-              <table className="dash-table w-full min-w-[900px]">
+              <table className="dash-table w-full min-w-[760px]">
                 <thead>
                   <tr className="border-b border-slate-200 bg-[#fafbfd]">
                     <th>Destination</th>
                     <th>Country</th>
-                    <th>Region</th>
                     <th>Status</th>
                     <th>Added</th>
                     <th>Actions</th>
@@ -358,7 +331,6 @@ export function DestinationDashboard() {
                     <tr key={record.id} className="border-b border-slate-100">
                       <td className="font-semibold text-[#0b2f57]">{record.title}</td>
                       <td>{record.country}</td>
-                      <td>{record.region}</td>
                       <td>
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusStyle(record.status)}`}>
                           {record.status}
@@ -417,7 +389,7 @@ export function DestinationDashboard() {
             <form onSubmit={handleSubmit} className="space-y-3 p-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="space-y-1 sm:col-span-2">
-                  <span className="text-[11px] font-semibold text-slate-600">Destination Title</span>
+                  <span className="text-[11px] font-semibold text-slate-600">Destination</span>
                   <input
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
@@ -426,7 +398,7 @@ export function DestinationDashboard() {
                     required
                   />
                 </label>
-                <label className="space-y-1">
+                <label className="space-y-1 sm:col-span-2">
                   <span className="text-[11px] font-semibold text-slate-600">Country</span>
                   <input
                     value={country}
@@ -436,44 +408,12 @@ export function DestinationDashboard() {
                     required
                   />
                 </label>
-                <label className="space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-600">Region</span>
-                  <select
-                    value={region}
-                    onChange={(event) => setRegion(event.target.value as DestinationRecord["region"])}
-                    className="w-full rounded-md border border-slate-200 px-2.5 py-2 text-sm outline-none focus:border-[#e30613]"
-                  >
-                    {DESTINATION_REGION_VALUES.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="space-y-1 sm:col-span-2">
-                  <span className="text-[11px] font-semibold text-slate-600">Subtitle</span>
-                  <input
-                    value={subtitle}
-                    onChange={(event) => setSubtitle(event.target.value)}
-                    placeholder="Island of Gods"
-                    className="w-full rounded-md border border-slate-200 px-2.5 py-2 text-sm outline-none focus:border-[#e30613]"
-                  />
-                </label>
                 <label className="space-y-1 sm:col-span-2">
                   <span className="text-[11px] font-semibold text-slate-600">Image URL</span>
                   <input
                     value={imageUrl}
                     onChange={(event) => setImageUrl(event.target.value)}
                     placeholder="https://..."
-                    className="w-full rounded-md border border-slate-200 px-2.5 py-2 text-sm outline-none focus:border-[#e30613]"
-                  />
-                </label>
-                <label className="space-y-1 sm:col-span-2">
-                  <span className="text-[11px] font-semibold text-slate-600">Travel Styles</span>
-                  <input
-                    value={travelStyles}
-                    onChange={(event) => setTravelStyles(event.target.value)}
-                    placeholder="Beach & Island, Adventure"
                     className="w-full rounded-md border border-slate-200 px-2.5 py-2 text-sm outline-none focus:border-[#e30613]"
                   />
                 </label>

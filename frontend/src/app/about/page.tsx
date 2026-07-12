@@ -106,11 +106,12 @@ export default function AboutPage() {
       <div className="w-full overflow-x-hidden">
         <ContentPageHero
           image={IMAGES.hero}
+          title="About Us"
+          description="Your trusted travel partner for flights, hotels, visas and packages worldwide."
           highlights={highlights}
           centered
           compact
           showBreadcrumb={false}
-          useLogo
         />
 
         <section className="w-full border-b border-white/10 bg-[#042448]">

@@ -46,7 +46,7 @@ export function ContactSelect({
     if (!button) return;
 
     const rect = button.getBoundingClientRect();
-    const menuWidth = Math.min(Math.max(rect.width, 240), window.innerWidth - 16);
+    const menuWidth = Math.min(Math.max(rect.width, 200), 320);
     const menuHeight = Math.min(options.length, 8) * 44 + 8;
     const spaceBelow = window.innerHeight - rect.bottom;
     const openAbove = spaceBelow < menuHeight + 12 && rect.top > menuHeight + 12;

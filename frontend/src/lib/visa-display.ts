@@ -4,7 +4,10 @@ const DEFAULT_VISA_IMAGE =
 const NEXT_IMAGE_HOSTS = [
   "images.unsplash.com",
   "plus.unsplash.com",
+  "images.trvl-media.com",
+  "assets.hyatt.com",
   "rede-i-flights.vercel.app",
+  "supabase.co",
 ];
 
 function isBadPagePath(pathname: string) {

@@ -94,11 +94,12 @@ export default function VisaPage() {
       <ContentPageHero
         image={HERO_IMAGE}
         imagePosition="center 40%"
+        eyebrow="Hassle-Free Applications"
+        title="Visa Services"
         description="Expert visa guidance with high success rate and end-to-end support. Tourist and business visas handled by trusted travel advisors."
         highlights={highlights}
         centered
         showBreadcrumb={false}
-        useLogo
       />
 
       {/* Trust strip */}

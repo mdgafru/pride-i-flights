@@ -125,11 +125,12 @@ export default function ContactPage() {
       <ContentPageHero
         image={CONTACT_HERO_IMAGE}
         imagePosition="center 70%"
+        eyebrow="We Are Here For You"
+        title="Contact Us"
         description="Your trusted partner for flights, hotels and visa. Reach out today and let our team plan your next journey from Dubai to destinations worldwide."
         highlights={quickActions}
         centered
         showBreadcrumb={false}
-        useLogo
       />
 
       <section className="border-b border-slate-200 bg-white">

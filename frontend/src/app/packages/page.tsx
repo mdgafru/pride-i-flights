@@ -270,10 +270,11 @@ export default function PackagesPage() {
       <ContentPageHero
         image="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=85"
         imagePosition="center 45%"
+        eyebrow="Curated Holidays"
+        title="Tour Packages"
         description="Handpicked holiday packages with flights, hotels and sightseeing. Search your trip and enquire directly with our travel experts."
         centered
         showBreadcrumb={false}
-        useLogo
       />
 
       <section className="border-b border-slate-200 bg-white">
