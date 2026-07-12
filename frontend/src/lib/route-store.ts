@@ -1,3 +1,4 @@
+import { useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import { deleteLocalRoute, findLocalRouteBySlug, getLocalRoute, updateLocalRoute } from "@/lib/route-local";
 import type { Route } from "@/types/route";
@@ -79,12 +80,16 @@ export async function saveRouteById(
 
   console.error("route supabase upsert error:", error);
 
-  try {
-    return await updateLocalRoute(id, patch);
-  } catch (localError) {
-    console.error("route local update error:", localError);
-    return null;
+  if (useLocalStorage()) {
+    try {
+      return await updateLocalRoute(id, patch);
+    } catch (localError) {
+      console.error("route local update error:", localError);
+      return null;
+    }
   }
+
+  return null;
 }
 
 export async function removeRouteById(id: string) {

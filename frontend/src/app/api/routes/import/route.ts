@@ -8,6 +8,7 @@ import { getSiteOrigin } from "@/lib/banner-meta";
 import { extractFlightDataFromRows, parseExcelBuffer } from "@/lib/excel-import";
 import { buildRouteSeo } from "@/lib/route-meta";
 import { insertLocalRoutesBatch, readLocalRoutes } from "@/lib/route-local";
+import { useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
@@ -126,17 +127,29 @@ export async function POST(request: Request) {
 
     if (routePayloads.length > 0) {
       const { data, error } = await supabase.from("routes").insert(routePayloads).select("id");
-      importedRoutes = !error && data ? data.length : (await insertLocalRoutesBatch(routePayloads)).length;
+      if (!error && data) {
+        importedRoutes = data.length;
+      } else if (useLocalStorage()) {
+        importedRoutes = (await insertLocalRoutesBatch(routePayloads)).length;
+      }
     }
 
     if (airlinePayloads.length > 0) {
       const { data, error } = await supabase.from("airlines").insert(airlinePayloads).select("id");
-      importedAirlines = !error && data ? data.length : (await insertLocalAirlinesBatch(airlinePayloads)).length;
+      if (!error && data) {
+        importedAirlines = data.length;
+      } else if (useLocalStorage()) {
+        importedAirlines = (await insertLocalAirlinesBatch(airlinePayloads)).length;
+      }
     }
 
     if (airportPayloads.length > 0) {
       const { data, error } = await supabase.from("airports").insert(airportPayloads).select("id");
-      importedAirports = !error && data ? data.length : (await insertLocalAirportsBatch(airportPayloads)).length;
+      if (!error && data) {
+        importedAirports = data.length;
+      } else if (useLocalStorage()) {
+        importedAirports = (await insertLocalAirportsBatch(airportPayloads)).length;
+      }
     }
 
     return NextResponse.json({

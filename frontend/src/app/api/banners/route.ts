@@ -7,6 +7,7 @@ import {
   buildBannerMetaFromFileName,
   buildBannerStoragePath,
   ensureDirectImageUrl,
+  getBannerPublicUrl,
   getSiteOrigin,
 } from "@/lib/banner";
 import {
@@ -15,6 +16,7 @@ import {
   saveBannerLocally,
   updateLocalBannerStatus,
 } from "@/lib/banner-local";
+import { formatStorageError, mergeWithLocalById, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import type { Banner, BannerStatus } from "@/types/banner";
@@ -49,10 +51,7 @@ async function loadBanners(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
     }
   }
 
-  const seen = new Set(banners.map((item) => item.id));
-  for (const item of filteredLocal) {
-    if (!seen.has(item.id)) banners.push(item);
-  }
+  banners = mergeWithLocalById(banners, filteredLocal);
 
   banners.sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -129,19 +128,24 @@ export async function POST(request: Request) {
     const rawBuffer = Buffer.from(await file.arrayBuffer());
     const fileBuffer = rawBuffer;
     const supabase = createAdminClient();
+    let imageUrl = "";
 
-    const imageUrl = await saveBannerLocally(fileBuffer, storagePath, siteOrigin);
+    if (useLocalStorage()) {
+      imageUrl = await saveBannerLocally(fileBuffer, storagePath, siteOrigin);
+    } else {
+      const { error: uploadError } = await supabase.storage
+        .from(BANNER_BUCKET)
+        .upload(storagePath, fileBuffer, {
+          contentType: file.type,
+          upsert: true,
+        });
 
-    const { error: uploadError } = await supabase.storage
-      .from(BANNER_BUCKET)
-      .upload(storagePath, fileBuffer, {
-        contentType: file.type,
-        upsert: true,
-      });
+      if (uploadError) {
+        console.error("banner supabase upload error:", uploadError);
+        return NextResponse.json({ error: formatStorageError(uploadError) }, { status: 500 });
+      }
 
-    const storedLocally = true;
-    if (uploadError) {
-      console.error("banner supabase backup upload error:", uploadError);
+      imageUrl = getBannerPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL || "", storagePath);
     }
 
     const payload = {
@@ -163,25 +167,22 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("banner insert error:", error);
-      if (!storedLocally) {
-        await supabase.storage.from(BANNER_BUCKET).remove([storagePath]);
+
+      if (useLocalStorage()) {
+        const localBanner = await insertLocalBanner(payload);
+        return NextResponse.json({
+          success: true,
+          message: "Banner uploaded and activated.",
+          banner: localBanner,
+        });
       }
 
-      const localBanner = await insertLocalBanner(payload);
-      return NextResponse.json({
-        success: true,
-        message: storedLocally
-          ? "Banner uploaded and activated. Image URL is ready on your site domain."
-          : "Banner uploaded and activated.",
-        banner: localBanner,
-      });
+      return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
-      message: storedLocally
-        ? "Banner uploaded and activated."
-        : "Banner uploaded and activated.",
+      message: "Banner uploaded and activated.",
       banner: data,
     });
   } catch (error) {
@@ -218,12 +219,17 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ banner: data });
     }
 
-    const localBanner = await updateLocalBannerStatus(body.id, body.status);
-    if (!localBanner) {
-      return NextResponse.json({ error: "Banner not found." }, { status: 404 });
+    if (useLocalStorage()) {
+      const localBanner = await updateLocalBannerStatus(body.id, body.status);
+      if (!localBanner) {
+        return NextResponse.json({ error: "Banner not found." }, { status: 404 });
+      }
+
+      return NextResponse.json({ banner: localBanner });
     }
 
-    return NextResponse.json({ banner: localBanner });
+    console.error("banner status update error:", error);
+    return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
   } catch (error) {
     console.error("banners PATCH error:", error);
     return NextResponse.json({ error: "Unable to update banner." }, { status: 500 });

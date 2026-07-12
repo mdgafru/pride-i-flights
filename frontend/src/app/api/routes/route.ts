@@ -5,6 +5,7 @@ import { upsertLinkedEntities } from "@/lib/link-route-entities";
 import { buildRouteSeo, sanitizeAirportIataCode } from "@/lib/route-meta";
 import { findLocalRouteBySlug, insertLocalRoute, readLocalRoutes } from "@/lib/route-local";
 import { saveRouteById } from "@/lib/route-store";
+import { formatStorageError, mergeWithLocalById, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import type { EntityStatus } from "@/types/airline";
@@ -37,10 +38,7 @@ async function loadRoutes(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
     ? localRoutes.filter((item) => item.status === "active")
     : localRoutes;
 
-  const seen = new Set(routes.map((item) => item.id));
-  for (const item of filteredLocal) {
-    if (!seen.has(item.id)) routes.push(item);
-  }
+  routes = mergeWithLocalById(routes, filteredLocal);
 
   routes.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -137,19 +135,24 @@ export async function POST(request: Request) {
       });
     }
 
-    const existing = await findLocalRouteBySlug(seo.slug);
-    if (existing) {
-      return NextResponse.json({ error: "This route already exists." }, { status: 409 });
+    if (useLocalStorage()) {
+      const existing = await findLocalRouteBySlug(seo.slug);
+      if (existing) {
+        return NextResponse.json({ error: "This route already exists." }, { status: 409 });
+      }
+
+      const localRoute = await insertLocalRoute(payload);
+      await upsertLinkedEntities(payload, siteOrigin);
+
+      return NextResponse.json({
+        success: true,
+        message: "Route saved with auto SEO. Airline & airports linked.",
+        route: localRoute,
+      });
     }
 
-    const localRoute = await insertLocalRoute(payload);
-    await upsertLinkedEntities(payload, siteOrigin);
-
-    return NextResponse.json({
-      success: true,
-      message: "Route saved with auto SEO. Airline & airports linked.",
-      route: localRoute,
-    });
+    console.error("route insert error:", error);
+    return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
   } catch (error) {
     console.error("routes POST error:", error);
     return NextResponse.json({ error: "Unable to add route." }, { status: 500 });
@@ -180,12 +183,17 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ route: data });
     }
 
-    const localRoute = await saveRouteById(body.id, { status: body.status });
-    if (!localRoute) {
-      return NextResponse.json({ error: "Route not found." }, { status: 404 });
+    if (useLocalStorage()) {
+      const localRoute = await saveRouteById(body.id, { status: body.status });
+      if (!localRoute) {
+        return NextResponse.json({ error: "Route not found." }, { status: 404 });
+      }
+
+      return NextResponse.json({ route: localRoute });
     }
 
-    return NextResponse.json({ route: localRoute });
+    console.error("route status update error:", error);
+    return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
   } catch (error) {
     console.error("routes PATCH error:", error);
     return NextResponse.json({ error: "Unable to update route." }, { status: 500 });

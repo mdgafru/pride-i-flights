@@ -1,12 +1,15 @@
 import { buildAirlineSeo } from "@/lib/airline-meta";
 import { findLocalAirlineByIata, insertLocalAirline, readDeletedAirlineCodes } from "@/lib/airline-local";
 import { buildAirportSeo } from "@/lib/airport-meta";
-import { findLocalAirportByIata, insertLocalAirport, readDeletedAirportCodes } from "@/lib/airport-local";
+import { insertLocalAirport, readDeletedAirportCodes } from "@/lib/airport-local";
 import { resolveAirlineIata } from "@/lib/route-meta";
 import { readLocalRoutes } from "@/lib/route-local";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { useLocalStorage } from "@/lib/storage-mode";
 
 export async function syncLocalAirlinesFromRoutes(siteOrigin: string) {
+  if (!useLocalStorage()) return;
+
   const routes = await readLocalRoutes();
   const deletedCodes = new Set(await readDeletedAirlineCodes());
   const seen = new Set<string>();
@@ -41,6 +44,26 @@ export async function syncLocalAirlinesFromRoutes(siteOrigin: string) {
   }
 }
 
+async function airlineExists(iataCode: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("airlines")
+    .select("id")
+    .eq("iata_code", iataCode)
+    .maybeSingle();
+  return Boolean(data);
+}
+
+async function airportExists(iataCode: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("airports")
+    .select("id")
+    .eq("iata_code", iataCode)
+    .maybeSingle();
+  return Boolean(data);
+}
+
 export async function upsertLinkedEntities(
   input: {
     airline_name?: string | null;
@@ -52,7 +75,6 @@ export async function upsertLinkedEntities(
   },
   siteOrigin: string,
 ) {
-  const supabase = createAdminClient();
   const deletedAirlineCodes = new Set((await readDeletedAirlineCodes()).map((code) => code.toUpperCase()));
   const deletedAirportCodes = new Set((await readDeletedAirportCodes()).map((code) => code.toUpperCase()));
 
@@ -72,12 +94,17 @@ export async function upsertLinkedEntities(
         page_url: seo.page_url,
         status: "active" as const,
       };
-      const existing = await findLocalAirlineByIata(code);
-      if (!existing) {
-        await insertLocalAirline(payload);
-        const { error } = await supabase.from("airlines").insert(payload);
-        if (error) {
-          console.error("airline link insert error:", error);
+
+      if (useLocalStorage()) {
+        const { findLocalAirlineByIata } = await import("@/lib/airline-local");
+        const existing = await findLocalAirlineByIata(code);
+        if (!existing) await insertLocalAirline(payload);
+      } else {
+        const exists = await airlineExists(code);
+        if (!exists) {
+          const supabase = createAdminClient();
+          const { error } = await supabase.from("airlines").insert(payload);
+          if (error) console.error("airline link insert error:", error);
         }
       }
     }
@@ -91,6 +118,7 @@ export async function upsertLinkedEntities(
   for (const pair of airportPairs) {
     const code = pair.code?.trim().toUpperCase();
     if (!code || code.length !== 3 || deletedAirportCodes.has(code)) continue;
+
     const seo = buildAirportSeo(`${pair.city} Airport`, code, pair.city, "", siteOrigin);
     const payload = {
       name: `${pair.city} Airport`,
@@ -104,12 +132,17 @@ export async function upsertLinkedEntities(
       page_url: seo.page_url,
       status: "active" as const,
     };
-    const existing = await findLocalAirportByIata(code);
-    if (!existing) {
-      await insertLocalAirport(payload);
-      const { error } = await supabase.from("airports").insert(payload);
-      if (error) {
-        console.error("airport link insert error:", error);
+
+    if (useLocalStorage()) {
+      const { findLocalAirportByIata } = await import("@/lib/airport-local");
+      const existing = await findLocalAirportByIata(code);
+      if (!existing) await insertLocalAirport(payload);
+    } else {
+      const exists = await airportExists(code);
+      if (!exists) {
+        const supabase = createAdminClient();
+        const { error } = await supabase.from("airports").insert(payload);
+        if (error) console.error("airport link insert error:", error);
       }
     }
   }

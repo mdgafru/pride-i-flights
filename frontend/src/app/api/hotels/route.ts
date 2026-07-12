@@ -4,6 +4,7 @@ import { getSiteOrigin } from "@/lib/banner-meta";
 import { findLocalHotelBySlug, insertLocalHotel, readLocalHotels } from "@/lib/hotel-local";
 import { buildHotelSeo } from "@/lib/hotel-meta";
 import { saveHotelById } from "@/lib/hotel-store";
+import { formatStorageError, mergeWithLocalById, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig, logSupabaseError } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import type { EntityStatus } from "@/types/airline";
@@ -47,10 +48,7 @@ async function loadHotels(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
     ? localHotels.filter((item) => item.status === "active")
     : localHotels;
 
-  const seen = new Set(hotels.map((item) => item.id));
-  for (const item of filteredLocal) {
-    if (!seen.has(item.id)) hotels.push(item);
-  }
+  hotels = mergeWithLocalById(hotels, filteredLocal);
 
   hotels.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -140,6 +138,8 @@ export async function POST(request: Request) {
       status: (body.status === "pending" ? "pending" : "active") as EntityStatus,
     };
 
+    let storageError: unknown = null;
+
     if (hasSupabaseConfig()) {
       const supabase = createAdminClient();
       const { data, error } = await supabase.from("hotels").insert(payload).select("*").single();
@@ -152,20 +152,25 @@ export async function POST(request: Request) {
         });
       }
 
+      storageError = error;
       console.error("hotel insert error:", error);
     }
 
-    const existing = await findLocalHotelBySlug(seo.slug);
-    if (existing) {
-      return NextResponse.json({ error: "This hotel already exists." }, { status: 409 });
+    if (useLocalStorage()) {
+      const existing = await findLocalHotelBySlug(seo.slug);
+      if (existing) {
+        return NextResponse.json({ error: "This hotel already exists." }, { status: 409 });
+      }
+
+      const localHotel = await insertLocalHotel(payload);
+      return NextResponse.json({
+        success: true,
+        message: "Hotel saved with auto SEO.",
+        hotel: localHotel,
+      });
     }
 
-    const localHotel = await insertLocalHotel(payload);
-    return NextResponse.json({
-      success: true,
-      message: "Hotel saved with auto SEO.",
-      hotel: localHotel,
-    });
+    return NextResponse.json({ error: formatStorageError(storageError) }, { status: 500 });
   } catch (error) {
     console.error("hotels POST error:", error);
     return NextResponse.json({ error: "Unable to add hotel." }, { status: 500 });
@@ -196,6 +201,18 @@ export async function PATCH(request: Request) {
       if (!error && data) {
         return NextResponse.json({ hotel: data });
       }
+
+      if (useLocalStorage()) {
+        const localHotel = await saveHotelById(body.id, { status: body.status });
+        if (!localHotel) {
+          return NextResponse.json({ error: "Hotel not found." }, { status: 404 });
+        }
+
+        return NextResponse.json({ hotel: localHotel });
+      }
+
+      console.error("hotel status update error:", error);
+      return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
     }
 
     const localHotel = await saveHotelById(body.id, { status: body.status });

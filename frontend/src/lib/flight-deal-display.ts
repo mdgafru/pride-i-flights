@@ -1,3 +1,5 @@
+import { WHATSAPP_URL } from "@/lib/contact";
+import { matchesFlightLocation } from "@/lib/flight-search-locations";
 import type { Route } from "@/types/route";
 
 export type FlightDeal = {
@@ -88,6 +90,85 @@ export function sortFlightDeals(
 }
 
 export function buildFlightEnquiryUrl(fromCity: string, toCity: string, airline: string) {
-  const text = `Hi REDE FLIGHTS, I want to book a flight from ${fromCity} to ${toCity}${airline ? ` (${airline})` : ""}. Please share the best fare.`;
-  return `https://wa.me/971509513634?text=${encodeURIComponent(text)}`;
+  return buildFlightSearchEnquiryUrl({ from: fromCity, to: toCity, airline });
+}
+
+const passengerLabels: Record<string, string> = {
+  "1a": "1 Adult",
+  "2a": "2 Adults",
+  "1a1c": "1 Adult, 1 Child",
+  "2a1c": "2 Adults, 1 Child",
+};
+
+const travelClassLabels: Record<string, string> = {
+  economy: "Economy",
+  premium: "Premium Economy",
+  business: "Business",
+  first: "First",
+};
+
+export type FlightSearchEnquiryInput = {
+  from?: string;
+  to?: string;
+  departDate?: string;
+  returnDate?: string;
+  travelClass?: string;
+  passengers?: string;
+  airline?: string;
+};
+
+function formatEnquiryDate(value: string) {
+  const parsed = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function findMatchingRouteAirline(routes: Route[], from: string, to: string) {
+  const match = routes.find(
+    (route) =>
+      matchesFlightLocation(from, route.from_city, route.from_airport_code || "") &&
+      matchesFlightLocation(to, route.to_city, route.to_airport_code || ""),
+  );
+
+  return match?.airline_name?.trim() || "";
+}
+
+export function buildFlightSearchEnquiryMessage(input: FlightSearchEnquiryInput) {
+  const from = input.from?.trim() || "";
+  const to = input.to?.trim() || "";
+  const airline = input.airline?.trim() || "";
+  const lines = ["Hi REDE FLIGHTS, I would like to enquire about a flight."];
+
+  if (from && to) lines.push(`Route: ${from} → ${to}`);
+  else if (from) lines.push(`From: ${from}`);
+  else if (to) lines.push(`To: ${to}`);
+
+  if (input.departDate) lines.push(`Departure date: ${formatEnquiryDate(input.departDate)}`);
+  if (input.returnDate) lines.push(`Return date: ${formatEnquiryDate(input.returnDate)}`);
+
+  if (input.passengers) {
+    lines.push(`Travellers: ${passengerLabels[input.passengers] || input.passengers}`);
+  }
+
+  if (input.travelClass) {
+    lines.push(`Class: ${travelClassLabels[input.travelClass] || input.travelClass}`);
+  }
+
+  if (airline) lines.push(`Airline: ${airline}`);
+
+  lines.push("Please share the best available fare and options.");
+  return lines.join("\n");
+}
+
+export function buildFlightSearchEnquiryUrl(input: FlightSearchEnquiryInput) {
+  const text = encodeURIComponent(buildFlightSearchEnquiryMessage(input));
+  return `${WHATSAPP_URL}?text=${text}`;
+}
+
+export function openFlightSearchEnquiry(input: FlightSearchEnquiryInput) {
+  window.open(buildFlightSearchEnquiryUrl(input), "_blank", "noopener,noreferrer");
 }

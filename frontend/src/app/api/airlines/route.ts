@@ -4,6 +4,7 @@ import { buildAirlineSeo } from "@/lib/airline-meta";
 import { findLocalAirlineByIata, insertLocalAirline, readDeletedAirlineCodes, readLocalAirlines, updateLocalAirlineStatus } from "@/lib/airline-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { syncLocalAirlinesFromRoutes } from "@/lib/link-route-entities";
+import { formatStorageError, mergeWithLocalByCode, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import type { Airline, EntityStatus } from "@/types/airline";
@@ -34,14 +35,7 @@ async function loadAirlines(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
     ? localAirlines.filter((item) => item.status === "active")
     : localAirlines;
 
-  const seen = new Set(airlines.map((item) => item.iata_code.toUpperCase()));
-  for (const item of filteredLocal) {
-    const code = item.iata_code.toUpperCase();
-    if (!seen.has(code)) {
-      airlines.push(item);
-      seen.add(code);
-    }
-  }
+  airlines = mergeWithLocalByCode(airlines, filteredLocal);
 
   airlines.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -132,17 +126,22 @@ export async function POST(request: Request) {
     }
 
     console.error("airline insert error:", error);
-    const existing = await findLocalAirlineByIata(iataCode);
-    if (existing) {
-      return NextResponse.json({ error: `Airline with IATA code ${iataCode} already exists.` }, { status: 409 });
+
+    if (useLocalStorage()) {
+      const existing = await findLocalAirlineByIata(iataCode);
+      if (existing) {
+        return NextResponse.json({ error: `Airline with IATA code ${iataCode} already exists.` }, { status: 409 });
+      }
+
+      const localAirline = await insertLocalAirline(payload);
+      return NextResponse.json({
+        success: true,
+        message: "Airline saved locally with auto SEO and page URL.",
+        airline: localAirline,
+      });
     }
 
-    const localAirline = await insertLocalAirline(payload);
-    return NextResponse.json({
-      success: true,
-      message: "Airline saved locally with auto SEO and page URL.",
-      airline: localAirline,
-    });
+    return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
   } catch (error) {
     console.error("airlines POST error:", error);
     return NextResponse.json({ error: "Unable to add airline." }, { status: 500 });
@@ -177,12 +176,17 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ airline: data });
     }
 
-    const localAirline = await updateLocalAirlineStatus(body.id, body.status);
-    if (!localAirline) {
-      return NextResponse.json({ error: "Airline not found." }, { status: 404 });
+    if (useLocalStorage()) {
+      const localAirline = await updateLocalAirlineStatus(body.id, body.status);
+      if (!localAirline) {
+        return NextResponse.json({ error: "Airline not found." }, { status: 404 });
+      }
+
+      return NextResponse.json({ airline: localAirline });
     }
 
-    return NextResponse.json({ airline: localAirline });
+    console.error("airline status update error:", error);
+    return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
   } catch (error) {
     console.error("airlines PATCH error:", error);
     return NextResponse.json({ error: "Unable to update airline." }, { status: 500 });

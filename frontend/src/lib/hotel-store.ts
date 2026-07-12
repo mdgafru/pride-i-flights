@@ -91,6 +91,7 @@ export async function saveHotelById(
     }
 
     console.error("hotel supabase upsert error:", error);
+    return null;
   }
 
   try {

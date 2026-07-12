@@ -10,16 +10,15 @@ import { SiteShell } from "@/components/SiteShell";
 import { SwapRoutesIcon, WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { bannersToSlides } from "@/lib/banner";
+import {
+  findMatchingRouteAirline,
+  openFlightSearchEnquiry,
+} from "@/lib/flight-deal-display";
 import { buildFlightSearchLocations } from "@/lib/flight-search-locations";
 import { SITE_BACKGROUND_VIDEO_SRC } from "@/lib/site-media";
 import type { Airport } from "@/types/airport";
 import type { Banner, BannerSlide } from "@/types/banner";
 import type { Route } from "@/types/route";
-
-const tripTypeOptions = [
-  { value: "return", label: "Return" },
-  { value: "oneway", label: "One way" },
-];
 
 const travelClassOptions = [
   { value: "economy", label: "Economy" },
@@ -48,11 +47,9 @@ const heroLocationInputClass =
 const heroSearchDateInputClass =
   "hero-search-date mt-0.5 w-full min-w-0 rounded-md border border-white/25 bg-white px-2.5 py-2 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none disabled:opacity-45 sm:mt-1";
 const heroSearchBarClass =
-  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 overflow-x-hidden rounded-xl border border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)_auto]";
+  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 overflow-x-hidden rounded-xl border border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(0,1fr)_auto]";
 const heroSearchSubmitCellClass =
   "flex min-h-[56px] items-center justify-center border-b border-white/15 bg-white/10 px-3 py-3 sm:col-span-2 sm:border-b-0 lg:col-span-1 lg:min-h-[82px] lg:border-l lg:border-white/15 lg:px-4";
-const heroTripPillClass =
-  "rounded-lg px-4 py-2 text-sm font-bold transition sm:px-5";
 
 const BANNER_VISIBLE_MS = 5000;
 const BANNER_TRANSITION_S = 1.25;
@@ -183,13 +180,11 @@ const reviews = [
 ];
 
 export default function Home() {
-  const [tripType, setTripType] = useState("return");
   const [travelClass, setTravelClass] = useState("economy");
   const [passengers, setPassengers] = useState("1a");
   const [fromQuery, setFromQuery] = useState("");
   const [toQuery, setToQuery] = useState("");
   const [departDate, setDepartDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
   const [swapRotation, setSwapRotation] = useState(0);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
@@ -226,10 +221,6 @@ export default function Home() {
   useEffect(() => {
     loadFlightLocations();
   }, [loadFlightLocations]);
-
-  useEffect(() => {
-    if (tripType === "oneway") setReturnDate("");
-  }, [tripType]);
 
   useEffect(() => {
     async function loadBanners() {
@@ -291,36 +282,18 @@ export default function Home() {
               className="relative z-20 w-full min-w-0 space-y-3 overflow-x-hidden rounded-2xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] p-4 shadow-[0_20px_48px_rgba(179,0,15,0.35)] ring-1 ring-white/20 max-sm:mx-auto max-sm:max-w-full sm:space-y-0 sm:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                const params = new URLSearchParams();
-                if (fromQuery.trim()) params.set("from", fromQuery.trim());
-                if (toQuery.trim()) params.set("to", toQuery.trim());
-                if (departDate) params.set("depart", departDate);
-                if (tripType === "return" && returnDate) params.set("return", returnDate);
-                params.set("trip", tripType);
-                params.set("class", travelClass);
-                params.set("passengers", passengers);
-                const query = params.toString();
-                window.location.href = query ? `/flights?${query}` : "/flights";
+                const airline = findMatchingRouteAirline(routes, fromQuery, toQuery);
+                openFlightSearchEnquiry({
+                  from: fromQuery,
+                  to: toQuery,
+                  departDate,
+                  travelClass,
+                  passengers,
+                  airline,
+                });
               }}
             >
-              <div className="inline-flex rounded-xl border border-white/20 bg-white/10 p-1 backdrop-blur-sm">
-                {tripTypeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setTripType(option.value)}
-                    className={`${heroTripPillClass} ${
-                      tripType === option.value
-                        ? "bg-white text-[#e30613] shadow-sm"
-                        : "text-white hover:bg-white/15"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="border-t border-white/15 pt-3 sm:mt-2">
+              <div className="w-full">
                 <div className={`${heroSearchBarClass} max-sm:mx-0 sm:mx-0`}>
                   <div className="flex min-h-[56px] min-w-0 flex-row items-stretch gap-1 overflow-x-hidden border-b border-white/15 bg-white/10 sm:min-h-[82px] sm:col-span-2 sm:gap-0 sm:border-r sm:border-b-0 lg:col-span-1">
                     <div className="flex min-w-0 flex-1 flex-col justify-center overflow-x-hidden px-2.5 py-2.5 sm:px-4 sm:py-4">
@@ -375,19 +348,6 @@ export default function Home() {
                       />
                     </div>
                   </label>
-                  <label className={heroSearchDateCellClass}>
-                    <span className={heroSearchLabelClass}>Return</span>
-                    <div className="hero-search-date-wrap">
-                      <input
-                        type="date"
-                        value={returnDate}
-                        onChange={(e) => setReturnDate(e.target.value)}
-                        className={heroSearchDateInputClass}
-                        disabled={tripType === "oneway"}
-                        min={departDate || undefined}
-                      />
-                    </div>
-                  </label>
                   <div className={heroSearchTravellerCellClass}>
                     <span className={heroSearchLabelClass}>Travellers &amp; class</span>
                     <div className="mt-1 grid min-w-0 grid-cols-2 gap-2 sm:mt-1.5 sm:grid-cols-1 sm:gap-1.5">
@@ -419,9 +379,10 @@ export default function Home() {
                   <div className={heroSearchSubmitCellClass}>
                     <button
                       type="submit"
-                      className="btn-premium inline-flex h-11 min-h-[44px] w-full max-w-[220px] items-center justify-center rounded-lg bg-[#0b2f57] px-6 text-sm font-bold tracking-wide text-white shadow-[0_8px_20px_rgba(11,47,87,0.35)] transition hover:bg-[#092847] active:scale-[0.98] sm:max-w-none lg:min-w-[112px]"
+                      className="btn-premium inline-flex h-11 min-h-[44px] w-full max-w-[220px] items-center justify-center gap-2 rounded-lg bg-[#0b2f57] px-6 text-sm font-bold tracking-wide text-white shadow-[0_8px_20px_rgba(11,47,87,0.35)] transition hover:bg-[#092847] active:scale-[0.98] sm:max-w-none lg:min-w-[132px]"
                     >
-                      Search
+                      <WhatsAppIcon className="h-4 w-4" />
+                      Enquiry Now
                     </button>
                   </div>
                 </div>

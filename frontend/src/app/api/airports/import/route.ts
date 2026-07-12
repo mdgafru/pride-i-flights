@@ -4,6 +4,7 @@ import { buildAirportSeo } from "@/lib/airport-meta";
 import { findLocalAirportByIata, insertLocalAirport } from "@/lib/airport-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { mapAirportRows, parseExcelBuffer } from "@/lib/excel-import";
+import { useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
@@ -63,18 +64,23 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const existing = await findLocalAirportByIata(iataCode);
-      if (existing) {
-        skipped.push(iataCode);
+      if (useLocalStorage()) {
+        const existing = await findLocalAirportByIata(iataCode);
+        if (existing) {
+          skipped.push(iataCode);
+          continue;
+        }
+
+        try {
+          await insertLocalAirport(payload);
+          imported.push(iataCode);
+        } catch {
+          errors.push(iataCode);
+        }
         continue;
       }
 
-      try {
-        await insertLocalAirport(payload);
-        imported.push(iataCode);
-      } catch {
-        errors.push(iataCode);
-      }
+      errors.push(iataCode);
     }
 
     return NextResponse.json({

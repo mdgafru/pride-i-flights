@@ -3,6 +3,7 @@ import { readLocalDestinations } from "@/lib/destination-local";
 import { readLocalHotels } from "@/lib/hotel-local";
 import { readLocalRoutes } from "@/lib/route-local";
 import { readLocalVisas } from "@/lib/visa-local";
+import { mergeWithLocalById } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig, logSupabaseError } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import { sanitizeSlug } from "@/lib/slug-utils";
@@ -95,12 +96,8 @@ async function loadFromTable<T extends { status: string; id: string }>(
   const localItems = activeOnly
     ? (await localReader()).filter((item) => item.status === "active")
     : await localReader();
-  const seen = new Set(items.map((item) => item.id));
-  for (const item of localItems) {
-    if (!seen.has(item.id)) items.push(item);
-  }
 
-  return items;
+  return mergeWithLocalById(items, localItems);
 }
 
 export async function loadManagedDestinations(activeOnly = false) {
@@ -129,10 +126,7 @@ export async function loadManagedDestinations(activeOnly = false) {
     ? localRecords.filter((item) => item.status === "active")
     : localRecords;
 
-  const seen = new Set(records.map((item) => item.id));
-  for (const item of filteredLocal) {
-    if (!seen.has(item.id)) records.push(item);
-  }
+  records = mergeWithLocalById(records, filteredLocal);
 
   records.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   return records;

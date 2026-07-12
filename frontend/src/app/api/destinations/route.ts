@@ -10,6 +10,7 @@ import {
 } from "@/lib/destination-aggregate";
 import { findLocalDestinationBySlug, insertLocalDestination } from "@/lib/destination-local";
 import { saveDestinationById } from "@/lib/destination-store";
+import { formatStorageError, mergeWithLocalById, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import type { EntityStatus } from "@/types/airline";
 import type { DestinationRecord } from "@/types/destination";
@@ -117,6 +118,8 @@ export async function POST(request: Request) {
       siteOrigin,
     );
 
+    let storageError: unknown = null;
+
     if (hasSupabaseConfig()) {
       const supabase = createAdminClient();
       const { data, error } = await supabase.from("destinations").insert(payload).select("*").single();
@@ -129,20 +132,25 @@ export async function POST(request: Request) {
         });
       }
 
+      storageError = error;
       console.error("destination insert error:", error);
     }
 
-    const existing = await findLocalDestinationBySlug(payload.slug);
-    if (existing) {
-      return NextResponse.json({ error: "This destination already exists." }, { status: 409 });
+    if (useLocalStorage()) {
+      const existing = await findLocalDestinationBySlug(payload.slug);
+      if (existing) {
+        return NextResponse.json({ error: "This destination already exists." }, { status: 409 });
+      }
+
+      const localDestination = await insertLocalDestination(payload);
+      return NextResponse.json({
+        success: true,
+        message: "Destination saved with auto SEO.",
+        destination: localDestination,
+      });
     }
 
-    const localDestination = await insertLocalDestination(payload);
-    return NextResponse.json({
-      success: true,
-      message: "Destination saved with auto SEO.",
-      destination: localDestination,
-    });
+    return NextResponse.json({ error: formatStorageError(storageError) }, { status: 500 });
   } catch (error) {
     console.error("destinations POST error:", error);
     return NextResponse.json({ error: "Unable to add destination." }, { status: 500 });
@@ -173,6 +181,18 @@ export async function PATCH(request: Request) {
       if (!error && data) {
         return NextResponse.json({ destination: data });
       }
+
+      if (useLocalStorage()) {
+        const localDestination = await saveDestinationById(body.id, { status: body.status });
+        if (!localDestination) {
+          return NextResponse.json({ error: "Destination not found." }, { status: 404 });
+        }
+
+        return NextResponse.json({ destination: localDestination });
+      }
+
+      console.error("destination status update error:", error);
+      return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
     }
 
     const localDestination = await saveDestinationById(body.id, { status: body.status });

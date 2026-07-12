@@ -82,6 +82,7 @@ export async function saveVisaById(
     }
 
     console.error("visa supabase upsert error:", error);
+    return null;
   }
 
   try {

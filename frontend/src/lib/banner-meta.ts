@@ -35,7 +35,22 @@ export function buildDirectBannerImageUrl(
 
 export function ensureDirectImageUrl(imageUrl: string, options: BannerUrlOptions = {}) {
   if (!imageUrl) return imageUrl;
-  const fileName = extractBannerFileName(imageUrl);
+
+  const trimmed = imageUrl.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    if (/\.supabase\.co\/storage\/v1\/object\/public\//i.test(trimmed)) {
+      return trimmed;
+    }
+
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(trimmed);
+    if (!isLocalhost) return trimmed;
+
+    const fileName = extractBannerFileName(trimmed);
+    return buildDirectBannerImageUrl(fileName, options);
+  }
+
+  const fileName = extractBannerFileName(trimmed);
   return buildDirectBannerImageUrl(fileName, options);
 }
 

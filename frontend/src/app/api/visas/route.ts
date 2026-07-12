@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { getSiteOrigin } from "@/lib/banner-meta";
+import { formatStorageError, mergeWithLocalById, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import { buildVisaSeo } from "@/lib/visa-meta";
@@ -73,10 +74,7 @@ async function loadVisas(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
     ? localVisas.filter((item) => item.status === "active")
     : localVisas;
 
-  const seen = new Set(visas.map((item) => item.id));
-  for (const item of filteredLocal) {
-    if (!seen.has(item.id)) visas.push(item);
-  }
+  visas = mergeWithLocalById(visas, filteredLocal);
 
   visas.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -176,6 +174,8 @@ export async function POST(request: Request) {
       status: (input.status === "pending" ? "pending" : "active") as EntityStatus,
     };
 
+    let storageError: unknown = null;
+
     if (hasSupabaseConfig()) {
       const supabase = createAdminClient();
       const { data, error } = await supabase.from("visas").insert(payload).select("*").single();
@@ -188,20 +188,25 @@ export async function POST(request: Request) {
         });
       }
 
+      storageError = error;
       console.error("visa insert error:", error);
     }
 
-    const existing = await findLocalVisaBySlug(seo.slug);
-    if (existing) {
-      return NextResponse.json({ error: "This visa service already exists." }, { status: 409 });
+    if (useLocalStorage()) {
+      const existing = await findLocalVisaBySlug(seo.slug);
+      if (existing) {
+        return NextResponse.json({ error: "This visa service already exists." }, { status: 409 });
+      }
+
+      const localVisa = await insertLocalVisa(payload);
+      return NextResponse.json({
+        success: true,
+        message: "Visa service saved with auto SEO.",
+        visa: localVisa,
+      });
     }
 
-    const localVisa = await insertLocalVisa(payload);
-    return NextResponse.json({
-      success: true,
-      message: "Visa service saved with auto SEO.",
-      visa: localVisa,
-    });
+    return NextResponse.json({ error: formatStorageError(storageError) }, { status: 500 });
   } catch (error) {
     console.error("visas POST error:", error);
     return NextResponse.json({ error: "Unable to add visa service." }, { status: 500 });
@@ -232,6 +237,18 @@ export async function PATCH(request: Request) {
       if (!error && data) {
         return NextResponse.json({ visa: data });
       }
+
+      if (useLocalStorage()) {
+        const localVisa = await saveVisaById(body.id, { status: body.status });
+        if (!localVisa) {
+          return NextResponse.json({ error: "Visa not found." }, { status: 404 });
+        }
+
+        return NextResponse.json({ visa: localVisa });
+      }
+
+      console.error("visa status update error:", error);
+      return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
     }
 
     const localVisa = await saveVisaById(body.id, { status: body.status });

@@ -4,6 +4,7 @@ import { buildAirlineSeo } from "@/lib/airline-meta";
 import { findLocalAirlineByIata, insertLocalAirline } from "@/lib/airline-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { mapAirlineRows, parseExcelBuffer } from "@/lib/excel-import";
+import { useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
@@ -63,18 +64,23 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const existing = await findLocalAirlineByIata(iataCode);
-      if (existing) {
-        skipped.push(iataCode);
+      if (useLocalStorage()) {
+        const existing = await findLocalAirlineByIata(iataCode);
+        if (existing) {
+          skipped.push(iataCode);
+          continue;
+        }
+
+        try {
+          await insertLocalAirline(payload);
+          imported.push(iataCode);
+        } catch {
+          errors.push(iataCode);
+        }
         continue;
       }
 
-      try {
-        await insertLocalAirline(payload);
-        imported.push(iataCode);
-      } catch {
-        errors.push(iataCode);
-      }
+      errors.push(iataCode);
     }
 
     return NextResponse.json({

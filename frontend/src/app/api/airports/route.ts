@@ -3,6 +3,7 @@ import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { buildAirportSeo } from "@/lib/airport-meta";
 import { findLocalAirportByIata, insertLocalAirport, readDeletedAirportCodes, readLocalAirports, updateLocalAirportStatus } from "@/lib/airport-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
+import { formatStorageError, mergeWithLocalByCode, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient } from "@/lib/supabase-admin";
 import type { EntityStatus } from "@/types/airline";
 import type { Airport } from "@/types/airport";
@@ -25,10 +26,7 @@ async function loadAirports(activeOnly: boolean, siteOrigin = getSiteOrigin()) {
     ? localAirports.filter((item) => item.status === "active")
     : localAirports;
 
-  const seen = new Set(airports.map((item) => item.id));
-  for (const item of filteredLocal) {
-    if (!seen.has(item.id)) airports.push(item);
-  }
+  airports = mergeWithLocalByCode(airports, filteredLocal);
 
   airports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -123,17 +121,22 @@ export async function POST(request: Request) {
     }
 
     console.error("airport insert error:", error);
-    const existing = await findLocalAirportByIata(iataCode);
-    if (existing) {
-      return NextResponse.json({ error: `Airport with IATA code ${iataCode} already exists.` }, { status: 409 });
+
+    if (useLocalStorage()) {
+      const existing = await findLocalAirportByIata(iataCode);
+      if (existing) {
+        return NextResponse.json({ error: `Airport with IATA code ${iataCode} already exists.` }, { status: 409 });
+      }
+
+      const localAirport = await insertLocalAirport(payload);
+      return NextResponse.json({
+        success: true,
+        message: "Airport saved locally with auto SEO and page URL.",
+        airport: localAirport,
+      });
     }
 
-    const localAirport = await insertLocalAirport(payload);
-    return NextResponse.json({
-      success: true,
-      message: "Airport saved locally with auto SEO and page URL.",
-      airport: localAirport,
-    });
+    return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
   } catch (error) {
     console.error("airports POST error:", error);
     return NextResponse.json({ error: "Unable to add airport." }, { status: 500 });
@@ -168,12 +171,17 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ airport: data });
     }
 
-    const localAirport = await updateLocalAirportStatus(body.id, body.status);
-    if (!localAirport) {
-      return NextResponse.json({ error: "Airport not found." }, { status: 404 });
+    if (useLocalStorage()) {
+      const localAirport = await updateLocalAirportStatus(body.id, body.status);
+      if (!localAirport) {
+        return NextResponse.json({ error: "Airport not found." }, { status: 404 });
+      }
+
+      return NextResponse.json({ airport: localAirport });
     }
 
-    return NextResponse.json({ airport: localAirport });
+    console.error("airport status update error:", error);
+    return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
   } catch (error) {
     console.error("airports PATCH error:", error);
     return NextResponse.json({ error: "Unable to update airport." }, { status: 500 });

@@ -98,6 +98,7 @@ export async function saveDestinationById(
     }
 
     console.error("destination supabase upsert error:", error);
+    return null;
   }
 
   try {

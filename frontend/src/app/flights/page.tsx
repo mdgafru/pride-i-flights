@@ -9,6 +9,8 @@ import { WhatsAppIcon } from "@/components/icons";
 import {
   buildFlightDeal,
   buildFlightEnquiryUrl,
+  findMatchingRouteAirline,
+  openFlightSearchEnquiry,
   sortFlightDeals,
   type FlightDeal,
 } from "@/lib/flight-deal-display";
@@ -21,16 +23,10 @@ import type { Route } from "@/types/route";
 
 type SortOption = "newest" | "route" | "airline";
 
-const tripTypeOptions = [
-  { value: "return", label: "Return" },
-  { value: "oneway", label: "One way" },
-];
-
 const flightsLabelClass =
   "mb-0.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-white/90";
 const flightsFieldClass =
   "min-h-[40px] w-full rounded-lg border border-white/25 bg-white px-2.5 py-2 text-sm font-semibold text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-white focus:ring-2 focus:ring-white/30";
-const flightsTripPillClass = "rounded-md px-3 py-1.5 text-xs font-bold transition sm:text-sm";
 
 function DealCardSkeleton() {
   return (
@@ -77,11 +73,10 @@ export default function FlightsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [tripType, setTripType] = useState("return");
   const [fromQuery, setFromQuery] = useState("");
   const [toQuery, setToQuery] = useState("");
   const [departDate, setDepartDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
+  const [travelClass, setTravelClass] = useState("economy");
 
   const loadRoutes = useCallback(async (silent = false) => {
     if (!silent) {
@@ -129,19 +124,11 @@ export default function FlightsPage() {
     const params = new URLSearchParams(window.location.search);
     const from = params.get("from");
     const to = params.get("to");
-    const trip = params.get("trip");
     const depart = params.get("depart");
-    const returnParam = params.get("return");
     if (from) setFromQuery(from);
     if (to) setToQuery(to);
-    if (trip === "oneway" || trip === "return") setTripType(trip);
     if (depart) setDepartDate(depart);
-    if (returnParam) setReturnDate(returnParam);
   }, []);
-
-  useEffect(() => {
-    if (tripType === "oneway") setReturnDate("");
-  }, [tripType]);
 
   useEffect(() => {
     const onFocus = () => loadRoutes(true);
@@ -198,36 +185,14 @@ export default function FlightsPage() {
       >
         <div className="mx-auto max-w-[1260px] px-4 pb-4 sm:mt-[-6px]">
           <div className="overflow-x-hidden rounded-xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] shadow-[0_16px_36px_rgba(179,0,15,0.3)] ring-1 ring-white/20">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/15 px-3 py-2 sm:px-3.5">
-              <div className="inline-flex rounded-lg border border-white/20 bg-white/10 p-0.5">
-                {tripTypeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setTripType(option.value)}
-                    className={`${flightsTripPillClass} ${
-                      tripType === option.value
-                        ? "bg-white text-[#e30613] shadow-sm"
-                        : "text-white hover:bg-white/15"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
+            <div className="flex flex-wrap items-center justify-end gap-2 border-b border-white/15 px-3 py-2 sm:px-3.5">
               <p className="text-[10px] font-medium text-white/70">
                 {locationOptions.length} cities
               </p>
             </div>
 
             <div className="p-3 sm:p-3.5">
-              <div
-                className={`grid grid-cols-1 gap-2 sm:grid-cols-2 lg:items-center lg:gap-2 ${
-                  tripType === "return"
-                    ? "lg:grid-cols-[1fr_auto_1fr_1fr_1fr_1fr_auto]"
-                    : "lg:grid-cols-[1fr_auto_1fr_1fr_1fr_auto]"
-                }`}
-              >
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr_auto] lg:items-center lg:gap-2">
                 <FlightLocationAutocomplete
                   label="From"
                   value={fromQuery}
@@ -270,35 +235,36 @@ export default function FlightsPage() {
                   />
                 </label>
 
-                {tripType === "return" ? (
-                  <label className="flight-date-field block">
-                    <span className={flightsLabelClass}>Return</span>
-                    <input
-                      type="date"
-                      value={returnDate}
-                      onChange={(e) => setReturnDate(e.target.value)}
-                      min={departDate || undefined}
-                      className={`${flightsFieldClass} flight-date-input`}
-                    />
-                  </label>
-                ) : null}
-
                 <label className="block">
                   <span className={flightsLabelClass}>Class</span>
-                  <select className={flightsFieldClass}>
-                    <option>Economy</option>
-                    <option>Premium Economy</option>
-                    <option>Business</option>
-                    <option>First</option>
+                  <select
+                    value={travelClass}
+                    onChange={(e) => setTravelClass(e.target.value)}
+                    className={flightsFieldClass}
+                  >
+                    <option value="economy">Economy</option>
+                    <option value="premium">Premium Economy</option>
+                    <option value="business">Business</option>
+                    <option value="first">First</option>
                   </select>
                 </label>
 
                 <button
                   type="button"
-                  onClick={() => loadRoutes()}
-                  className="btn-premium inline-flex h-10 min-h-[40px] w-full items-center justify-center rounded-lg bg-[#0b2f57] px-5 text-sm font-bold tracking-wide text-white shadow-[0_6px_16px_rgba(11,47,87,0.3)] transition hover:bg-[#092847] active:scale-[0.98] lg:w-auto lg:min-w-[100px]"
+                  onClick={() => {
+                    const airline = findMatchingRouteAirline(routes, fromQuery, toQuery);
+                    openFlightSearchEnquiry({
+                      from: fromQuery,
+                      to: toQuery,
+                      departDate,
+                      travelClass,
+                      airline,
+                    });
+                  }}
+                  className="btn-premium inline-flex h-10 min-h-[40px] w-full items-center justify-center gap-2 rounded-lg bg-[#0b2f57] px-5 text-sm font-bold tracking-wide text-white shadow-[0_6px_16px_rgba(11,47,87,0.3)] transition hover:bg-[#092847] active:scale-[0.98] lg:w-auto lg:min-w-[132px]"
                 >
-                  Search
+                  <WhatsAppIcon className="h-4 w-4" />
+                  Enquiry Now
                 </button>
               </div>
             </div>
