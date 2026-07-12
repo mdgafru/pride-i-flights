@@ -139,11 +139,11 @@ export function FlightLocationAutocomplete({
                     key={option.key}
                     role="option"
                     aria-selected={index === activeIndex}
-                    className={`cursor-pointer px-3 py-2.5 transition ${
+                    className={`cursor-pointer touch-manipulation px-3 py-2.5 transition ${
                       index === activeIndex ? "bg-[#f8fafc]" : "hover:bg-[#f8fafc]"
                     }`}
                     onMouseEnter={() => setActiveIndex(index)}
-                    onMouseDown={(event) => {
+                    onPointerDown={(event) => {
                       event.preventDefault();
                       selectOption(option);
                     }}
