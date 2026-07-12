@@ -1,24 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ContactSelect } from "@/components/ContactSelect";
 import {
   DEFAULT_DESTINATION_FILTERS,
   DESTINATION_MONTHS,
   DESTINATION_SORT_OPTIONS,
   DESTINATION_TRAVELERS,
+  fetchDestinationOptionsFromApi,
   fetchDestinationsFromApi,
   filterDestinations,
-  getDestinationSuggestions,
   searchDestinations,
 } from "@/lib/destinations";
 import type { Destination, DestinationSearchFilters } from "@/types/destination";
 
 const fieldLabelClass = "text-xs font-bold uppercase tracking-wide text-slate-600";
-const fieldClass =
-  "mt-1.5 w-full min-w-0 border-0 bg-transparent p-0 text-[15px] font-semibold leading-snug text-[#0b2f57] outline-none placeholder:font-medium placeholder:text-slate-500";
 const selectClass =
   "mt-1.5 w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 pr-6 text-[15px] font-semibold text-[#0b2f57] outline-none";
 const imageBadgeClass =
@@ -54,9 +53,6 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
 }
 
 export function DestinationSearchSection() {
-  const listId = useId();
-  const destinationRef = useRef<HTMLDivElement>(null);
-
   const [draftFilters, setDraftFilters] = useState<DestinationSearchFilters>(
     DEFAULT_DESTINATION_FILTERS,
   );
@@ -64,30 +60,30 @@ export function DestinationSearchSection() {
     DEFAULT_DESTINATION_FILTERS,
   );
   const [allDestinations, setAllDestinations] = useState<Destination[]>([]);
+  const [destinationOptions, setDestinationOptions] = useState([
+    { label: "All Destinations", value: "" },
+  ]);
   const [results, setResults] = useState<Destination[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     async function loadDestinations() {
-      const destinations = await fetchDestinationsFromApi();
+      const [destinations, options] = await Promise.all([
+        fetchDestinationsFromApi(),
+        fetchDestinationOptionsFromApi(),
+      ]);
       setAllDestinations(destinations);
+      setDestinationOptions(options);
       setResults(filterDestinations(destinations, DEFAULT_DESTINATION_FILTERS));
     }
 
     loadDestinations();
   }, []);
 
-  const suggestions = useMemo(
-    () => getDestinationSuggestions(draftFilters.query, allDestinations),
-    [draftFilters.query, allDestinations],
-  );
-
   const applyFilters = useCallback(
     (filters: DestinationSearchFilters) => {
       setResults(filterDestinations(allDestinations, filters));
       setAppliedFilters(filters);
-      setShowSuggestions(false);
     },
     [allDestinations],
   );
@@ -100,7 +96,6 @@ export function DestinationSearchSection() {
       setAppliedFilters(filters);
     } finally {
       setIsSearching(false);
-      setShowSuggestions(false);
     }
   }, []);
 
@@ -170,17 +165,6 @@ export function DestinationSearchSection() {
     return chips;
   }, [appliedFilters, applyFilters]);
 
-  useEffect(() => {
-    if (!showSuggestions) return;
-    const onDoc = (e: MouseEvent) => {
-      if (!destinationRef.current?.contains(e.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [showSuggestions]);
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     runSearch(draftFilters);
@@ -191,61 +175,32 @@ export function DestinationSearchSection() {
     applyFilters(DEFAULT_DESTINATION_FILTERS);
   };
 
-  const handleSuggestionSelect = (place: Destination) => {
-    const next = { ...draftFilters, query: place.title };
-    setDraftFilters(next);
-    runSearch(next);
-  };
-
   return (
     <>
       <section className="border-y border-slate-200 bg-[#f8fafc]">
         <div className="mx-auto max-w-[1260px] px-4 py-6 md:py-8">
           <form onSubmit={handleSearch}>
-            <div className="mx-auto max-w-5xl overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-[0_10px_28px_rgba(11,47,87,0.1)]">
+            <div className="relative z-20 mx-auto max-w-5xl overflow-visible rounded-xl border border-slate-200/90 bg-white shadow-[0_10px_28px_rgba(11,47,87,0.1)]">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
-                <div
-                  ref={destinationRef}
-                  className="relative border-b border-slate-200 px-3.5 py-3 sm:border-r sm:border-b-0 lg:px-4"
-                >
-                  <label htmlFor="destination-query" className={fieldLabelClass}>
-                    Destination
-                  </label>
-                  <input
-                    id="destination-query"
-                    type="text"
+                <div className="relative border-b border-slate-200 px-3.5 py-3 sm:border-r sm:border-b-0 lg:px-4">
+                  <span className={fieldLabelClass}>Destination</span>
+                  <ContactSelect
                     value={draftFilters.query}
-                    onChange={(e) => {
-                      setDraftFilters((prev) => ({ ...prev, query: e.target.value }));
-                      setShowSuggestions(true);
+                    onChange={(value) => {
+                      const next = { ...draftFilters, query: value };
+                      setDraftFilters(next);
+                      runSearch(next);
                     }}
-                    onFocus={() => setShowSuggestions(true)}
-                    placeholder="Where do you want to go?"
-                    autoComplete="off"
-                    className={fieldClass}
+                    options={destinationOptions}
+                    ariaLabel="Select destination"
+                    selectedLabel={
+                      draftFilters.query
+                        ? destinationOptions.find((option) => option.value === draftFilters.query)?.label
+                        : "All Destinations"
+                    }
+                    className="mt-1"
+                    listClassName="z-50 max-h-72 min-w-full"
                   />
-
-                  {showSuggestions && suggestions.length > 0 && (
-                    <ul
-                      id={listId}
-                      className="absolute top-full right-0 left-0 z-30 mt-1 max-h-56 overflow-auto border border-slate-200 bg-white py-1 shadow-[0_10px_24px_rgba(15,23,42,0.12)]"
-                    >
-                      {suggestions.map((place) => (
-                        <li key={place.id}>
-                          <button
-                            type="button"
-                            onClick={() => handleSuggestionSelect(place)}
-                            className="flex w-full px-4 py-3 text-left text-sm transition hover:bg-slate-50"
-                          >
-                            <span className="font-semibold text-[#0b2f57]">{place.title}</span>
-                            <span className="mt-0.5 block text-xs text-gray-500">
-                              {place.subtitle} · {place.region}
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </div>
 
                 <div className="border-b border-slate-200 px-3.5 py-3 sm:border-r sm:border-b-0 lg:px-4">

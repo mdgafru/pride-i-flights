@@ -39,7 +39,7 @@ async function loadFromTable<T extends Timestamped>(
       return [];
     }
 
-    return (data ?? []) as T[];
+    return (data ?? []) as unknown as T[];
   } catch (error) {
     logSupabaseError(`${label} activity error:`, error);
     return [];

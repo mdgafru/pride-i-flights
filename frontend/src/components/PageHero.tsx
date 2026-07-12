@@ -66,7 +66,7 @@ export function PageHero({
           ) : null}
           {brandLogo ? (
             <div className={`mt-2 ${centered ? "flex justify-center" : ""}`}>
-              <BrandLogo variant="hero" />
+              <BrandLogo variant="hero" tone="onDark" />
             </div>
           ) : null}
           {!brandLogo && title ? (

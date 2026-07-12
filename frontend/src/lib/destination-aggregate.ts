@@ -217,7 +217,7 @@ export function buildManagedDestinationPayload(
     country: string;
     subtitle?: string;
     region?: Destination["region"];
-    travel_styles?: DestinationTravelStyle[];
+    travel_styles?: DestinationRecord["travel_styles"];
     image_url?: string | null;
     packages_count?: number;
     popular_score?: number;
