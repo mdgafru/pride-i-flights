@@ -243,6 +243,6 @@ export function buildManagedDestinationPayload(
     og_title: seo.og_title,
     og_description: seo.og_description,
     seo_keywords: seo.seo_keywords,
-    status: input.status || ("pending" as const),
+    status: input.status || ("active" as const),
   };
 }

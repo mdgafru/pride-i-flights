@@ -37,7 +37,7 @@ const passengerOptions = [
 
 const heroSearchLabelClass = "text-[11px] font-extrabold uppercase tracking-wide text-white/90";
 const heroSearchCellClass =
-  "flex min-h-[56px] min-w-0 flex-col justify-center overflow-visible border-b border-white/15 bg-white/10 px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 sm:py-3 lg:px-4 lg:last:border-r-0";
+  "flex min-h-[56px] min-w-0 flex-col justify-center overflow-x-hidden border-b border-white/15 bg-white/10 px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-4 sm:py-3 lg:px-4 lg:last:border-r-0";
 const heroSearchDateCellClass =
   "flex min-h-[56px] min-w-0 flex-col justify-center border-b border-white/15 bg-white/10 px-3 py-2.5 sm:min-h-[82px] sm:border-r sm:border-b-0 sm:px-3.5 sm:pr-4 sm:py-3 lg:px-3.5 lg:pr-4";
 const heroSearchTravellerCellClass = heroSearchCellClass;
@@ -48,7 +48,7 @@ const heroLocationInputClass =
 const heroSearchDateInputClass =
   "hero-search-date mt-0.5 w-full min-w-0 rounded-md border border-white/25 bg-white px-2.5 py-2 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none disabled:opacity-45 sm:mt-1";
 const heroSearchBarClass =
-  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 overflow-visible rounded-xl border border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)_auto]";
+  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 overflow-x-hidden rounded-xl border border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(118px,1.05fr)_minmax(0,1fr)_auto]";
 const heroSearchSubmitCellClass =
   "flex min-h-[56px] items-center justify-center border-b border-white/15 bg-white/10 px-3 py-3 sm:col-span-2 sm:border-b-0 lg:col-span-1 lg:min-h-[82px] lg:border-l lg:border-white/15 lg:px-4";
 const heroTripPillClass =
@@ -285,10 +285,10 @@ export default function Home() {
         />
         <div className="hero-overlay-premium pointer-events-none absolute inset-0 z-[1]" />
 
-        <div className="relative z-[2] mx-auto flex w-full max-w-[1420px] flex-col gap-6 px-8 sm:gap-5 sm:px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+        <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[1420px] flex-col gap-6 px-4 sm:gap-5 sm:px-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
           <div className="flex w-full min-w-0 flex-1 flex-col max-sm:mt-4 max-sm:px-1 sm:mt-0 sm:px-0 lg:max-w-none">
             <form
-              className="relative z-20 w-full space-y-3 overflow-visible rounded-2xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] p-4 shadow-[0_20px_48px_rgba(179,0,15,0.35)] ring-1 ring-white/20 max-sm:mx-auto max-sm:max-w-full sm:space-y-0 sm:p-4"
+              className="relative z-20 w-full min-w-0 space-y-3 overflow-x-hidden rounded-2xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] p-4 shadow-[0_20px_48px_rgba(179,0,15,0.35)] ring-1 ring-white/20 max-sm:mx-auto max-sm:max-w-full sm:space-y-0 sm:p-4"
               onSubmit={(e) => {
                 e.preventDefault();
                 const params = new URLSearchParams();
@@ -321,9 +321,9 @@ export default function Home() {
               </div>
 
               <div className="border-t border-white/15 pt-3 sm:mt-2">
-                <div className={`${heroSearchBarClass} max-sm:mx-1 sm:mx-0`}>
-                  <div className="flex min-h-[56px] min-w-0 flex-row items-stretch gap-1 overflow-visible border-b border-white/15 bg-white/10 sm:min-h-[82px] sm:col-span-2 sm:gap-0 sm:border-r sm:border-b-0 lg:col-span-1">
-                    <div className="flex min-w-0 flex-1 flex-col justify-center overflow-visible px-2.5 py-2.5 sm:px-4 sm:py-4">
+                <div className={`${heroSearchBarClass} max-sm:mx-0 sm:mx-0`}>
+                  <div className="flex min-h-[56px] min-w-0 flex-row items-stretch gap-1 overflow-x-hidden border-b border-white/15 bg-white/10 sm:min-h-[82px] sm:col-span-2 sm:gap-0 sm:border-r sm:border-b-0 lg:col-span-1">
+                    <div className="flex min-w-0 flex-1 flex-col justify-center overflow-x-hidden px-2.5 py-2.5 sm:px-4 sm:py-4">
                       <FlightLocationAutocomplete
                         label="From"
                         value={fromQuery}
@@ -352,7 +352,7 @@ export default function Home() {
                       </button>
                     </div>
 
-                    <div className="flex min-w-0 flex-1 flex-col justify-center overflow-visible border-l border-white/15 px-2.5 py-2.5 sm:border-l-0 sm:px-4 sm:py-4">
+                    <div className="flex min-w-0 flex-1 flex-col justify-center overflow-x-hidden border-l border-white/15 px-2.5 py-2.5 sm:border-l-0 sm:px-4 sm:py-4">
                       <FlightLocationAutocomplete
                         label="To"
                         value={toQuery}

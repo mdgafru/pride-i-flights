@@ -112,7 +112,7 @@ export async function POST(request: Request) {
         image_url: String(body.image_url || "").trim() || null,
         packages_count: Number(body.packages_count || 0),
         popular_score: Number(body.popular_score || 0),
-        status: body.status === "active" ? "active" : "pending",
+        status: body.status === "pending" ? "pending" : "active",
       },
       siteOrigin,
     );

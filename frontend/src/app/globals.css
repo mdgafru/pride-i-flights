@@ -18,6 +18,14 @@ html.dark {
   --nav-text: #e2e8f0;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 7.25rem;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -25,9 +33,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  position: relative;
+  overscroll-behavior-x: none;
   background-image:
     radial-gradient(circle at 12% 16%, rgba(227, 6, 19, 0.03), transparent 30%),
     radial-gradient(circle at 88% 0%, rgba(4, 36, 72, 0.05), transparent 38%);
+}
+
+main,
+header,
+footer,
+section {
+  max-width: 100%;
 }
 
 html.dark body {
@@ -36,10 +56,18 @@ html.dark body {
     radial-gradient(circle at 88% 0%, rgba(59, 130, 246, 0.08), transparent 38%);
 }
 
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 7.25rem;
-  overflow-x: hidden;
+@media (max-width: 639px) {
+  html,
+  body {
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
+
+  .hero-search-bar,
+  .content-page-hero,
+  .hero-depth {
+    overflow-x: hidden;
+  }
 }
 
 @media (min-width: 640px) {

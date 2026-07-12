@@ -152,7 +152,7 @@ export async function POST(request: Request) {
       h1_heading: meta.h1Heading,
       image_url: imageUrl,
       storage_path: storagePath,
-      status: "pending" as const,
+      status: "active" as const,
     };
 
     const { data, error } = await supabase
@@ -171,8 +171,8 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         message: storedLocally
-          ? "Banner uploaded. Image URL is ready on your site domain."
-          : "Banner uploaded successfully. Status is pending.",
+          ? "Banner uploaded and activated. Image URL is ready on your site domain."
+          : "Banner uploaded and activated.",
         banner: localBanner,
       });
     }
@@ -180,8 +180,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: storedLocally
-        ? "Banner uploaded successfully. Status is pending."
-        : "Banner uploaded successfully. Status is pending.",
+        ? "Banner uploaded and activated."
+        : "Banner uploaded and activated.",
       banner: data,
     });
   } catch (error) {

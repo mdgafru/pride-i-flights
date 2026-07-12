@@ -180,7 +180,7 @@ export function DestinationSearchSection() {
       <section className="border-y border-slate-200 bg-[#f8fafc]">
         <div className="mx-auto max-w-[1260px] px-4 py-6 md:py-8">
           <form onSubmit={handleSearch}>
-            <div className="relative z-20 mx-auto max-w-5xl overflow-visible rounded-xl border border-slate-200/90 bg-white shadow-[0_10px_28px_rgba(11,47,87,0.1)]">
+            <div className="relative z-20 mx-auto max-w-5xl overflow-x-hidden rounded-xl border border-slate-200/90 bg-white shadow-[0_10px_28px_rgba(11,47,87,0.1)]">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <div className="relative border-b border-slate-200 px-3.5 py-3 sm:border-r sm:border-b-0 lg:px-4">
                   <span className={fieldLabelClass}>Destination</span>

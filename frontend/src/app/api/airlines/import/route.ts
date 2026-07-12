@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         meta_description: seo.meta_description,
         h1_heading: seo.h1_heading,
         page_url: seo.page_url,
-        status: "pending" as const,
+        status: "active" as const,
       };
 
       const { error } = await supabase.from("airlines").insert(payload);

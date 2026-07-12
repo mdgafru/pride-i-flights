@@ -31,7 +31,7 @@ export function PageHero({
 }: PageHeroProps) {
   return (
     <section
-      className={`hero-depth relative bg-cover bg-center ${children ? "overflow-visible" : "overflow-hidden"}`}
+      className={`hero-depth relative bg-cover bg-center overflow-x-hidden ${children ? "overflow-y-visible" : "overflow-hidden"}`}
       style={{
         backgroundImage: `linear-gradient(135deg, rgba(4, 36, 72, 0.88) 0%, rgba(11, 47, 87, 0.72) 45%, rgba(4, 36, 72, 0.55) 100%), url('${image}')`,
       }}

@@ -16,7 +16,7 @@ create table if not exists public.routes (
   meta_description text not null,
   h1_heading text not null,
   page_url text not null,
-  status text not null default 'pending' check (status in ('pending', 'active')),
+  status text not null default 'active' check (status in ('pending', 'active')),
   created_at timestamptz not null default now()
 );
 

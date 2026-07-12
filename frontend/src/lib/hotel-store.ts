@@ -18,7 +18,7 @@ function withHotelDefaults(hotel: Partial<Hotel> & Pick<Hotel, "id" | "name" | "
     og_title: "",
     og_description: "",
     seo_keywords: "",
-    status: "pending",
+    status: "active",
     created_at: new Date().toISOString(),
     ...hotel,
   };

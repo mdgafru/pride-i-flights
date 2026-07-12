@@ -84,7 +84,7 @@ export async function insertLocalBanner(input: {
     h1_heading: input.h1_heading || "",
     image_url: input.image_url,
     storage_path: input.storage_path,
-    status: input.status || "pending",
+    status: input.status || "active",
     created_at: new Date().toISOString(),
   };
   banners.unshift(banner);

@@ -16,7 +16,7 @@ create table if not exists public.visas (
   og_title text not null default '',
   og_description text not null default '',
   seo_keywords text not null default '',
-  status text not null default 'pending' check (status in ('pending', 'active')),
+  status text not null default 'active' check (status in ('pending', 'active')),
   created_at timestamptz not null default now()
 );
 

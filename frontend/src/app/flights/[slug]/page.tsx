@@ -77,42 +77,13 @@ export default async function FlightRoutePage({ params }: FlightRoutePageProps) 
       <section className="mx-auto max-w-[1260px] px-4 py-10 sm:py-12">
         <div className="mx-auto max-w-3xl">
           <article className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[0_8px_24px_rgba(11,47,87,0.06)] sm:p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-[#0b2f57] text-xs font-bold text-white">
-                  {deal.airlineCode}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#0b2f57]">{deal.airline}</p>
-                  <h2 className="text-lg font-bold text-[#0b2f57]">
-                    {deal.fromCity}
-                    <span className="mx-2 font-normal text-slate-300">→</span>
-                    {deal.toCity}
-                  </h2>
-                </div>
-              </div>
-              <span
-                className={`rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
-                  deal.stopType === "Non-stop"
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-amber-50 text-amber-700"
-                }`}
-              >
-                {deal.stopType}
-              </span>
-            </div>
-
-            <div className="mt-5 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Departure</p>
-                <p className="mt-1 text-lg font-bold text-[#0b2f57]">{deal.departure}</p>
-                <p className="text-xs font-semibold text-slate-500">{deal.fromCode}</p>
-              </div>
-              <div className="sm:text-right">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Arrival</p>
-                <p className="mt-1 text-lg font-bold text-[#0b2f57]">{deal.arrival}</p>
-                <p className="text-xs font-semibold text-slate-500">{deal.toCode}</p>
-              </div>
+            <div className="min-w-0 space-y-2">
+              <p className="text-sm font-semibold text-[#0b2f57]">{deal.airline}</p>
+              <h2 className="text-lg font-bold leading-snug text-[#0b2f57]">
+                {deal.fromCity}
+                <span className="mx-2.5 font-normal text-slate-300">→</span>
+                {deal.toCity}
+              </h2>
             </div>
 
             <p className="mt-5 text-sm leading-relaxed text-slate-600">

@@ -9,7 +9,7 @@ create table if not exists public.banners (
   h1_heading text,
   image_url text not null,
   storage_path text not null,
-  status text not null default 'pending' check (status in ('pending', 'active')),
+  status text not null default 'active' check (status in ('pending', 'active')),
   created_at timestamptz not null default now()
 );
 

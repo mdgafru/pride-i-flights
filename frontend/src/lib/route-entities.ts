@@ -30,7 +30,7 @@ export async function upsertLinkedEntities(
         meta_description: seo.meta_description,
         h1_heading: seo.h1_heading,
         page_url: seo.page_url,
-        status: "pending" as const,
+        status: "active" as const,
       };
       const existing = await findLocalAirlineByIata(code);
       if (!existing) {
@@ -59,7 +59,7 @@ export async function upsertLinkedEntities(
       meta_description: seo.meta_description,
       h1_heading: seo.h1_heading,
       page_url: seo.page_url,
-      status: "pending" as const,
+      status: "active" as const,
     };
     const existing = await findLocalAirportByIata(code);
     if (!existing) {

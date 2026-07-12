@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       meta_description: seo.meta_description,
       h1_heading: seo.h1_heading,
       page_url: seo.page_url,
-      status: (body.status === "active" ? "active" : "pending") as EntityStatus,
+      status: (body.status === "pending" ? "pending" : "active") as EntityStatus,
     };
 
     const supabase = createAdminClient();

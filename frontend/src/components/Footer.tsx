@@ -20,7 +20,7 @@ const serviceLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative w-full overflow-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
+    <footer className="relative w-full max-w-full overflow-x-hidden border-t border-[#dbe4f0] bg-gradient-to-b from-[#0b2f57] to-[#072040] text-white">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={FOOTER_SKY_IMAGE}

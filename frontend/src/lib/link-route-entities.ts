@@ -35,7 +35,7 @@ export async function syncLocalAirlinesFromRoutes(siteOrigin: string) {
       meta_description: seo.meta_description,
       h1_heading: seo.h1_heading,
       page_url: seo.page_url,
-      status: "pending",
+      status: "active",
     });
     seen.add(code);
   }
@@ -70,7 +70,7 @@ export async function upsertLinkedEntities(
         meta_description: seo.meta_description,
         h1_heading: seo.h1_heading,
         page_url: seo.page_url,
-        status: "pending" as const,
+        status: "active" as const,
       };
       const existing = await findLocalAirlineByIata(code);
       if (!existing) {
@@ -102,7 +102,7 @@ export async function upsertLinkedEntities(
       meta_description: seo.meta_description,
       h1_heading: seo.h1_heading,
       page_url: seo.page_url,
-      status: "pending" as const,
+      status: "active" as const,
     };
     const existing = await findLocalAirportByIata(code);
     if (!existing) {

@@ -374,7 +374,7 @@ export default function HotelsPage() {
               event.preventDefault();
               setSearchQuery(destination);
             }}
-            className="relative z-20 mx-auto max-w-6xl overflow-visible rounded-2xl border border-slate-200/90 bg-white shadow-[0_12px_40px_rgba(11,47,87,0.1)]"
+            className="relative z-20 mx-auto max-w-6xl overflow-x-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_12px_40px_rgba(11,47,87,0.1)]"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.45fr_1fr_1fr_1fr_auto]">
               <div className={`${searchFieldClass} sm:border-r lg:border-b-0`}>

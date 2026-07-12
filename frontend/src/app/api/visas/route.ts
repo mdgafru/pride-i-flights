@@ -173,7 +173,7 @@ export async function POST(request: Request) {
       og_title: seo.og_title,
       og_description: seo.og_description,
       seo_keywords: seo.seo_keywords,
-      status: (input.status === "active" ? "active" : "pending") as EntityStatus,
+      status: (input.status === "pending" ? "pending" : "active") as EntityStatus,
     };
 
     if (hasSupabaseConfig()) {

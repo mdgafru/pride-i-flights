@@ -15,7 +15,7 @@ function withRouteDefaults(route: Partial<Route> & Pick<Route, "id" | "from_city
     meta_description: "",
     h1_heading: "",
     page_url: "",
-    status: "pending",
+    status: "active",
     created_at: new Date().toISOString(),
     ...route,
   };
