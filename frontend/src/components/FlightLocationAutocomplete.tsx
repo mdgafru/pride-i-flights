@@ -57,15 +57,17 @@ export function FlightLocationAutocomplete({
 
     const wrapperRect = wrapper.getBoundingClientRect();
     const inputRect = input.getBoundingClientRect();
-    const menuWidth = Math.max(wrapperRect.width, 280);
+    const menuWidth = Math.min(Math.max(wrapperRect.width, 240), window.innerWidth - 16);
     const menuHeight = Math.min(suggestions.length, 8) * 52 + 16;
     const spaceBelow = window.innerHeight - inputRect.bottom;
     const openAbove = spaceBelow < menuHeight + 12 && inputRect.top > menuHeight + 12;
+    const maxLeft = window.innerWidth - menuWidth - 8;
+    const left = Math.max(8, Math.min(wrapperRect.left, maxLeft));
 
     setMenuPosition({
       top: openAbove ? undefined : inputRect.bottom + 6,
       bottom: openAbove ? window.innerHeight - inputRect.top + 8 : undefined,
-      left: wrapperRect.left,
+      left,
       width: menuWidth,
     });
   };
@@ -93,7 +95,7 @@ export function FlightLocationAutocomplete({
   }, [open, suggestions.length, value]);
 
   useEffect(() => {
-    const onPointerDown = (event: MouseEvent) => {
+    const onPointerDown = (event: MouseEvent | TouchEvent | PointerEvent) => {
       const target = event.target as Node;
       if (wrapperRef.current?.contains(target)) return;
       if ((target as HTMLElement).closest?.(`[data-flight-menu="${listId}"]`)) return;
@@ -101,7 +103,13 @@ export function FlightLocationAutocomplete({
     };
 
     document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown, { passive: true });
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [listId]);
 
   function selectOption(option: FlightLocationOption) {

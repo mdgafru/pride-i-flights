@@ -303,7 +303,7 @@ export default function PackagesPage() {
               event.preventDefault();
               setSearchQuery(destination);
             }}
-            className="mx-auto max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_14px_36px_rgba(11,47,87,0.12)]"
+            className="relative z-20 mx-auto max-w-6xl overflow-visible rounded-xl border border-slate-200 bg-white shadow-[0_14px_36px_rgba(11,47,87,0.12)]"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_auto]">
               <div className="border-b border-slate-200 px-4 py-3 sm:border-r lg:border-b-0">
