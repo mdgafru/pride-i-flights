@@ -25,6 +25,7 @@ import {
   FileUp,
   Image,
   LoaderCircle,
+  Package,
   X,
 } from "lucide-react";
 
@@ -56,6 +57,7 @@ const iconByKey: Record<DashboardIconKey, typeof LayoutDashboard> = {
   image: Image,
   search: Search,
   "file-text": FileText,
+  package: Package,
   settings: Settings,
 };
 

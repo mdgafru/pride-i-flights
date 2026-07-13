@@ -7,83 +7,24 @@ import { ContactSelect } from "@/components/ContactSelect";
 import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
-import { fetchDestinationOptionsFromApi } from "@/lib/destinations";
+import { fetchDestinationOptionsFromApi, DESTINATION_MONTHS } from "@/lib/destinations";
+import { fetchPackagesFromApi, toDisplayPackage, type DisplayPackage } from "@/lib/packages";
 import { WHATSAPP_URL } from "@/lib/contact";
 
-const packages = [
-  {
-    id: "europe",
-    tag: "Best Seller",
-    title: "Romantic Europe Getaway",
-    route: "Paris · Switzerland · Italy",
-    duration: "7 Days / 6 Nights",
-    region: "Europe",
-    theme: "Honeymoon",
-    includes: ["Flight", "Hotel", "Meals", "Sightseeing"],
-    image:
-      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&h=420&q=85",
-  },
-  {
-    id: "bali",
-    tag: "Popular",
-    title: "Bali Island Escape",
-    route: "Ubud · Kuta · Nusa Dua",
-    duration: "5 Days / 4 Nights",
-    region: "Asia",
-    theme: "Beach",
-    includes: ["Flight", "Hotel", "Breakfast", "Transfers"],
-    image:
-      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=700&h=420&q=85",
-  },
-  {
-    id: "switzerland",
-    tag: "Trending",
-    title: "Switzerland Explorer",
-    route: "Zurich · Interlaken · Lucerne",
-    duration: "6 Days / 5 Nights",
-    region: "Europe",
-    theme: "Adventure",
-    includes: ["Flight", "Hotel", "Meals", "Train Pass"],
-    image:
-      "https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?auto=format&fit=crop&w=700&h=420&q=85",
-  },
-  {
-    id: "dubai",
-    tag: "Hot Deal",
-    title: "Dubai City Experience",
-    route: "Dubai · Abu Dhabi",
-    duration: "4 Days / 3 Nights",
-    region: "Middle East",
-    theme: "Family",
-    includes: ["Flight", "Hotel", "Desert Safari", "Transfers"],
-    image:
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&h=420&q=85",
-  },
-  {
-    id: "maldives",
-    tag: "Luxury",
-    title: "Maldives Honeymoon",
-    route: "Male · Overwater Villa",
-    duration: "5 Days / 4 Nights",
-    region: "Asia",
-    theme: "Luxury",
-    includes: ["Flight", "Villa", "All Meals", "Spa"],
-    image:
-      "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=700&h=420&q=85",
-  },
-  {
-    id: "singapore",
-    tag: "Family",
-    title: "Singapore Fun Trip",
-    route: "Marina Bay · Sentosa",
-    duration: "4 Days / 3 Nights",
-    region: "Asia",
-    theme: "Family",
-    includes: ["Flight", "Hotel", "Park Tickets", "Transfers"],
-    image:
-      "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=700&h=420&q=85",
-  },
+const fieldLabelClass = "text-xs font-bold uppercase tracking-wide text-slate-600";
+
+const packageTravelerOptions = [
+  { value: "1", label: "1 Traveler" },
+  { value: "2", label: "2 Travelers" },
+  { value: "3", label: "3 Travelers" },
+  { value: "4", label: "4 Travelers" },
+  { value: "family", label: "Family Group" },
 ];
+
+const monthOptions = DESTINATION_MONTHS.map((month) => ({
+  value: month.value,
+  label: month.value ? month.label : "Any Month",
+}));
 
 const trustItems = [
   { title: "Curated Packages", sub: "Handpicked holidays worldwide" },
@@ -207,10 +148,12 @@ function FilterPanel({
 }
 
 export default function PackagesPage() {
+  const [packageItems, setPackageItems] = useState<DisplayPackage[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [destination, setDestination] = useState("");
   const [travelMonth, setTravelMonth] = useState("");
-  const [travelers, setTravelers] = useState("2 Travelers");
+  const [travelers, setTravelers] = useState("2");
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [destinationOptions, setDestinationOptions] = useState([
@@ -223,13 +166,26 @@ export default function PackagesPage() {
       setDestinationOptions(options);
     }
 
+    async function loadPackages() {
+      setLoadingPackages(true);
+      const items = await fetchPackagesFromApi(true);
+      setPackageItems(items.map(toDisplayPackage));
+      setLoadingPackages(false);
+    }
+
     loadDestinationOptions();
+    loadPackages();
   }, []);
+
+  const selectedTravelMonth =
+    monthOptions.find((option) => option.value === travelMonth)?.label || "Any Month";
+  const selectedTravelers =
+    packageTravelerOptions.find((option) => option.value === travelers)?.label || "2 Travelers";
 
   const visiblePackages = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return packages.filter((pkg) => {
+    return packageItems.filter((pkg) => {
       const matchesQuery =
         !query ||
         pkg.title.toLowerCase().includes(query) ||
@@ -242,7 +198,7 @@ export default function PackagesPage() {
 
       return matchesQuery && matchesRegion && matchesTheme;
     });
-  }, [searchQuery, selectedRegions, selectedThemes]);
+  }, [packageItems, searchQuery, selectedRegions, selectedThemes]);
 
   const toggleRegion = (region: string) => {
     setSelectedRegions((current) =>
@@ -304,13 +260,11 @@ export default function PackagesPage() {
               event.preventDefault();
               setSearchQuery(destination);
             }}
-            className="relative z-20 mx-auto max-w-6xl overflow-x-hidden rounded-xl border border-slate-200 bg-white shadow-[0_14px_36px_rgba(11,47,87,0.12)]"
+            className="relative z-20 mx-auto max-w-6xl overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_16px_40px_rgba(11,47,87,0.1)]"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_auto]">
-              <div className="border-b border-slate-200 px-4 py-3 sm:border-r lg:border-b-0">
-                <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                  Destination
-                </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.45fr_1fr_1fr_auto]">
+              <div className="flex min-h-[76px] flex-col justify-center border-b border-slate-200 px-3.5 py-3 transition-colors hover:bg-slate-50/60 sm:border-r lg:border-b-0 lg:px-4">
+                <span className={fieldLabelClass}>Destination</span>
                 <ContactSelect
                   value={destination}
                   onChange={(value) => {
@@ -324,44 +278,41 @@ export default function PackagesPage() {
                       ? destinationOptions.find((option) => option.value === destination)?.label
                       : "All Destinations"
                   }
-                  className="mt-1"
+                  className="mt-0.5"
                   listClassName="z-50 max-h-72"
                 />
               </div>
 
-              <label className="border-b border-slate-200 px-4 py-3 sm:border-b-0 sm:border-r">
-                <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                  Travel Month
-                </span>
-                <input
-                  type="month"
+              <div className="flex min-h-[76px] flex-col justify-center border-b border-slate-200 px-3.5 py-3 transition-colors hover:bg-slate-50/60 sm:border-b-0 sm:border-r lg:px-4">
+                <span className={fieldLabelClass}>Travel Month</span>
+                <ContactSelect
                   value={travelMonth}
-                  onChange={(event) => setTravelMonth(event.target.value)}
-                  className="mt-1.5 w-full border-0 bg-transparent p-0 text-sm font-semibold text-[#0b2f57] outline-none"
+                  onChange={setTravelMonth}
+                  options={monthOptions}
+                  ariaLabel="Select travel month"
+                  selectedLabel={selectedTravelMonth}
+                  className="mt-0.5"
+                  listClassName="z-50 max-h-72"
                 />
-              </label>
+              </div>
 
-              <label className="border-b border-slate-200 px-4 py-3 sm:border-b-0 sm:border-r">
-                <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                  Travelers
-                </span>
-                <select
+              <div className="flex min-h-[76px] flex-col justify-center border-b border-slate-200 px-3.5 py-3 transition-colors hover:bg-slate-50/60 sm:border-b-0 sm:border-r lg:px-4">
+                <span className={fieldLabelClass}>Travelers</span>
+                <ContactSelect
                   value={travelers}
-                  onChange={(event) => setTravelers(event.target.value)}
-                  className="mt-1.5 w-full cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold text-[#0b2f57] outline-none"
-                >
-                  <option>1 Traveler</option>
-                  <option>2 Travelers</option>
-                  <option>3 Travelers</option>
-                  <option>4 Travelers</option>
-                  <option>Family Group</option>
-                </select>
-              </label>
+                  onChange={setTravelers}
+                  options={packageTravelerOptions}
+                  ariaLabel="Select number of travelers"
+                  selectedLabel={selectedTravelers}
+                  className="mt-0.5"
+                  listClassName="z-50"
+                />
+              </div>
 
-              <div className="flex items-stretch p-3 sm:col-span-2 lg:col-span-1">
+              <div className="flex items-stretch p-3 sm:col-span-2 lg:col-span-1 lg:p-3.5">
                 <button
                   type="submit"
-                  className="btn-premium min-h-[48px] w-full bg-[#e30613] px-6 text-sm font-semibold text-white hover:bg-[#c40010]"
+                  className="btn-premium flex min-h-[52px] w-full items-center justify-center bg-[#e30613] px-6 text-sm font-semibold text-white transition hover:bg-[#c40010] lg:min-w-[168px]"
                 >
                   Search Packages
                 </button>
@@ -450,15 +401,19 @@ export default function PackagesPage() {
               </p>
             </div>
 
-            {visiblePackages.length > 0 ? (
+            {loadingPackages ? (
+              <div className="rounded-xl border border-dashed border-slate-300 bg-[#f8fafc] px-6 py-14 text-center text-sm text-slate-500">
+                Loading tour packages...
+              </div>
+            ) : visiblePackages.length > 0 ? (
               <div className="space-y-4">
                 {visiblePackages.map((pkg, index) => {
                   const message = [
                     `Hello REDE I FLIGHTS, I would like to enquire about the ${pkg.title} tour package.`,
                     `Route: ${pkg.route}.`,
                     `Duration: ${pkg.duration}.`,
-                    travelMonth ? `Travel month: ${travelMonth}.` : "",
-                    `Travelers: ${travelers}.`,
+                    travelMonth ? `Travel month: ${selectedTravelMonth}.` : "",
+                    `Travelers: ${selectedTravelers}.`,
                   ]
                     .filter(Boolean)
                     .join(" ");
@@ -552,30 +507,6 @@ export default function PackagesPage() {
                 </button>
               </div>
             )}
-
-            <div className="mt-8 overflow-hidden rounded-xl border border-[#e30613]/20 bg-[#fff5f6]">
-              <div className="flex flex-col items-start justify-between gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
-                <div>
-                  <p className="text-lg font-bold text-[#0b2f57]">
-                    Can&apos;t find the perfect package?
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Let our travel experts customize a holiday plan for you.
-                  </p>
-                </div>
-                <a
-                  href={`${WHATSAPP_URL}?text=${encodeURIComponent(
-                    "Hello REDE I FLIGHTS, I would like a custom tour package plan.",
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-premium inline-flex min-h-[46px] items-center gap-2 bg-[#e30613] px-6 text-sm font-semibold text-white hover:bg-[#c40010]"
-                >
-                  <WhatsAppIcon className="h-5 w-5" />
-                  Custom Package Enquiry
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </section>

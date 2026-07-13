@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
-import { buildAirlineSeo } from "@/lib/airline-meta";
-import { insertLocalAirlinesBatch, readLocalAirlines } from "@/lib/airline-local";
-import { buildAirportSeo } from "@/lib/airport-meta";
-import { insertLocalAirportsBatch, readLocalAirports } from "@/lib/airport-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { extractFlightDataFromRows, parseExcelBuffer } from "@/lib/excel-import";
-import { buildRouteSeo } from "@/lib/route-meta";
-import { insertLocalRoutesBatch, readLocalRoutes } from "@/lib/route-local";
-import { useLocalStorage } from "@/lib/storage-mode";
+import {
+  formatImportMessage,
+  upsertImportedAirlines,
+  upsertImportedAirports,
+  upsertImportedRoutes,
+} from "@/lib/import-upsert";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
@@ -48,116 +47,29 @@ export async function POST(request: Request) {
     const siteOrigin = getSiteOrigin(new URL(request.url).origin);
     const supabase = createAdminClient();
 
-    const existingRouteSlugs = new Set((await readLocalRoutes()).map((item) => item.slug));
-    const existingAirlineCodes = new Set((await readLocalAirlines()).map((item) => item.iata_code.toUpperCase()));
-    const existingAirportCodes = new Set((await readLocalAirports()).map((item) => item.iata_code.toUpperCase()));
+    const [routeStats, airlineStats, airportStats] = await Promise.all([
+      upsertImportedRoutes(supabase, extracted.routes, siteOrigin),
+      upsertImportedAirlines(supabase, extracted.airlines, siteOrigin),
+      upsertImportedAirports(supabase, extracted.airports, siteOrigin),
+    ]);
 
-    const { data: dbRoutes } = await supabase.from("routes").select("slug");
-    const { data: dbAirlines } = await supabase.from("airlines").select("iata_code");
-    const { data: dbAirports } = await supabase.from("airports").select("iata_code");
-
-    for (const item of dbRoutes || []) existingRouteSlugs.add(String(item.slug));
-    for (const item of dbAirlines || []) existingAirlineCodes.add(String(item.iata_code).toUpperCase());
-    for (const item of dbAirports || []) existingAirportCodes.add(String(item.iata_code).toUpperCase());
-
-    const routePayloads = extracted.routes
-      .filter((row) => !existingRouteSlugs.has(row.slug))
-      .map((row) => {
-        const seo = buildRouteSeo(row.from_city, row.to_city, siteOrigin, row.airline_name || "");
-        existingRouteSlugs.add(row.slug);
-        return {
-          from_city: row.from_city,
-          to_city: row.to_city,
-          from_airport_code: row.from_airport_code || null,
-          to_airport_code: row.to_airport_code || null,
-          airline_name: row.airline_name || null,
-          slug: seo.slug,
-          og_title: seo.og_title,
-          og_description: seo.og_description,
-          seo_keywords: seo.seo_keywords,
-          seo_title: seo.seo_title,
-          meta_description: seo.meta_description,
-          h1_heading: seo.h1_heading,
-          page_url: seo.page_url,
-          status: "active" as const,
-        };
-      });
-
-    const airlinePayloads = extracted.airlines
-      .filter((row) => !existingAirlineCodes.has(row.iata_code.toUpperCase()))
-      .map((row) => {
-        const seo = buildAirlineSeo(row.name, row.iata_code, row.country || "", siteOrigin);
-        existingAirlineCodes.add(row.iata_code.toUpperCase());
-        return {
-          name: row.name.trim(),
-          iata_code: row.iata_code.toUpperCase(),
-          icao_code: row.icao_code?.trim().toUpperCase() || null,
-          country: row.country?.trim() || null,
-          slug: seo.slug,
-          seo_title: seo.seo_title,
-          meta_description: seo.meta_description,
-          h1_heading: seo.h1_heading,
-          page_url: seo.page_url,
-          status: "active" as const,
-        };
-      });
-
-    const airportPayloads = extracted.airports
-      .filter((row) => !existingAirportCodes.has(row.iata_code.toUpperCase()))
-      .map((row) => {
-        const seo = buildAirportSeo(row.name, row.iata_code, row.city, row.country || "", siteOrigin);
-        existingAirportCodes.add(row.iata_code.toUpperCase());
-        return {
-          name: row.name.trim(),
-          iata_code: row.iata_code.toUpperCase(),
-          city: row.city.trim(),
-          country: row.country?.trim() || null,
-          slug: seo.slug,
-          seo_title: seo.seo_title,
-          meta_description: seo.meta_description,
-          h1_heading: seo.h1_heading,
-          page_url: seo.page_url,
-          status: "active" as const,
-        };
-      });
-
-    let importedRoutes = 0;
-    let importedAirlines = 0;
-    let importedAirports = 0;
-
-    if (routePayloads.length > 0) {
-      const { data, error } = await supabase.from("routes").insert(routePayloads).select("id");
-      if (!error && data) {
-        importedRoutes = data.length;
-      } else if (useLocalStorage()) {
-        importedRoutes = (await insertLocalRoutesBatch(routePayloads)).length;
-      }
-    }
-
-    if (airlinePayloads.length > 0) {
-      const { data, error } = await supabase.from("airlines").insert(airlinePayloads).select("id");
-      if (!error && data) {
-        importedAirlines = data.length;
-      } else if (useLocalStorage()) {
-        importedAirlines = (await insertLocalAirlinesBatch(airlinePayloads)).length;
-      }
-    }
-
-    if (airportPayloads.length > 0) {
-      const { data, error } = await supabase.from("airports").insert(airportPayloads).select("id");
-      if (!error && data) {
-        importedAirports = data.length;
-      } else if (useLocalStorage()) {
-        importedAirports = (await insertLocalAirportsBatch(airportPayloads)).length;
-      }
-    }
+    const message = [
+      formatImportMessage("Routes", routeStats),
+      formatImportMessage("Airlines", airlineStats),
+      formatImportMessage("Airports", airportStats),
+    ].join(". ");
 
     return NextResponse.json({
       success: true,
-      message: `Imported ${importedRoutes} route(s), ${importedAirlines} airline(s), ${importedAirports} airport(s).`,
-      importedRoutes,
-      importedAirlines,
-      importedAirports,
+      message: `${message}.`,
+      insertedRoutes: routeStats.inserted,
+      updatedRoutes: routeStats.updated,
+      insertedAirlines: airlineStats.inserted,
+      updatedAirlines: airlineStats.updated,
+      insertedAirports: airportStats.inserted,
+      updatedAirports: airportStats.updated,
+      errors:
+        routeStats.errors + airlineStats.errors + airportStats.errors,
       totalRows: rows.length,
     });
   } catch (error) {

@@ -1,0 +1,268 @@
+import { buildAirlineSeo } from "@/lib/airline-meta";
+import { findLocalAirlineByIata, insertLocalAirline, updateLocalAirline, deleteLocalAirline } from "@/lib/airline-local";
+import { buildAirportSeo } from "@/lib/airport-meta";
+import { findLocalAirportByIata, insertLocalAirport, updateLocalAirport, deleteLocalAirport } from "@/lib/airport-local";
+import { buildRouteSeo } from "@/lib/route-meta";
+import { findLocalRouteBySlug, insertLocalRoute, updateLocalRoute, deleteLocalRoute } from "@/lib/route-local";
+import type { ParsedAirlineRow, ParsedAirportRow, ParsedRouteRow } from "@/lib/excel-import";
+import { useLocalStorage } from "@/lib/storage-mode";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+export type ImportUpsertStats = {
+  inserted: number;
+  updated: number;
+  errors: number;
+};
+
+export function dedupeByKey<T>(rows: T[], getKey: (row: T) => string): T[] {
+  const map = new Map<string, T>();
+  for (const row of rows) {
+    const key = getKey(row).trim();
+    if (!key) continue;
+    map.set(key.toUpperCase(), row);
+  }
+  return Array.from(map.values());
+}
+
+export function dedupeRoutesBySlug(rows: ParsedRouteRow[]): ParsedRouteRow[] {
+  const map = new Map<string, ParsedRouteRow>();
+  for (const row of rows) {
+    if (row.slug) map.set(row.slug, row);
+  }
+  return Array.from(map.values());
+}
+
+function bumpStats(stats: ImportUpsertStats, result: "inserted" | "updated" | "error") {
+  if (result === "inserted") stats.inserted += 1;
+  else if (result === "updated") stats.updated += 1;
+  else stats.errors += 1;
+}
+
+export async function upsertImportedAirline(
+  supabase: SupabaseClient,
+  row: ParsedAirlineRow,
+  siteOrigin: string,
+): Promise<"inserted" | "updated" | "error"> {
+  const iataCode = row.iata_code.trim().toUpperCase();
+  const seo = buildAirlineSeo(row.name, iataCode, row.country || "", siteOrigin);
+  const payload = {
+    name: row.name.trim(),
+    iata_code: iataCode,
+    icao_code: row.icao_code?.trim().toUpperCase() || null,
+    country: row.country?.trim() || null,
+    slug: seo.slug,
+    seo_title: seo.seo_title,
+    meta_description: seo.meta_description,
+    h1_heading: seo.h1_heading,
+    page_url: seo.page_url,
+    status: "active" as const,
+  };
+
+  const { data: existing } = await supabase
+    .from("airlines")
+    .select("id")
+    .eq("iata_code", iataCode)
+    .maybeSingle();
+
+  if (existing?.id) {
+    const { error } = await supabase.from("airlines").update(payload).eq("id", existing.id);
+    if (!error) {
+      const localDuplicate = await findLocalAirlineByIata(iataCode);
+      if (localDuplicate) await deleteLocalAirline(localDuplicate.id);
+      return "updated";
+    }
+  } else {
+    const { error } = await supabase.from("airlines").insert(payload);
+    if (!error) {
+      const localDuplicate = await findLocalAirlineByIata(iataCode);
+      if (localDuplicate) await deleteLocalAirline(localDuplicate.id);
+      return "inserted";
+    }
+  }
+
+  const localExisting = await findLocalAirlineByIata(iataCode);
+  if (localExisting) {
+    await updateLocalAirline(localExisting.id, payload);
+    return "updated";
+  }
+
+  if (useLocalStorage()) {
+    await insertLocalAirline(payload);
+    return "inserted";
+  }
+
+  return "error";
+}
+
+export async function upsertImportedAirport(
+  supabase: SupabaseClient,
+  row: ParsedAirportRow,
+  siteOrigin: string,
+): Promise<"inserted" | "updated" | "error"> {
+  const iataCode = row.iata_code.trim().toUpperCase();
+  const seo = buildAirportSeo(row.name, iataCode, row.city, row.country || "", siteOrigin);
+  const payload = {
+    name: row.name.trim(),
+    iata_code: iataCode,
+    city: row.city.trim(),
+    country: row.country?.trim() || null,
+    slug: seo.slug,
+    seo_title: seo.seo_title,
+    meta_description: seo.meta_description,
+    h1_heading: seo.h1_heading,
+    page_url: seo.page_url,
+    status: "active" as const,
+  };
+
+  const { data: existing } = await supabase
+    .from("airports")
+    .select("id")
+    .eq("iata_code", iataCode)
+    .maybeSingle();
+
+  if (existing?.id) {
+    const { error } = await supabase.from("airports").update(payload).eq("id", existing.id);
+    if (!error) {
+      const localDuplicate = await findLocalAirportByIata(iataCode);
+      if (localDuplicate) await deleteLocalAirport(localDuplicate.id);
+      return "updated";
+    }
+  } else {
+    const { error } = await supabase.from("airports").insert(payload);
+    if (!error) {
+      const localDuplicate = await findLocalAirportByIata(iataCode);
+      if (localDuplicate) await deleteLocalAirport(localDuplicate.id);
+      return "inserted";
+    }
+  }
+
+  const localExisting = await findLocalAirportByIata(iataCode);
+  if (localExisting) {
+    await updateLocalAirport(localExisting.id, payload);
+    return "updated";
+  }
+
+  if (useLocalStorage()) {
+    await insertLocalAirport(payload);
+    return "inserted";
+  }
+
+  return "error";
+}
+
+export async function upsertImportedRoute(
+  supabase: SupabaseClient,
+  row: ParsedRouteRow,
+  siteOrigin: string,
+): Promise<"inserted" | "updated" | "error"> {
+  const seo = buildRouteSeo(row.from_city, row.to_city, siteOrigin, row.airline_name || "");
+  const payload = {
+    from_city: row.from_city,
+    to_city: row.to_city,
+    from_airport_code: row.from_airport_code || null,
+    to_airport_code: row.to_airport_code || null,
+    airline_name: row.airline_name || null,
+    slug: seo.slug,
+    og_title: seo.og_title,
+    og_description: seo.og_description,
+    seo_keywords: seo.seo_keywords,
+    seo_title: seo.seo_title,
+    meta_description: seo.meta_description,
+    h1_heading: seo.h1_heading,
+    page_url: seo.page_url,
+    status: "active" as const,
+  };
+
+  const { data: existing } = await supabase
+    .from("routes")
+    .select("id")
+    .eq("slug", seo.slug)
+    .maybeSingle();
+
+  if (existing?.id) {
+    const { error } = await supabase.from("routes").update(payload).eq("id", existing.id);
+    if (!error) {
+      const localDuplicate = await findLocalRouteBySlug(seo.slug);
+      if (localDuplicate) await deleteLocalRoute(localDuplicate.id);
+      return "updated";
+    }
+  } else {
+    const { error } = await supabase.from("routes").insert(payload);
+    if (!error) {
+      const localDuplicate = await findLocalRouteBySlug(seo.slug);
+      if (localDuplicate) await deleteLocalRoute(localDuplicate.id);
+      return "inserted";
+    }
+  }
+
+  const localExisting = await findLocalRouteBySlug(seo.slug);
+  if (localExisting) {
+    await updateLocalRoute(localExisting.id, payload);
+    return "updated";
+  }
+
+  if (useLocalStorage()) {
+    await insertLocalRoute(payload);
+    return "inserted";
+  }
+
+  return "error";
+}
+
+export async function upsertImportedAirlines(
+  supabase: SupabaseClient,
+  rows: ParsedAirlineRow[],
+  siteOrigin: string,
+): Promise<ImportUpsertStats> {
+  const stats: ImportUpsertStats = { inserted: 0, updated: 0, errors: 0 };
+  const deduped = dedupeByKey(rows, (row) => row.iata_code);
+
+  for (const row of deduped) {
+    const result = await upsertImportedAirline(supabase, row, siteOrigin);
+    bumpStats(stats, result);
+  }
+
+  return stats;
+}
+
+export async function upsertImportedAirports(
+  supabase: SupabaseClient,
+  rows: ParsedAirportRow[],
+  siteOrigin: string,
+): Promise<ImportUpsertStats> {
+  const stats: ImportUpsertStats = { inserted: 0, updated: 0, errors: 0 };
+  const deduped = dedupeByKey(rows, (row) => row.iata_code);
+
+  for (const row of deduped) {
+    const result = await upsertImportedAirport(supabase, row, siteOrigin);
+    bumpStats(stats, result);
+  }
+
+  return stats;
+}
+
+export async function upsertImportedRoutes(
+  supabase: SupabaseClient,
+  rows: ParsedRouteRow[],
+  siteOrigin: string,
+): Promise<ImportUpsertStats> {
+  const stats: ImportUpsertStats = { inserted: 0, updated: 0, errors: 0 };
+  const deduped = dedupeRoutesBySlug(rows);
+
+  for (const row of deduped) {
+    const result = await upsertImportedRoute(supabase, row, siteOrigin);
+    bumpStats(stats, result);
+  }
+
+  return stats;
+}
+
+export function formatImportMessage(label: string, stats: ImportUpsertStats) {
+  const parts: string[] = [];
+  if (stats.inserted > 0) parts.push(`${stats.inserted} new`);
+  if (stats.updated > 0) parts.push(`${stats.updated} updated`);
+  if (parts.length === 0 && stats.errors === 0) return `No ${label} changes`;
+  if (parts.length === 0) return `${label}: ${stats.errors} failed`;
+  const suffix = stats.errors > 0 ? `, ${stats.errors} failed` : "";
+  return `${label}: ${parts.join(", ")}${suffix}`;
+}

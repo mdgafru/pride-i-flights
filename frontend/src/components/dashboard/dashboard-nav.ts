@@ -11,6 +11,7 @@ export type DashboardIconKey =
   | "image"
   | "search"
   | "file-text"
+  | "package"
   | "settings";
 
 export type DashboardNavItem = {
@@ -101,6 +102,13 @@ export const dashboardNavSections: DashboardNavSection[] = [
         icon: "visa",
         description: "Visa services and image uploads",
       },
+      {
+        key: "packages",
+        label: "Tour Packages",
+        href: "/dashboard/packages",
+        icon: "package",
+        description: "Holiday packages with image upload",
+      },
     ],
   },
   {
@@ -137,5 +145,6 @@ export const dashboardQuickActions = [
   { label: "Add Destination", href: "/dashboard/destinations", icon: "search" as const },
   { label: "Add Hotel", href: "/dashboard/hotels", icon: "hotel" as const },
   { label: "Add Visa", href: "/dashboard/visa", icon: "visa" as const },
+  { label: "Add Package", href: "/dashboard/packages", icon: "package" as const },
   { label: "Upload Banner", href: "/dashboard/banner-images", icon: "image" as const },
 ];

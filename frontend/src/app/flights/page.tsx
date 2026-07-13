@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlightLocationAutocomplete } from "@/components/FlightLocationAutocomplete";
 import { PageHero } from "@/components/PageHero";
 import { SiteShell } from "@/components/SiteShell";
-import { WhatsAppIcon } from "@/components/icons";
+import { SwapRoutesIcon, WhatsAppIcon } from "@/components/icons";
 import {
   buildFlightDeal,
   buildFlightEnquiryUrl,
@@ -24,9 +24,11 @@ import type { Route } from "@/types/route";
 type SortOption = "newest" | "route" | "airline";
 
 const flightsLabelClass =
-  "mb-0.5 block text-[10px] font-bold uppercase tracking-[0.1em] text-white/90";
+  "mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-white/90";
 const flightsFieldClass =
-  "min-h-[40px] w-full rounded-lg border border-white/25 bg-white px-2.5 py-2 text-sm font-semibold text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-white focus:ring-2 focus:ring-white/30";
+  "min-h-[42px] w-full rounded-lg border border-white/25 bg-white px-3 py-2 text-sm font-semibold text-[#0b2f57] outline-none transition placeholder:text-slate-400 focus:border-white focus:ring-2 focus:ring-white/30";
+const flightsSwapButtonClass =
+  "mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-white bg-white text-[#e30613] shadow-sm transition hover:bg-white/90 active:scale-95";
 
 function DealCardSkeleton() {
   return (
@@ -173,6 +175,11 @@ export default function FlightsPage() {
     return sortFlightDeals(filtered, sortBy);
   }, [routes, sortBy, fromQuery, toQuery]);
 
+  const searchGridClass =
+    tripType === "return"
+      ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end lg:gap-3"
+      : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end lg:gap-3";
+
   return (
     <SiteShell active="Flights">
       <PageHero
@@ -188,7 +195,7 @@ export default function FlightsPage() {
       >
         <div className="mx-auto max-w-[1260px] px-4 pb-4 sm:mt-[-6px]">
           <div className="overflow-x-hidden rounded-xl bg-gradient-to-br from-[#a8000d] via-[#e30613] to-[#c40010] shadow-[0_16px_36px_rgba(179,0,15,0.3)] ring-1 ring-white/20">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/15 px-3 py-2 sm:px-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/15 px-4 py-2.5 sm:px-5">
               <div className="inline-flex gap-1 rounded-full border border-white/20 bg-white/10 p-0.5">
                 <button
                   type="button"
@@ -221,41 +228,47 @@ export default function FlightsPage() {
               </p>
             </div>
 
-            <div className="p-3 sm:p-3.5">
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr_auto] lg:items-center lg:gap-2">
-                <FlightLocationAutocomplete
-                  label="From"
-                  value={fromQuery}
-                  onChange={setFromQuery}
-                  options={locationOptions}
-                  placeholder="City"
-                  labelClassName={flightsLabelClass}
-                  inputClassName={flightsFieldClass}
-                />
+            <div className="p-4 sm:p-5">
+              <div className={searchGridClass}>
+                <div className="flex min-w-0 items-end gap-2 sm:col-span-2 lg:col-span-1">
+                  <div className="min-w-0 flex-1">
+                    <FlightLocationAutocomplete
+                      label="From"
+                      value={fromQuery}
+                      onChange={setFromQuery}
+                      options={locationOptions}
+                      placeholder="City"
+                      labelClassName={flightsLabelClass}
+                      inputClassName={flightsFieldClass}
+                    />
+                  </div>
 
-                <button
-                  type="button"
-                  aria-label="Swap from and to"
-                  onClick={() => {
-                    setFromQuery(toQuery);
-                    setToQuery(fromQuery);
-                  }}
-                  className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/30 bg-white/10 text-white transition hover:bg-white/20 lg:grid"
-                >
-                  ⇄
-                </button>
+                  <button
+                    type="button"
+                    aria-label="Swap from and to"
+                    onClick={() => {
+                      setFromQuery(toQuery);
+                      setToQuery(fromQuery);
+                    }}
+                    className={flightsSwapButtonClass}
+                  >
+                    <SwapRoutesIcon className="h-4 w-4" />
+                  </button>
 
-                <FlightLocationAutocomplete
-                  label="To"
-                  value={toQuery}
-                  onChange={setToQuery}
-                  options={locationOptions}
-                  placeholder="City"
-                  labelClassName={flightsLabelClass}
-                  inputClassName={flightsFieldClass}
-                />
+                  <div className="min-w-0 flex-1">
+                    <FlightLocationAutocomplete
+                      label="To"
+                      value={toQuery}
+                      onChange={setToQuery}
+                      options={locationOptions}
+                      placeholder="City"
+                      labelClassName={flightsLabelClass}
+                      inputClassName={flightsFieldClass}
+                    />
+                  </div>
+                </div>
 
-                <label className="flight-date-field block">
+                <label className="flight-date-field block min-w-0">
                   <span className={flightsLabelClass}>Departure</span>
                   <input
                     type="date"
@@ -269,21 +282,22 @@ export default function FlightsPage() {
                     }}
                     className={`${flightsFieldClass} flight-date-input`}
                   />
-                  {tripType === "return" ? (
-                    <>
-                      <span className={`${flightsLabelClass} mt-2`}>Return</span>
-                      <input
-                        type="date"
-                        value={returnDate}
-                        min={departDate || undefined}
-                        onChange={(e) => setReturnDate(e.target.value)}
-                        className={`${flightsFieldClass} flight-date-input`}
-                      />
-                    </>
-                  ) : null}
                 </label>
 
-                <label className="block">
+                {tripType === "return" ? (
+                  <label className="flight-date-field block min-w-0">
+                    <span className={flightsLabelClass}>Return</span>
+                    <input
+                      type="date"
+                      value={returnDate}
+                      min={departDate || undefined}
+                      onChange={(e) => setReturnDate(e.target.value)}
+                      className={`${flightsFieldClass} flight-date-input`}
+                    />
+                  </label>
+                ) : null}
+
+                <label className="block min-w-0">
                   <span className={flightsLabelClass}>Class</span>
                   <select
                     value={travelClass}
@@ -311,7 +325,7 @@ export default function FlightsPage() {
                       airline,
                     });
                   }}
-                  className="btn-premium inline-flex h-10 min-h-[40px] w-full items-center justify-center gap-2 rounded-lg bg-[#0b2f57] px-5 text-sm font-bold tracking-wide text-white shadow-[0_6px_16px_rgba(11,47,87,0.3)] transition hover:bg-[#092847] active:scale-[0.98] lg:w-auto lg:min-w-[132px]"
+                  className="btn-premium inline-flex h-[42px] w-full items-center justify-center gap-2 self-end rounded-lg bg-[#0b2f57] px-5 text-sm font-bold tracking-wide text-white shadow-[0_6px_16px_rgba(11,47,87,0.3)] transition hover:bg-[#092847] active:scale-[0.98] sm:col-span-2 lg:col-span-1 lg:min-w-[148px]"
                 >
                   <WhatsAppIcon className="h-4 w-4" />
                   Enquiry Now

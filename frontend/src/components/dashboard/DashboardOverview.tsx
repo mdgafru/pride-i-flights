@@ -12,6 +12,7 @@ import {
   Hotel,
   Image,
   LoaderCircle,
+  Package,
   RefreshCw,
   Route,
   Search,
@@ -51,6 +52,7 @@ const iconMap = {
   hotel: Hotel,
   visa: BadgeCheck,
   image: Image,
+  package: Package,
   "file-text": FileText,
 } as const;
 

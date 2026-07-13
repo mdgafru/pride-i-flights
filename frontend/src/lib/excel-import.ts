@@ -262,8 +262,7 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
 }
 
 export function mapAirlineRows(rows: Record<string, unknown>[]) {
-  const result: ParsedAirlineRow[] = [];
-  const seen = new Set<string>();
+  const map = new Map<string, ParsedAirlineRow>();
 
   for (const row of rows) {
     const name = pickValue(row, ["name", "airlinename", "airline", "airline name", "carrier"]);
@@ -280,10 +279,9 @@ export function mapAirlineRows(rows: Record<string, unknown>[]) {
     const country = pickValue(row, ["country", "nation"]);
     const code = (iataCode.trim().toUpperCase() || (name ? guessAirlineCode(name) : "")).trim();
 
-    if (!name.trim() || !isLikelyAirlineCode(code) || seen.has(code)) continue;
-    seen.add(code);
+    if (!name.trim() || !isLikelyAirlineCode(code)) continue;
 
-    result.push({
+    map.set(code, {
       name: name.trim(),
       iata_code: code,
       icao_code: icaoCode.trim().toUpperCase() || undefined,
@@ -291,12 +289,11 @@ export function mapAirlineRows(rows: Record<string, unknown>[]) {
     });
   }
 
-  return result;
+  return Array.from(map.values());
 }
 
 export function mapAirportRows(rows: Record<string, unknown>[]) {
-  const result: ParsedAirportRow[] = [];
-  const seen = new Set<string>();
+  const map = new Map<string, ParsedAirportRow>();
 
   for (const row of rows) {
     const name = pickValue(row, ["name", "airportname", "airport", "airport name"]);
@@ -305,13 +302,12 @@ export function mapAirportRows(rows: Record<string, unknown>[]) {
     const country = pickValue(row, ["country", "nation"]);
     const code = sanitizeAirportIata(iataCode) || iataCode.trim().toUpperCase();
 
-    if (!isLikelyAirportCode(code) || seen.has(code)) continue;
+    if (!isLikelyAirportCode(code)) continue;
 
     const finalCity = city.trim() || name.trim() || code;
     if (!finalCity) continue;
-    seen.add(code);
 
-    result.push({
+    map.set(code, {
       name: name.trim() || `${finalCity} Airport`,
       iata_code: code,
       city: finalCity,
@@ -319,5 +315,5 @@ export function mapAirportRows(rows: Record<string, unknown>[]) {
     });
   }
 
-  return result;
+  return Array.from(map.values());
 }

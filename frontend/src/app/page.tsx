@@ -15,6 +15,7 @@ import {
   openFlightSearchEnquiry,
 } from "@/lib/flight-deal-display";
 import { buildFlightSearchLocations } from "@/lib/flight-search-locations";
+import { fetchPackagesFromApi, toDisplayPackage, type DisplayPackage } from "@/lib/packages";
 import { SITE_BACKGROUND_VIDEO_SRC } from "@/lib/site-media";
 import type { Airport } from "@/types/airport";
 import type { Banner, BannerSlide } from "@/types/banner";
@@ -46,8 +47,10 @@ const heroLocationInputClass =
   "mt-0.5 w-full min-w-0 rounded-md border border-white/25 bg-white px-2.5 py-2 text-sm font-semibold text-[#0b2f57] outline-none placeholder:font-medium placeholder:text-slate-400 focus:border-white focus:ring-2 focus:ring-white/30 sm:mt-1 sm:text-[15px]";
 const heroSearchDateInputClass =
   "hero-search-date mt-0.5 w-full min-w-0 rounded-md border border-white/25 bg-white px-2.5 py-2 pr-7 text-[14px] font-semibold leading-none text-[#0b2f57] outline-none disabled:opacity-45 sm:mt-1";
-const heroSearchBarClass =
+const heroSearchBarClassOneWay =
   "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 overflow-x-hidden rounded-xl border border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(118px,1.05fr)_minmax(0,1fr)_auto]";
+const heroSearchBarClassReturn =
+  "hero-search-bar grid w-full min-w-0 flex-1 grid-cols-1 overflow-x-hidden rounded-xl border border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-[minmax(260px,1.95fr)_minmax(110px,0.95fr)_minmax(110px,0.95fr)_minmax(0,1fr)_auto]";
 const heroSearchSubmitCellClass =
   "flex min-h-[56px] items-center justify-center border-b border-white/15 bg-white/10 px-3 py-3 sm:col-span-2 sm:border-b-0 lg:col-span-1 lg:min-h-[82px] lg:border-l lg:border-white/15 lg:px-4";
 
@@ -129,30 +132,6 @@ const destinations = [
   },
 ];
 
-const packages = [
-  {
-    tag: "Best Seller",
-    title: "Romantic Europe Getaway",
-    duration: "7D / 6N",
-    image:
-      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    tag: "Popular",
-    title: "Bali Island Escape",
-    duration: "5D / 4N",
-    image:
-      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-  {
-    tag: "Hot Deal",
-    title: "Dubai City Experience",
-    duration: "4D / 3N",
-    image:
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=700&h=420&q=80",
-  },
-];
-
 const steps = [
   { n: "01", title: "Tell us your plan", text: "Share dates, destination and budget." },
   { n: "02", title: "Get curated options", text: "Flights, hotels, visa and packages matched for you." },
@@ -191,6 +170,7 @@ export default function Home() {
   const [bannerIndex, setBannerIndex] = useState(0);
   const [bannerTransitionEnabled, setBannerTransitionEnabled] = useState(true);
   const [heroBanners, setHeroBanners] = useState<BannerSlide[]>([]);
+  const [homePackages, setHomePackages] = useState<DisplayPackage[]>([]);
 
   const loopBanners = useMemo(
     () => (heroBanners.length > 1 ? [...heroBanners, ...heroBanners] : heroBanners),
@@ -242,6 +222,19 @@ export default function Home() {
     }
 
     loadBanners();
+  }, []);
+
+  useEffect(() => {
+    async function loadPackages() {
+      try {
+        const items = await fetchPackagesFromApi(true);
+        setHomePackages(items.map(toDisplayPackage).slice(0, 3));
+      } catch {
+        setHomePackages([]);
+      }
+    }
+
+    loadPackages();
   }, []);
 
   useEffect(() => {
@@ -328,7 +321,11 @@ export default function Home() {
                 </div>
               </div>
               <div className="w-full">
-                <div className={`${heroSearchBarClass} max-sm:mx-0 sm:mx-0`}>
+                <div
+                  className={`${
+                    tripType === "return" ? heroSearchBarClassReturn : heroSearchBarClassOneWay
+                  } max-sm:mx-0 sm:mx-0`}
+                >
                   <div className="flex min-h-[56px] min-w-0 flex-row items-stretch gap-1 overflow-x-hidden border-b border-white/15 bg-white/10 sm:min-h-[82px] sm:col-span-2 sm:gap-0 sm:border-r sm:border-b-0 lg:col-span-1">
                     <div className="flex min-w-0 flex-1 flex-col justify-center overflow-x-hidden px-2.5 py-2.5 sm:px-4 sm:py-4">
                       <FlightLocationAutocomplete
@@ -347,7 +344,7 @@ export default function Home() {
                         type="button"
                         aria-label="Swap departure and destination"
                         title="Swap From and To"
-                        className="hero-route-swap flex h-9 w-9 min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-full border-2 border-white/40 bg-white/10 text-white shadow-sm hover:border-white hover:bg-white/20 sm:h-11 sm:w-11 sm:min-h-[44px] sm:min-w-[44px]"
+                        className="hero-route-swap flex h-9 w-9 min-h-[36px] min-w-[36px] cursor-pointer items-center justify-center rounded-full border-2 border-white bg-white text-[#e30613] shadow-sm hover:bg-white/90 sm:h-11 sm:w-11 sm:min-h-[44px] sm:min-w-[44px]"
                         style={{ transform: `rotate(${swapRotation}deg)` }}
                         onClick={() => {
                           setFromQuery(toQuery);
@@ -371,11 +368,7 @@ export default function Home() {
                       />
                     </div>
                   </div>
-                  <label
-                    className={`${heroSearchDateCellClass} ${
-                      tripType === "return" ? "min-h-[104px] sm:min-h-[128px]" : ""
-                    }`}
-                  >
+                  <label className={heroSearchDateCellClass}>
                     <span className={heroSearchLabelClass}>Depart</span>
                     <div className="hero-search-date-wrap">
                       <input
@@ -391,21 +384,21 @@ export default function Home() {
                         className={heroSearchDateInputClass}
                       />
                     </div>
-                    {tripType === "return" ? (
-                      <>
-                        <span className={`${heroSearchLabelClass} mt-2`}>Return</span>
-                        <div className="hero-search-date-wrap">
-                          <input
-                            type="date"
-                            value={returnDate}
-                            min={departDate || undefined}
-                            onChange={(e) => setReturnDate(e.target.value)}
-                            className={heroSearchDateInputClass}
-                          />
-                        </div>
-                      </>
-                    ) : null}
                   </label>
+                  {tripType === "return" ? (
+                    <label className={heroSearchDateCellClass}>
+                      <span className={heroSearchLabelClass}>Return</span>
+                      <div className="hero-search-date-wrap">
+                        <input
+                          type="date"
+                          value={returnDate}
+                          min={departDate || undefined}
+                          onChange={(e) => setReturnDate(e.target.value)}
+                          className={heroSearchDateInputClass}
+                        />
+                      </div>
+                    </label>
+                  ) : null}
                   <div className={heroSearchTravellerCellClass}>
                     <span className={heroSearchLabelClass}>Travellers &amp; class</span>
                     <div className="mt-1 grid min-w-0 grid-cols-2 gap-2 sm:mt-1.5 sm:grid-cols-1 sm:gap-1.5">
@@ -587,9 +580,9 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-5">
-          {packages.map((pkg, index) => (
+          {homePackages.map((pkg, index) => (
             <motion.article
-              key={pkg.title}
+              key={pkg.id}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

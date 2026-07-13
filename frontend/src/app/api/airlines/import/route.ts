@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
-import { buildAirlineSeo } from "@/lib/airline-meta";
-import { findLocalAirlineByIata, insertLocalAirline } from "@/lib/airline-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { mapAirlineRows, parseExcelBuffer } from "@/lib/excel-import";
-import { useLocalStorage } from "@/lib/storage-mode";
+import { formatImportMessage, upsertImportedAirlines } from "@/lib/import-upsert";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export async function POST(request: Request) {
@@ -38,57 +36,14 @@ export async function POST(request: Request) {
 
     const siteOrigin = getSiteOrigin(new URL(request.url).origin);
     const supabase = createAdminClient();
-    const imported: string[] = [];
-    const skipped: string[] = [];
-    const errors: string[] = [];
-
-    for (const row of rows) {
-      const iataCode = row.iata_code.trim().toUpperCase();
-      const seo = buildAirlineSeo(row.name, iataCode, row.country, siteOrigin);
-      const payload = {
-        name: row.name.trim(),
-        iata_code: iataCode,
-        icao_code: row.icao_code?.trim().toUpperCase() || null,
-        country: row.country?.trim() || null,
-        slug: seo.slug,
-        seo_title: seo.seo_title,
-        meta_description: seo.meta_description,
-        h1_heading: seo.h1_heading,
-        page_url: seo.page_url,
-        status: "active" as const,
-      };
-
-      const { error } = await supabase.from("airlines").insert(payload);
-      if (!error) {
-        imported.push(iataCode);
-        continue;
-      }
-
-      if (useLocalStorage()) {
-        const existing = await findLocalAirlineByIata(iataCode);
-        if (existing) {
-          skipped.push(iataCode);
-          continue;
-        }
-
-        try {
-          await insertLocalAirline(payload);
-          imported.push(iataCode);
-        } catch {
-          errors.push(iataCode);
-        }
-        continue;
-      }
-
-      errors.push(iataCode);
-    }
+    const stats = await upsertImportedAirlines(supabase, rows, siteOrigin);
 
     return NextResponse.json({
       success: true,
-      message: `Imported ${imported.length} airline(s). Skipped ${skipped.length}.`,
-      imported,
-      skipped,
-      errors,
+      message: `${formatImportMessage("Airlines", stats)}.`,
+      inserted: stats.inserted,
+      updated: stats.updated,
+      errors: stats.errors,
       total: rows.length,
     });
   } catch (error) {
