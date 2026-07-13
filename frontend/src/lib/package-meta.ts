@@ -23,3 +23,46 @@ export function parseIncludesInput(value: string) {
 export function includesToText(values: string[]) {
   return values.join(", ");
 }
+
+const PACKAGE_TITLE_NOISE = [
+  "Add Tour Package",
+  "Edit Tour Package",
+  "Saved directly to Supabase database",
+  "Package Title",
+  "Badge Tag",
+  "Route / Cities",
+  "Package Image",
+  "Choose Image",
+  "Change Image",
+  "Upload image",
+];
+
+export function normalizePackageTitle(raw: string) {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+
+  const embedded = trimmed.match(/Package Title\s+(.+?)(?:\s+Badge Tag\b|\s+Route\b|$)/i);
+  if (embedded?.[1]) {
+    return embedded[1].trim().slice(0, 120);
+  }
+
+  if (PACKAGE_TITLE_NOISE.some((noise) => trimmed.includes(noise))) {
+    const cleaned = trimmed
+      .replace(/^.*Package Title\s*/i, "")
+      .split(/\s+Badge Tag\b/i)[0]
+      ?.trim();
+    if (cleaned && cleaned.length <= 120) return cleaned;
+  }
+
+  return trimmed.slice(0, 120);
+}
+
+export function validatePackageTitle(raw: string) {
+  const title = normalizePackageTitle(raw);
+  if (!title) return "Package title is required.";
+  if (title.length > 120) return "Package title must be 120 characters or less.";
+  if (PACKAGE_TITLE_NOISE.some((noise) => title.includes(noise))) {
+    return "Enter only the package name in the title field.";
+  }
+  return null;
+}

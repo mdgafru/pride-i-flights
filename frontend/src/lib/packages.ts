@@ -1,3 +1,4 @@
+import { normalizePackageTitle } from "@/lib/package-meta";
 import type { TourPackage } from "@/types/tour-package";
 
 export type DisplayPackage = {
@@ -16,7 +17,7 @@ export function toDisplayPackage(pkg: TourPackage): DisplayPackage {
   return {
     id: pkg.id,
     tag: pkg.tag,
-    title: pkg.title,
+    title: normalizePackageTitle(pkg.title) || "Tour Package",
     route: pkg.route,
     duration: pkg.duration,
     region: pkg.region,

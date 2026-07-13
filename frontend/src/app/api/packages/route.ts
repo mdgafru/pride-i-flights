@@ -3,7 +3,9 @@ import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import {
   includesToText,
   parseIncludesInput,
+  normalizePackageTitle,
   resolveUniquePackageSlug,
+  validatePackageTitle,
 } from "@/lib/package-meta";
 import { processPackageImageUpload } from "@/lib/package-upload";
 import { formatStorageError } from "@/lib/storage-mode";
@@ -123,8 +125,10 @@ export async function POST(request: Request) {
 
   try {
     const input = await parsePackageRequest(request);
-    if (!input.title) {
-      return NextResponse.json({ error: "Package title is required." }, { status: 400 });
+    const title = normalizePackageTitle(input.title);
+    const titleError = validatePackageTitle(title);
+    if (titleError) {
+      return NextResponse.json({ error: titleError }, { status: 400 });
     }
 
     const supabase = createAdminClient();
@@ -135,7 +139,7 @@ export async function POST(request: Request) {
     let imageMeta: { image_url: string | null; storage_path: string | null };
     try {
       imageMeta = await processPackageImageUpload(input.file, {
-        title: input.title,
+        title,
         existingPaths: (existingRows || [])
           .map((item) => item.storage_path || "")
           .filter(Boolean),
@@ -158,7 +162,7 @@ export async function POST(request: Request) {
     }
 
     const payload = {
-      title: input.title,
+      title,
       tag: input.tag || "Popular",
       route: input.route,
       duration: input.duration,

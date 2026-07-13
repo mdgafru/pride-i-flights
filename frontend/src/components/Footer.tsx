@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
-import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, TEL_URL } from "@/lib/contact";
+import { CONTACT_EMAIL, CONTACT_PHONE, MAILTO_URL, OFFICE_ADDRESS, TEL_URL } from "@/lib/contact";
 
 const FOOTER_SKY_IMAGE = "/background.png";
 const quickLinks = [
@@ -63,6 +63,9 @@ export function Footer() {
           <div className="min-w-0">
             <p className="mb-2 text-sm font-semibold text-[#ff4d5a] sm:text-base">Contact Us</p>
             <ul className="space-y-0.5 text-sm text-blue-50/90">
+              <li className="footer-link leading-6">
+                <span>{OFFICE_ADDRESS}</span>
+              </li>
               <li className="footer-link">
                 <a href={TEL_URL}>{CONTACT_PHONE}</a>
               </li>

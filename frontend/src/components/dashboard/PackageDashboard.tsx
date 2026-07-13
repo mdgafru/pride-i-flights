@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { includesToText, parseIncludesInput } from "@/lib/package-meta";
+import { includesToText, normalizePackageTitle, parseIncludesInput } from "@/lib/package-meta";
 import type { EntityStatus } from "@/types/airline";
 import type { TourPackage } from "@/types/tour-package";
 import {
@@ -152,7 +152,7 @@ export function PackageDashboard() {
   }
 
   function fillForm(tourPackage: TourPackage) {
-    setTitle(tourPackage.title);
+    setTitle(normalizePackageTitle(tourPackage.title));
     setTag(tourPackage.tag);
     setRoute(tourPackage.route);
     setDuration(tourPackage.duration);
@@ -173,8 +173,15 @@ export function PackageDashboard() {
     setError(null);
     setMessage(null);
 
+    const cleanTitle = normalizePackageTitle(title);
+    if (!cleanTitle) {
+      setError("Package title is required.");
+      setSaving(false);
+      return;
+    }
+
     const formData = new FormData();
-    formData.append("title", title);
+    formData.append("title", cleanTitle);
     formData.append("tag", tag);
     formData.append("route", route);
     formData.append("duration", duration);
@@ -187,6 +194,7 @@ export function PackageDashboard() {
     try {
       const response = await fetch(editing ? `/api/packages/${editing.id}` : "/api/packages", {
         method: editing ? "PATCH" : "POST",
+        credentials: "same-origin",
         body: formData,
       });
       const result = (await response.json()) as {
@@ -362,7 +370,9 @@ export function PackageDashboard() {
                               </div>
                             )}
                             <div>
-                              <p className="font-bold text-[#0b2f57]">{tourPackage.title}</p>
+                              <p className="font-bold text-[#0b2f57]">
+                                {normalizePackageTitle(tourPackage.title)}
+                              </p>
                               <p className="text-[10px] text-slate-500">{tourPackage.tag}</p>
                             </div>
                           </div>
@@ -471,22 +481,31 @@ export function PackageDashboard() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col" autoComplete="off">
               <div className="flex-1 space-y-3 overflow-y-auto p-4">
-                <label className="block text-sm font-semibold text-slate-700">
-                  Package Title
+                <div>
+                  <label htmlFor="package-title" className="block text-sm font-semibold text-slate-700">
+                    Package Title
+                  </label>
                   <input
+                    id="package-title"
+                    name="package-title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
+                    autoComplete="off"
                     placeholder="Romantic Europe Getaway"
                     className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
                   />
-                </label>
+                </div>
 
-                <label className="block text-sm font-semibold text-slate-700">
-                  Badge Tag
+                <div>
+                  <label htmlFor="package-tag" className="block text-sm font-semibold text-slate-700">
+                    Badge Tag
+                  </label>
                   <select
+                    id="package-tag"
+                    name="package-tag"
                     value={tag}
                     onChange={(e) => setTag(e.target.value)}
                     className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
@@ -497,32 +516,46 @@ export function PackageDashboard() {
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
 
-                <label className="block text-sm font-semibold text-slate-700">
-                  Route / Cities
+                <div>
+                  <label htmlFor="package-route" className="block text-sm font-semibold text-slate-700">
+                    Route / Cities
+                  </label>
                   <input
+                    id="package-route"
+                    name="package-route"
                     value={route}
                     onChange={(e) => setRoute(e.target.value)}
+                    autoComplete="off"
                     placeholder="Paris · Switzerland · Italy"
                     className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
                   />
-                </label>
+                </div>
 
-                <label className="block text-sm font-semibold text-slate-700">
-                  Duration
+                <div>
+                  <label htmlFor="package-duration" className="block text-sm font-semibold text-slate-700">
+                    Duration
+                  </label>
                   <input
+                    id="package-duration"
+                    name="package-duration"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
+                    autoComplete="off"
                     placeholder="7 Days / 6 Nights"
                     className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
                   />
-                </label>
+                </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <label className="block text-sm font-semibold text-slate-700">
-                    Region
+                  <div>
+                    <label htmlFor="package-region" className="block text-sm font-semibold text-slate-700">
+                      Region
+                    </label>
                     <select
+                      id="package-region"
+                      name="package-region"
                       value={region}
                       onChange={(e) => setRegion(e.target.value)}
                       className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
@@ -533,10 +566,14 @@ export function PackageDashboard() {
                         </option>
                       ))}
                     </select>
-                  </label>
-                  <label className="block text-sm font-semibold text-slate-700">
-                    Theme
+                  </div>
+                  <div>
+                    <label htmlFor="package-theme" className="block text-sm font-semibold text-slate-700">
+                      Theme
+                    </label>
                     <select
+                      id="package-theme"
+                      name="package-theme"
                       value={theme}
                       onChange={(e) => setTheme(e.target.value)}
                       className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
@@ -547,28 +584,37 @@ export function PackageDashboard() {
                         </option>
                       ))}
                     </select>
-                  </label>
+                  </div>
                 </div>
 
-                <label className="block text-sm font-semibold text-slate-700">
-                  Includes
+                <div>
+                  <label htmlFor="package-includes" className="block text-sm font-semibold text-slate-700">
+                    Includes
+                  </label>
                   <input
+                    id="package-includes"
+                    name="package-includes"
                     value={includes}
                     onChange={(e) => setIncludes(e.target.value)}
+                    autoComplete="off"
                     placeholder="Flight, Hotel, Meals, Sightseeing"
                     className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
                   />
-                </label>
+                </div>
 
-                <label className="block text-sm font-semibold text-slate-700">
-                  Sort Order
+                <div>
+                  <label htmlFor="package-sort-order" className="block text-sm font-semibold text-slate-700">
+                    Sort Order
+                  </label>
                   <input
+                    id="package-sort-order"
+                    name="package-sort-order"
                     type="number"
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value)}
                     className="mt-1.5 w-full rounded-md border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#e30613]/40"
                   />
-                </label>
+                </div>
 
                 <div>
                   <p className="text-sm font-semibold text-slate-700">

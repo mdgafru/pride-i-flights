@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import {
   parseIncludesInput,
+  normalizePackageTitle,
   resolveUniquePackageSlug,
+  validatePackageTitle,
 } from "@/lib/package-meta";
 import { processPackageImageUpload, removePackageImageFile } from "@/lib/package-upload";
 import { getPackageById, removePackageById, savePackageById } from "@/lib/package-store";
@@ -72,9 +74,10 @@ export async function PATCH(
     }
 
     const input = await parsePackagePatchRequest(request);
-    const title = input.title || existing.title;
-    if (!title) {
-      return NextResponse.json({ error: "Package title is required." }, { status: 400 });
+    const title = normalizePackageTitle(input.title || existing.title);
+    const titleError = validatePackageTitle(title);
+    if (titleError) {
+      return NextResponse.json({ error: titleError }, { status: 400 });
     }
 
     const supabase = createAdminClient();

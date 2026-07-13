@@ -7,7 +7,7 @@ import { ContactSelect } from "@/components/ContactSelect";
 import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
-import { CONTACT_EMAIL, MAILTO_URL, WHATSAPP_URL } from "@/lib/contact";
+import { CONTACT_EMAIL, MAILTO_URL, OFFICE_ADDRESS, WHATSAPP_URL } from "@/lib/contact";
 import {
   DEFAULT_PHONE_COUNTRY_CODE,
   formatPhoneWithCountryCode,
@@ -44,6 +44,7 @@ const trustItems = [
 const services = ["Flights", "Hotels", "Visa", "Tour Packages"];
 
 const quickActions = [
+  { title: "Office", sub: OFFICE_ADDRESS },
   { title: "Email Us", sub: CONTACT_EMAIL, href: MAILTO_URL },
   { title: "WhatsApp", sub: "Chat instantly", href: WHATSAPP_URL, external: true },
 ];
@@ -127,7 +128,7 @@ export default function ContactPage() {
         imagePosition="center 70%"
         eyebrow="We Are Here For You"
         title="Contact Us"
-        description="Your trusted partner for flights, hotels and visa. Reach out today and let our team plan your next journey from Dubai to destinations worldwide."
+        description="Your trusted partner for flights, hotels and visa. Reach out today and let our team plan your next journey from Ajman to destinations worldwide."
         highlights={quickActions}
         centered
         showBreadcrumb={false}
@@ -304,6 +305,16 @@ export default function ContactPage() {
             </p>
 
             <div className="mt-10 space-y-7">
+              <div className={featureBoxClass}>
+                <p className="text-sm font-bold uppercase tracking-wide text-slate-500">
+                  Office Address
+                </p>
+                <p className="mt-2 text-base font-bold leading-relaxed text-[#0b2f57]">
+                  {OFFICE_ADDRESS}
+                </p>
+                <p className="mt-1.5 text-base text-gray-500">Visit us in Ajman, UAE</p>
+              </div>
+
               <div className={featureBoxClass}>
                 <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Email</p>
                 <a

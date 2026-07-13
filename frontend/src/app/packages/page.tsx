@@ -429,14 +429,16 @@ export default function PackagesPage() {
                       className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-[#e30613]/25 hover:shadow-[0_10px_28px_rgba(11,47,87,0.08)]"
                     >
                       <div className="flex flex-col sm:flex-row">
-                        <div className="relative h-40 w-full shrink-0 overflow-hidden bg-slate-100 sm:h-auto sm:w-52 sm:self-stretch md:w-56">
-                          <Image
-                            src={pkg.image}
-                            alt={pkg.title}
-                            width={700}
-                            height={420}
-                            className="h-full min-h-40 w-full object-cover transition duration-500 group-hover:scale-[1.02] sm:min-h-[168px]"
-                          />
+                        <div className="relative w-full shrink-0 overflow-hidden bg-slate-100 sm:w-52 sm:min-h-[180px] md:w-56">
+                          <div className="relative aspect-[5/3] w-full sm:absolute sm:inset-0 sm:aspect-auto sm:h-full">
+                            <Image
+                              src={pkg.image}
+                              alt={pkg.title}
+                              fill
+                              sizes="(max-width: 640px) 100vw, 224px"
+                              className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                            />
+                          </div>
                           <span className="absolute left-3 top-3 rounded-md bg-[#e30613] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
                             {pkg.tag}
                           </span>
@@ -447,7 +449,7 @@ export default function PackagesPage() {
                             <p className="text-xs font-semibold uppercase tracking-wide text-[#e30613]">
                               {pkg.region} · {pkg.theme}
                             </p>
-                            <h3 className="mt-1 text-lg font-bold leading-snug text-[#0b2f57] md:text-xl">
+                            <h3 className="mt-1 line-clamp-2 text-lg font-bold leading-snug text-[#0b2f57] md:text-xl">
                               {pkg.title}
                             </h3>
                             <p className="mt-1 text-sm text-slate-500">{pkg.route}</p>
