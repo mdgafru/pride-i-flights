@@ -8,6 +8,14 @@ import type { ParsedAirlineRow, ParsedAirportRow, ParsedRouteRow } from "@/lib/e
 import { useLocalStorage } from "@/lib/storage-mode";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+async function safeLocalCleanup(task: () => Promise<unknown>) {
+  try {
+    await task();
+  } catch (error) {
+    console.warn("import local cleanup skipped:", error);
+  }
+}
+
 export type ImportUpsertStats = {
   inserted: number;
   updated: number;
@@ -68,27 +76,35 @@ export async function upsertImportedAirline(
     const { error } = await supabase.from("airlines").update(payload).eq("id", existing.id);
     if (!error) {
       const localDuplicate = await findLocalAirlineByIata(iataCode);
-      if (localDuplicate) await deleteLocalAirline(localDuplicate.id);
+      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirline(localDuplicate.id));
       return "updated";
     }
   } else {
     const { error } = await supabase.from("airlines").insert(payload);
     if (!error) {
       const localDuplicate = await findLocalAirlineByIata(iataCode);
-      if (localDuplicate) await deleteLocalAirline(localDuplicate.id);
+      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirline(localDuplicate.id));
       return "inserted";
     }
   }
 
   const localExisting = await findLocalAirlineByIata(iataCode);
   if (localExisting) {
-    await updateLocalAirline(localExisting.id, payload);
-    return "updated";
+    try {
+      await updateLocalAirline(localExisting.id, payload);
+      return "updated";
+    } catch {
+      return "error";
+    }
   }
 
   if (useLocalStorage()) {
-    await insertLocalAirline(payload);
-    return "inserted";
+    try {
+      await insertLocalAirline(payload);
+      return "inserted";
+    } catch {
+      return "error";
+    }
   }
 
   return "error";
@@ -124,27 +140,35 @@ export async function upsertImportedAirport(
     const { error } = await supabase.from("airports").update(payload).eq("id", existing.id);
     if (!error) {
       const localDuplicate = await findLocalAirportByIata(iataCode);
-      if (localDuplicate) await deleteLocalAirport(localDuplicate.id);
+      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirport(localDuplicate.id));
       return "updated";
     }
   } else {
     const { error } = await supabase.from("airports").insert(payload);
     if (!error) {
       const localDuplicate = await findLocalAirportByIata(iataCode);
-      if (localDuplicate) await deleteLocalAirport(localDuplicate.id);
+      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirport(localDuplicate.id));
       return "inserted";
     }
   }
 
   const localExisting = await findLocalAirportByIata(iataCode);
   if (localExisting) {
-    await updateLocalAirport(localExisting.id, payload);
-    return "updated";
+    try {
+      await updateLocalAirport(localExisting.id, payload);
+      return "updated";
+    } catch {
+      return "error";
+    }
   }
 
   if (useLocalStorage()) {
-    await insertLocalAirport(payload);
-    return "inserted";
+    try {
+      await insertLocalAirport(payload);
+      return "inserted";
+    } catch {
+      return "error";
+    }
   }
 
   return "error";
@@ -183,27 +207,35 @@ export async function upsertImportedRoute(
     const { error } = await supabase.from("routes").update(payload).eq("id", existing.id);
     if (!error) {
       const localDuplicate = await findLocalRouteBySlug(seo.slug);
-      if (localDuplicate) await deleteLocalRoute(localDuplicate.id);
+      if (localDuplicate) await safeLocalCleanup(() => deleteLocalRoute(localDuplicate.id));
       return "updated";
     }
   } else {
     const { error } = await supabase.from("routes").insert(payload);
     if (!error) {
       const localDuplicate = await findLocalRouteBySlug(seo.slug);
-      if (localDuplicate) await deleteLocalRoute(localDuplicate.id);
+      if (localDuplicate) await safeLocalCleanup(() => deleteLocalRoute(localDuplicate.id));
       return "inserted";
     }
   }
 
   const localExisting = await findLocalRouteBySlug(seo.slug);
   if (localExisting) {
-    await updateLocalRoute(localExisting.id, payload);
-    return "updated";
+    try {
+      await updateLocalRoute(localExisting.id, payload);
+      return "updated";
+    } catch {
+      return "error";
+    }
   }
 
   if (useLocalStorage()) {
-    await insertLocalRoute(payload);
-    return "inserted";
+    try {
+      await insertLocalRoute(payload);
+      return "inserted";
+    } catch {
+      return "error";
+    }
   }
 
   return "error";

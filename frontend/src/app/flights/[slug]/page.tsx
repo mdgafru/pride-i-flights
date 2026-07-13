@@ -5,6 +5,7 @@ import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { buildFlightDeal, buildFlightEnquiryUrl } from "@/lib/flight-deal-display";
 import { getRouteBySlug } from "@/lib/route-store";
+import { dynamicPageMetadata, brandedTitle } from "@/lib/site-seo";
 
 type FlightRoutePageProps = {
   params: Promise<{ slug: string }>;
@@ -24,20 +25,15 @@ export async function generateMetadata({ params }: FlightRoutePageProps): Promis
   const route = await loadActiveRoute(slug);
 
   if (!route) {
-    return { title: "Flight Not Found | REDE FLIGHTS" };
+    return { title: { absolute: brandedTitle("Flight Not Found") } };
   }
 
-  return {
-    title: route.seo_title,
-    description: route.meta_description,
-    keywords: route.seo_keywords,
-    openGraph: {
-      title: route.og_title,
-      description: route.og_description,
-      url: route.page_url,
-      type: "website",
-    },
-  };
+  return dynamicPageMetadata(
+    route.h1_heading || `${route.from_city} to ${route.to_city} Flights`,
+    route.meta_description,
+    route.seo_keywords,
+    route.page_url,
+  );
 }
 
 export default async function FlightRoutePage({ params }: FlightRoutePageProps) {

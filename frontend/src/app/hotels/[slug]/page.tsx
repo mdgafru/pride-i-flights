@@ -5,6 +5,7 @@ import { SiteShell } from "@/components/SiteShell";
 import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { getHotelBySlug } from "@/lib/hotel-store";
+import { dynamicPageMetadata, brandedTitle } from "@/lib/site-seo";
 
 type HotelDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -24,20 +25,15 @@ export async function generateMetadata({ params }: HotelDetailPageProps): Promis
   const hotel = await loadActiveHotel(slug);
 
   if (!hotel) {
-    return { title: "Hotel Not Found | REDE FLIGHTS" };
+    return { title: { absolute: brandedTitle("Hotel Not Found") } };
   }
 
-  return {
-    title: hotel.seo_title,
-    description: hotel.meta_description,
-    keywords: hotel.seo_keywords,
-    openGraph: {
-      title: hotel.og_title,
-      description: hotel.og_description,
-      url: hotel.page_url,
-      type: "website",
-    },
-  };
+  return dynamicPageMetadata(
+    hotel.h1_heading || hotel.name,
+    hotel.meta_description,
+    hotel.seo_keywords,
+    hotel.page_url,
+  );
 }
 
 export default async function HotelDetailPage({ params }: HotelDetailPageProps) {

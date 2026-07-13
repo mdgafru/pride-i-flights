@@ -7,6 +7,7 @@ import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { getVisaBySlug } from "@/lib/visa-store";
 import { DEFAULT_VISA_IMAGE, resolveVisaImageUrl } from "@/lib/visa-display";
+import { dynamicPageMetadata, brandedTitle } from "@/lib/site-seo";
 
 type VisaDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -25,20 +26,15 @@ export async function generateMetadata({ params }: VisaDetailPageProps): Promise
   const visa = await loadActiveVisa(slug);
 
   if (!visa) {
-    return { title: "Visa Service Not Found | REDE FLIGHTS" };
+    return { title: { absolute: brandedTitle("Visa Service Not Found") } };
   }
 
-  return {
-    title: visa.seo_title,
-    description: visa.meta_description,
-    keywords: visa.seo_keywords,
-    openGraph: {
-      title: visa.og_title,
-      description: visa.og_description,
-      url: visa.page_url,
-      type: "website",
-    },
-  };
+  return dynamicPageMetadata(
+    visa.h1_heading || `${visa.country} Visa`,
+    visa.meta_description,
+    visa.seo_keywords,
+    visa.page_url,
+  );
 }
 
 export default async function VisaDetailPage({ params }: VisaDetailPageProps) {

@@ -8,12 +8,24 @@ import {
   upsertImportedAirports,
   upsertImportedRoutes,
 } from "@/lib/import-upsert";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
+import { formatStorageError } from "@/lib/storage-mode";
 
 export async function POST(request: Request) {
-  const session = getAdminSessionFromRequest(request);
+  let session = null;
+  try {
+    session = getAdminSessionFromRequest(request);
+  } catch (error) {
+    console.error("routes import session error:", error);
+    return NextResponse.json({ error: "Invalid admin session." }, { status: 401 });
+  }
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (!hasSupabaseConfig()) {
+    return NextResponse.json({ error: "Supabase is not configured." }, { status: 500 });
   }
 
   try {
@@ -74,6 +86,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("routes import error:", error);
-    return NextResponse.json({ error: "Unable to import routes from Excel." }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Unable to import routes from Excel.";
+    return NextResponse.json({ error: formatStorageError(error) || message }, { status: 500 });
   }
 }

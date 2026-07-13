@@ -89,8 +89,10 @@ const services = [
     desc: "Expert visa guidance with high success rate and fast processing.",
     href: "/visa",
     badge: "Expert Help",
-    image:
-      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=80",
+    image: "/visa-flags.png",
+    imageWrapperClass: "flex min-h-[220px] items-center justify-center bg-sky-50 p-4 sm:min-h-[240px]",
+    imageClass:
+      "h-auto max-h-[200px] w-full object-contain object-center transition duration-500 group-hover:scale-[1.01] sm:max-h-[220px]",
   },
 ];
 
@@ -525,13 +527,15 @@ export default function Home() {
               transition={{ duration: 0.35, delay: index * 0.06 }}
               className="group"
             >
-              <div className="relative overflow-hidden rounded-xl">
+              <div
+                className={`relative overflow-hidden rounded-xl ${item.imageWrapperClass ?? ""}`}
+              >
                 <Image
                   src={item.image}
                   alt={item.title}
                   width={640}
                   height={360}
-                  className={catalogImageClass}
+                  className={item.imageClass ?? catalogImageClass}
                 />
                 {item.badge ? <span className={imageBadgeClass}>{item.badge}</span> : null}
               </div>

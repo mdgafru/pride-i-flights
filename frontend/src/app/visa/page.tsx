@@ -3,15 +3,13 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { ContentPageHero } from "@/components/ContentPageHero";
 import { SiteShell } from "@/components/SiteShell";
+import { BrandLogo } from "@/components/BrandLogo";
 import { VisaImage } from "@/components/VisaImage";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { DEFAULT_VISA_IMAGE, resolveVisaImageUrl } from "@/lib/visa-display";
 import type { Visa } from "@/types/visa";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=2000&q=90";
 const CTA_IMAGE =
   "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?auto=format&fit=crop&w=1800&q=85";
 
@@ -91,16 +89,34 @@ export default function VisaPage() {
 
   return (
     <SiteShell active="Visa">
-      <ContentPageHero
-        image={HERO_IMAGE}
-        imagePosition="center 40%"
-        eyebrow="Hassle-Free Applications"
-        title="Visa Services"
-        description="Expert visa guidance with high success rate and end-to-end support. Tourist and business visas handled by trusted travel advisors."
-        highlights={highlights}
-        centered
-        showBreadcrumb={false}
-      />
+      <section className="border-b border-slate-200 bg-gradient-to-b from-sky-100 via-sky-50 to-white">
+        <div className="mx-auto max-w-[1260px] px-4 py-8 text-center sm:py-10 md:py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#e30613]">
+              Hassle-Free Applications
+            </p>
+            <h1 className="sr-only">Visa Services</h1>
+            <div className="mt-4 flex justify-center sm:mt-5">
+              <BrandLogo variant="hero" tone="onLight" />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="border-b border-slate-200 bg-[#042448]">
+        <div className="mx-auto grid max-w-[1260px] grid-cols-1 divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {highlights.map((item) => (
+            <div key={item.title} className="px-4 py-5 text-center sm:px-6 sm:py-6 md:px-8">
+              <p className="text-sm font-bold text-[#e30613] sm:text-base md:text-lg">{item.title}</p>
+              <p className="mt-1 text-xs text-white/75 sm:text-sm">{item.sub}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Trust strip */}
       <section className="border-b border-slate-200 bg-white">

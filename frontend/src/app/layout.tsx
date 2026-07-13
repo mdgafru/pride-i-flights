@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { homeMetadata, SITE_BRAND } from "@/lib/site-seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flight Centre - Tour Packages",
-  description: "Explore top tour packages with Flight Centre",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://redeflights.ae"),
+  title: {
+    default: SITE_BRAND,
+    template: `%s | ${SITE_BRAND}`,
+  },
+  description: homeMetadata.description,
+  keywords: homeMetadata.keywords,
+  openGraph: homeMetadata.openGraph,
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",

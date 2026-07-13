@@ -250,7 +250,11 @@ export function RoutesDashboard({ variant = "routes" }: { variant?: DashboardVar
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("/api/routes/import", { method: "POST", body: formData });
+      const response = await fetch("/api/routes/import", {
+        method: "POST",
+        credentials: "same-origin",
+        body: formData,
+      });
       const result = (await response.json()) as {
         message?: string;
         error?: string;
