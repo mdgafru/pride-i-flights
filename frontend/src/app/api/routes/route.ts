@@ -105,20 +105,22 @@ export async function POST(request: Request) {
 
     const siteOrigin = getSiteOrigin(new URL(request.url).origin);
     const airlineName = String(body.airline_name || "").trim();
+    const fromAirportCode = sanitizeAirportIataCode(body.from_airport_code);
+    const toAirportCode = sanitizeAirportIataCode(body.to_airport_code);
     const seo = buildRouteSeo(
       fromCity,
       toCity,
       siteOrigin,
       airlineName,
-      payload.from_airport_code || "",
-      payload.to_airport_code || "",
+      fromAirportCode || "",
+      toAirportCode || "",
     );
 
     const payload = {
       from_city: fromCity,
       to_city: toCity,
-      from_airport_code: sanitizeAirportIataCode(body.from_airport_code),
-      to_airport_code: sanitizeAirportIataCode(body.to_airport_code),
+      from_airport_code: fromAirportCode,
+      to_airport_code: toAirportCode,
       airline_name: airlineName || null,
       slug: seo.slug,
       og_title: seo.og_title,
