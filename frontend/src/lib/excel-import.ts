@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { buildRouteSlug } from "@/lib/route-meta";
+import { buildRouteSlug, buildRouteIdentityKey } from "@/lib/route-meta";
 
 export type ParsedAirlineRow = {
   name: string;
@@ -203,11 +203,18 @@ function addRoute(
     row.from_airport_code || "",
     row.to_airport_code || "",
   );
-  if (map.has(slug)) {
+  const identityKey = buildRouteIdentityKey({
+    from_city: fromCity,
+    to_city: toCity,
+    airline_name: row.airline_name,
+    from_airport_code: row.from_airport_code,
+    to_airport_code: row.to_airport_code,
+  });
+  if (map.has(identityKey)) {
     if (stats) stats.mergedDuplicates += 1;
     return;
   }
-  map.set(slug, {
+  map.set(identityKey, {
     from_city: fromCity,
     to_city: toCity,
     from_airport_code: sanitizeAirportIata(row.from_airport_code || "") || undefined,

@@ -2,8 +2,8 @@ import { buildAirlineSeo } from "@/lib/airline-meta";
 import { findLocalAirlineByIata, insertLocalAirline, updateLocalAirline, deleteLocalAirline } from "@/lib/airline-local";
 import { buildAirportSeo } from "@/lib/airport-meta";
 import { findLocalAirportByIata, insertLocalAirport, updateLocalAirport, deleteLocalAirport } from "@/lib/airport-local";
-import { buildRouteSeo } from "@/lib/route-meta";
-import { findLocalRouteBySlug, insertLocalRoute, updateLocalRoute, deleteLocalRoute } from "@/lib/route-local";
+import { buildRouteSeo, routesMatchForDedup, buildRouteIdentityKey } from "@/lib/route-meta";
+import { deleteLocalRoute, findLocalRouteBySlug, insertLocalRoute, readLocalRoutes, updateLocalRoute } from "@/lib/route-local";
 import type { ParsedAirlineRow, ParsedAirportRow, ParsedRouteRow } from "@/lib/excel-import";
 import { useLocalStorage } from "@/lib/storage-mode";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -35,9 +35,44 @@ export function dedupeByKey<T>(rows: T[], getKey: (row: T) => string): T[] {
 export function dedupeRoutesBySlug(rows: ParsedRouteRow[]): ParsedRouteRow[] {
   const map = new Map<string, ParsedRouteRow>();
   for (const row of rows) {
-    if (row.slug) map.set(row.slug, row);
+    const key = buildRouteIdentityKey(row);
+    if (key) map.set(key, row);
   }
   return Array.from(map.values());
+}
+
+type StoredRouteMatch = {
+  id: string;
+  slug: string;
+  from_city: string;
+  to_city: string;
+  airline_name?: string | null;
+  from_airport_code?: string | null;
+  to_airport_code?: string | null;
+};
+
+async function findMatchingImportedRoutes(
+  supabase: SupabaseClient,
+  row: ParsedRouteRow,
+  slug: string,
+) {
+  const { data: bySlug } = await supabase
+    .from("routes")
+    .select("id, slug, from_city, to_city, airline_name, from_airport_code, to_airport_code")
+    .eq("slug", slug);
+
+  const { data: byCities } = await supabase
+    .from("routes")
+    .select("id, slug, from_city, to_city, airline_name, from_airport_code, to_airport_code")
+    .ilike("from_city", row.from_city.trim())
+    .ilike("to_city", row.to_city.trim());
+
+  const unique = new Map<string, StoredRouteMatch>();
+  for (const record of [...(bySlug || []), ...(byCities || [])]) {
+    unique.set(record.id, record as StoredRouteMatch);
+  }
+
+  return Array.from(unique.values()).filter((record) => routesMatchForDedup(record, row));
 }
 
 function bumpStats(stats: ImportUpsertStats, result: "inserted" | "updated" | "error") {
@@ -210,11 +245,20 @@ export async function upsertImportedRoute(
     .eq("slug", seo.slug)
     .maybeSingle();
 
-  if (existing?.id) {
-    const { error } = await supabase.from("routes").update(payload).eq("id", existing.id);
+  const matches = await findMatchingImportedRoutes(supabase, row, seo.slug);
+  const primary = matches[0] ?? (existing ? { id: existing.id } : null);
+
+  if (primary?.id) {
+    const { error } = await supabase.from("routes").update(payload).eq("id", primary.id);
     if (!error) {
+      for (const duplicate of matches.slice(1)) {
+        await supabase.from("routes").delete().eq("id", duplicate.id);
+        await safeLocalCleanup(() => deleteLocalRoute(duplicate.id));
+      }
       const localDuplicate = await findLocalRouteBySlug(seo.slug);
-      if (localDuplicate) await safeLocalCleanup(() => deleteLocalRoute(localDuplicate.id));
+      if (localDuplicate && localDuplicate.id !== primary.id) {
+        await safeLocalCleanup(() => deleteLocalRoute(localDuplicate.id));
+      }
       return "updated";
     }
   } else {
@@ -226,10 +270,16 @@ export async function upsertImportedRoute(
     }
   }
 
-  const localExisting = await findLocalRouteBySlug(seo.slug);
-  if (localExisting) {
+  const localRoutes = await readLocalRoutes();
+  const localMatches = localRoutes.filter((record) => routesMatchForDedup(record, row));
+  const localPrimary = localMatches[0];
+
+  if (localPrimary) {
     try {
-      await updateLocalRoute(localExisting.id, payload);
+      await updateLocalRoute(localPrimary.id, payload);
+      for (const duplicate of localMatches.slice(1)) {
+        await safeLocalCleanup(() => deleteLocalRoute(duplicate.id));
+      }
       return "updated";
     } catch {
       return "error";

@@ -32,6 +32,50 @@ export function buildRouteSlug(
   return base;
 }
 
+export type RouteIdentityFields = {
+  from_city: string;
+  to_city: string;
+  airline_name?: string | null;
+  from_airport_code?: string | null;
+  to_airport_code?: string | null;
+};
+
+export function buildRouteIdentityKey(row: RouteIdentityFields) {
+  const norm = (value?: string | null) => String(value || "").trim().toLowerCase();
+  const normCode = (value?: string | null) => String(value || "").trim().toUpperCase();
+  return [
+    norm(row.from_city),
+    norm(row.to_city),
+    norm(row.airline_name),
+    normCode(row.from_airport_code),
+    normCode(row.to_airport_code),
+  ].join("|");
+}
+
+export function routesMatchForDedup(left: RouteIdentityFields, right: RouteIdentityFields) {
+  if (buildRouteIdentityKey(left) === buildRouteIdentityKey(right)) return true;
+
+  const sameFromTo =
+    left.from_city.trim().toLowerCase() === right.from_city.trim().toLowerCase() &&
+    left.to_city.trim().toLowerCase() === right.to_city.trim().toLowerCase();
+  if (!sameFromTo) return false;
+
+  const hasMeta = (row: RouteIdentityFields) =>
+    Boolean(
+      String(row.airline_name || "").trim() ||
+        String(row.from_airport_code || "").trim() ||
+        String(row.to_airport_code || "").trim(),
+    );
+
+  const leftHasMeta = hasMeta(left);
+  const rightHasMeta = hasMeta(right);
+
+  if (!leftHasMeta && !rightHasMeta) return true;
+  if (!leftHasMeta && rightHasMeta) return true;
+
+  return false;
+}
+
 export function buildRoutePageUrl(slug: string, siteOrigin = getSiteOrigin()) {
   const origin = siteOrigin.replace(/\/$/, "");
   return origin ? `${origin}/flights/${slug}` : `/flights/${slug}`;
