@@ -123,6 +123,7 @@ export function RoutesDashboard({ variant = "routes" }: { variant?: DashboardVar
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -362,6 +363,54 @@ export function RoutesDashboard({ variant = "routes" }: { variant?: DashboardVar
     }
   }
 
+  async function clearAllData() {
+    const total = routes.length + airlines.length + airports.length;
+    if (total === 0) return;
+    if (
+      !confirm(
+        "Clear all flights, airlines and airports? This will delete everything and cannot be undone.",
+      )
+    ) {
+      return;
+    }
+
+    setClearingAll(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const [routesRes, airlinesRes, airportsRes] = await Promise.all([
+        fetch("/api/routes", { method: "DELETE", credentials: "same-origin" }),
+        fetch("/api/airlines", { method: "DELETE", credentials: "same-origin" }),
+        fetch("/api/airports", { method: "DELETE", credentials: "same-origin" }),
+      ]);
+
+      const routesJson = (await routesRes.json()) as { message?: string; error?: string };
+      const airlinesJson = (await airlinesRes.json()) as { message?: string; error?: string };
+      const airportsJson = (await airportsRes.json()) as { message?: string; error?: string };
+
+      if (!routesRes.ok || !airlinesRes.ok || !airportsRes.ok) {
+        setError(
+          routesJson.error ||
+            airlinesJson.error ||
+            airportsJson.error ||
+            "Unable to clear all data.",
+        );
+        return;
+      }
+
+      setRoutes([]);
+      setAirlines([]);
+      setAirports([]);
+      setPage(0);
+      resetForm();
+      setMessage("All flights, airlines and airports cleared.");
+    } catch {
+      setError("Network error while clearing data.");
+    } finally {
+      setClearingAll(false);
+    }
+  }
+
   return (
     <DashboardShell title={copy.title} breadcrumb={copy.breadcrumb}>
       <div className={`transition-all duration-300 ${manualFormOpen ? "pointer-events-none scale-[0.98] opacity-60" : ""}`}>
@@ -502,9 +551,20 @@ export function RoutesDashboard({ variant = "routes" }: { variant?: DashboardVar
               </span>
             </button>
           </div>
-          <button type="button" onClick={loadData} className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600">
-            <RefreshCw size={12} /> Refresh
-          </button>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button type="button" onClick={loadData} className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600">
+              <RefreshCw size={12} /> Refresh
+            </button>
+            <button
+              type="button"
+              disabled={clearingAll || (routes.length === 0 && airlines.length === 0 && airports.length === 0)}
+              onClick={clearAllData}
+              className="inline-flex items-center gap-1 rounded-md border border-[#fecdd3] bg-[#fff5f6] px-2 py-1 text-[11px] font-semibold text-[#e30613] disabled:opacity-50"
+            >
+              {clearingAll ? <LoaderCircle size={12} className="animate-spin" /> : <Trash2 size={12} />}
+              Clear All
+            </button>
+          </div>
         </div>
 
         {loading ? (

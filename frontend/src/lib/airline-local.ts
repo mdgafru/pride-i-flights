@@ -110,3 +110,8 @@ export async function insertLocalAirlinesBatch(inputs: Omit<Airline, "id" | "cre
 export async function updateLocalAirlineStatus(id: string, status: EntityStatus) {
   return updateLocalAirline(id, { status });
 }
+
+export async function clearAllLocalAirlines() {
+  await writeLocalAirlines([]);
+  await writeDeletedAirlineCodes([]);
+}

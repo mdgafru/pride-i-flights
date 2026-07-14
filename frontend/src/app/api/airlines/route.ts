@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { buildAirlineSeo } from "@/lib/airline-meta";
-import { findLocalAirlineByIata, insertLocalAirline, readDeletedAirlineCodes, readLocalAirlines, updateLocalAirlineStatus } from "@/lib/airline-local";
+import {
+  clearAllLocalAirlines,
+  findLocalAirlineByIata,
+  insertLocalAirline,
+  readDeletedAirlineCodes,
+  readLocalAirlines,
+  updateLocalAirlineStatus,
+} from "@/lib/airline-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { syncLocalAirlinesFromRoutes } from "@/lib/link-route-entities";
 import { formatStorageError, mergeWithLocalByCode, useLocalStorage } from "@/lib/storage-mode";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import { withQueryTimeout } from "@/lib/supabase-query";
 import type { Airline, EntityStatus } from "@/types/airline";
 
@@ -145,6 +152,44 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("airlines POST error:", error);
     return NextResponse.json({ error: "Unable to add airline." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const session = getAdminSessionFromRequest(request);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  try {
+    let deletedCount = 0;
+
+    if (hasSupabaseConfig()) {
+      const supabase = createAdminClient();
+      const { data, error } = await supabase
+        .from("airlines")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000")
+        .select("id");
+
+      if (error) {
+        console.error("airlines clear-all error:", error);
+        return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
+      }
+
+      deletedCount = data?.length ?? 0;
+    }
+
+    await clearAllLocalAirlines();
+
+    return NextResponse.json({
+      success: true,
+      message: `All airlines cleared (${deletedCount} removed).`,
+      deleted: deletedCount,
+    });
+  } catch (error) {
+    console.error("airlines DELETE error:", error);
+    return NextResponse.json({ error: "Unable to clear airlines." }, { status: 500 });
   }
 }
 

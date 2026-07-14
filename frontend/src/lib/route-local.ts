@@ -82,3 +82,7 @@ export async function getLocalRoute(id: string) {
 export async function updateLocalRouteStatus(id: string, status: EntityStatus) {
   return updateLocalRoute(id, { status });
 }
+
+export async function clearAllLocalRoutes() {
+  await writeLocalRoutes([]);
+}

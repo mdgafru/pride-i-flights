@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { buildAirportSeo } from "@/lib/airport-meta";
-import { findLocalAirportByIata, insertLocalAirport, readDeletedAirportCodes, readLocalAirports, updateLocalAirportStatus } from "@/lib/airport-local";
+import {
+  clearAllLocalAirports,
+  findLocalAirportByIata,
+  insertLocalAirport,
+  readDeletedAirportCodes,
+  readLocalAirports,
+  updateLocalAirportStatus,
+} from "@/lib/airport-local";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { formatStorageError, mergeWithLocalByCode, useLocalStorage } from "@/lib/storage-mode";
-import { createAdminClient } from "@/lib/supabase-admin";
+import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
 import type { EntityStatus } from "@/types/airline";
 import type { Airport } from "@/types/airport";
 
@@ -140,6 +147,44 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("airports POST error:", error);
     return NextResponse.json({ error: "Unable to add airport." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const session = getAdminSessionFromRequest(request);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  try {
+    let deletedCount = 0;
+
+    if (hasSupabaseConfig()) {
+      const supabase = createAdminClient();
+      const { data, error } = await supabase
+        .from("airports")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000")
+        .select("id");
+
+      if (error) {
+        console.error("airports clear-all error:", error);
+        return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
+      }
+
+      deletedCount = data?.length ?? 0;
+    }
+
+    await clearAllLocalAirports();
+
+    return NextResponse.json({
+      success: true,
+      message: `All airports cleared (${deletedCount} removed).`,
+      deleted: deletedCount,
+    });
+  } catch (error) {
+    console.error("airports DELETE error:", error);
+    return NextResponse.json({ error: "Unable to clear airports." }, { status: 500 });
   }
 }
 

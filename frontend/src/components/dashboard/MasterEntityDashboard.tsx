@@ -81,6 +81,7 @@ export function MasterEntityDashboard({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -315,6 +316,35 @@ export function MasterEntityDashboard({
     }
   }
 
+  async function clearAllItems() {
+    if (items.length === 0) return;
+    const label = kind === "airline" ? "airlines" : "airports";
+    if (!confirm(`Clear all ${label}? This will delete everything and cannot be undone.`)) return;
+
+    setClearingAll(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const response = await fetch(apiBase, {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      const result = (await response.json()) as { message?: string; error?: string };
+      if (!response.ok) {
+        setError(result.error || `Unable to clear ${label}.`);
+        return;
+      }
+      setItems([]);
+      setPage(0);
+      resetForm();
+      setMessage(result.message || `All ${label} cleared.`);
+    } catch {
+      setError(`Network error while clearing ${label}.`);
+    } finally {
+      setClearingAll(false);
+    }
+  }
+
   const filterTabs: { key: "all" | EntityStatus; label: string; count: number }[] = [
     { key: "all", label: "All", count: stats.total },
     { key: "pending", label: "Pending", count: stats.pending },
@@ -487,13 +517,24 @@ export function MasterEntityDashboard({
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={loadItems}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600"
-          >
-            <RefreshCw size={12} /> Refresh
-          </button>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={loadItems}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600"
+            >
+              <RefreshCw size={12} /> Refresh
+            </button>
+            <button
+              type="button"
+              disabled={clearingAll || items.length === 0}
+              onClick={clearAllItems}
+              className="inline-flex items-center gap-1 rounded-md border border-[#fecdd3] bg-[#fff5f6] px-2 py-1 text-[11px] font-semibold text-[#e30613] disabled:opacity-50"
+            >
+              {clearingAll ? <LoaderCircle size={12} className="animate-spin" /> : <Trash2 size={12} />}
+              Clear All
+            </button>
+          </div>
         </div>
 
         {loading ? (

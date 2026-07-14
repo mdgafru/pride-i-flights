@@ -3,7 +3,7 @@ import { getAdminSessionFromRequest } from "@/lib/auth-session";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { upsertLinkedEntities } from "@/lib/link-route-entities";
 import { buildRouteSeo, sanitizeAirportIataCode } from "@/lib/route-meta";
-import { findLocalRouteBySlug, insertLocalRoute, readLocalRoutes } from "@/lib/route-local";
+import { findLocalRouteBySlug, insertLocalRoute, readLocalRoutes, clearAllLocalRoutes } from "@/lib/route-local";
 import { saveRouteById } from "@/lib/route-store";
 import { formatStorageError, mergeWithLocalById, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
@@ -156,6 +156,44 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("routes POST error:", error);
     return NextResponse.json({ error: "Unable to add route." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const session = getAdminSessionFromRequest(request);
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  try {
+    let deletedCount = 0;
+
+    if (hasSupabaseConfig()) {
+      const supabase = createAdminClient();
+      const { data, error } = await supabase
+        .from("routes")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000")
+        .select("id");
+
+      if (error) {
+        console.error("routes clear-all error:", error);
+        return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
+      }
+
+      deletedCount = data?.length ?? 0;
+    }
+
+    await clearAllLocalRoutes();
+
+    return NextResponse.json({
+      success: true,
+      message: `All routes cleared (${deletedCount} removed).`,
+      deleted: deletedCount,
+    });
+  } catch (error) {
+    console.error("routes DELETE error:", error);
+    return NextResponse.json({ error: "Unable to clear routes." }, { status: 500 });
   }
 }
 
