@@ -320,7 +320,7 @@ export function FlightDataDashboard() {
             Excel Upload — auto import airlines & airports
           </p>
           <p className="mt-0.5 text-[11px] text-slate-500">
-            Supports route Excel: From City, From Airport, From Airline, To City, To Airport, etc.
+            Supports Country / From Country / To Country columns with cities, airlines and IATA codes.
           </p>
         </div>
         <label className="flex cursor-pointer items-center gap-3 px-3 py-3 hover:bg-[#fafbfd]">
@@ -444,7 +444,8 @@ export function FlightDataDashboard() {
                 <tr className="border-b border-slate-200 bg-[#fafbfd]">
                   <th>Name</th>
                   <th>Code</th>
-                  {tab === "airports" ? <th>City</th> : <th>Country</th>}
+                  {tab === "airports" ? <th>City</th> : null}
+                  <th>Country</th>
                   <th>Page URL</th>
                   <th>Status</th>
                   <th>Added</th>
@@ -456,7 +457,8 @@ export function FlightDataDashboard() {
                   <tr key={item.id} className="border-b border-slate-100">
                     <td className="font-semibold text-[#0b2f57]">{item.name}</td>
                     <td>{item.iata_code}</td>
-                    <td>{tab === "airports" ? (item as Airport).city : item.country || "-"}</td>
+                    {tab === "airports" ? <td>{(item as Airport).city}</td> : null}
+                    <td>{item.country || "-"}</td>
                     <td className="max-w-[220px] break-all text-[11px] text-slate-500">{item.page_url}</td>
                     <td><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusStyle(item.status)}`}>{item.status}</span></td>
                     <td className="whitespace-nowrap text-slate-500">{formatDate(item.created_at)}</td>

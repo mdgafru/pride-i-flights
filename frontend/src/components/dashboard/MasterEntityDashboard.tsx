@@ -511,7 +511,8 @@ export function MasterEntityDashboard({
                 <tr className="border-b border-slate-200 bg-[#fafbfd]">
                   <th>Name</th>
                   <th>Code</th>
-                  {kind === "airport" ? <th>City</th> : <th>Country</th>}
+                  {kind === "airport" ? <th>City</th> : null}
+                  <th>Country</th>
                   <th>SEO & URL</th>
                   <th>Status</th>
                   <th>Added</th>
@@ -523,11 +524,8 @@ export function MasterEntityDashboard({
                   <tr key={item.id} className="border-b border-slate-100">
                     <td className="font-semibold text-[#0b2f57]">{item.name}</td>
                     <td>{item.iata_code}</td>
-                    {kind === "airport" ? (
-                      <td>{(item as Airport).city}</td>
-                    ) : (
-                      <td>{item.country || "-"}</td>
-                    )}
+                    {kind === "airport" ? <td>{(item as Airport).city}</td> : null}
+                    <td>{item.country || "-"}</td>
                     <td className="max-w-[260px]">
                       <p className="font-semibold text-[#0b2f57]">{item.seo_title}</p>
                       <p className="mt-0.5 break-all text-[11px] text-slate-500">{item.page_url}</p>

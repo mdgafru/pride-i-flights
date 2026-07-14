@@ -29,22 +29,34 @@ function normalizeHeader(value: string) {
 }
 
 function pickValue(row: Record<string, unknown>, aliases: string[]) {
-  const entries = Object.entries(row);
+  const entries = Object.entries(row).map(([key, value]) => ({
+    key: normalizeHeader(key),
+    value: String(value ?? "").trim(),
+  }));
+
+  // Prefer exact header matches so short aliases like "from"/"to" do not steal
+  // values from "From Country" / "To Country".
   for (const alias of aliases) {
     const normalizedAlias = normalizeHeader(alias);
-    const match = entries.find(([key]) => {
-      const normalizedKey = normalizeHeader(key);
-      return (
-        normalizedKey === normalizedAlias ||
-        normalizedKey.includes(normalizedAlias) ||
-        normalizedAlias.includes(normalizedKey)
-      );
-    });
-    if (match) {
-      const value = String(match[1] ?? "").trim();
-      if (value) return value;
-    }
+    if (!normalizedAlias) continue;
+    const exact = entries.find((entry) => entry.key === normalizedAlias && entry.value);
+    if (exact) return exact.value;
   }
+
+  // Then allow compound headers that end with the alias (e.g. "airportcity" → "city"),
+  // but only for aliases long enough to avoid accidental matches.
+  for (const alias of aliases) {
+    const normalizedAlias = normalizeHeader(alias);
+    if (normalizedAlias.length < 4) continue;
+    const fuzzy = entries.find(
+      (entry) =>
+        entry.value &&
+        entry.key !== normalizedAlias &&
+        (entry.key.endsWith(normalizedAlias) || entry.key.startsWith(normalizedAlias)),
+    );
+    if (fuzzy) return fuzzy.value;
+  }
+
   return "";
 }
 
@@ -130,13 +142,17 @@ function addAirline(
   const cleanName = name.trim();
   const cleanCode = code.trim().toUpperCase();
   if (!cleanName || !isLikelyAirlineCode(cleanCode)) return;
-  if (!map.has(cleanCode)) {
-    map.set(cleanCode, {
-      name: cleanName,
-      iata_code: cleanCode,
-      country: country.trim() || undefined,
-    });
+  const cleanCountry = country.trim();
+  const existing = map.get(cleanCode);
+  if (existing) {
+    if (!existing.country && cleanCountry) existing.country = cleanCountry;
+    return;
   }
+  map.set(cleanCode, {
+    name: cleanName,
+    iata_code: cleanCode,
+    country: cleanCountry || undefined,
+  });
 }
 
 function addAirport(
@@ -151,14 +167,18 @@ function addAirport(
   if (!cleanCode || !isLikelyAirportCode(cleanCode)) return;
   const finalName = name.trim() || `${cleanCity || cleanCode} Airport`;
   const finalCity = cleanCity || name.trim() || cleanCode;
-  if (!map.has(cleanCode)) {
-    map.set(cleanCode, {
-      name: finalName,
-      iata_code: cleanCode,
-      city: finalCity,
-      country: country.trim() || undefined,
-    });
+  const cleanCountry = country.trim();
+  const existing = map.get(cleanCode);
+  if (existing) {
+    if (!existing.country && cleanCountry) existing.country = cleanCountry;
+    return;
   }
+  map.set(cleanCode, {
+    name: finalName,
+    iata_code: cleanCode,
+    city: finalCity,
+    country: cleanCountry || undefined,
+  });
 }
 
 function addRoute(map: Map<string, ParsedRouteRow>, row: Omit<ParsedRouteRow, "slug">) {
@@ -197,8 +217,28 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
   const routes = new Map<string, ParsedRouteRow>();
 
   for (const row of rows) {
-    const fromCity = pickValue(row, ["from", "fromcity", "origin", "origincity", "departurecity", "cityfrom"]);
-    const toCity = pickValue(row, ["to", "tocity", "destination", "destinationcity", "arrivalcity", "cityto"]);
+    const fromCity = pickValue(row, [
+      "fromcity",
+      "from city",
+      "origincity",
+      "origin city",
+      "departurecity",
+      "departure city",
+      "cityfrom",
+      "from",
+      "origin",
+    ]);
+    const toCity = pickValue(row, [
+      "tocity",
+      "to city",
+      "destinationcity",
+      "destination city",
+      "arrivalcity",
+      "arrival city",
+      "cityto",
+      "to",
+      "destination",
+    ]);
     const airlineName = pickValue(row, [
       "airlinename",
       "airline",
@@ -216,7 +256,39 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
       "airline iata",
       "carriercode",
     ]);
-    const country = pickValue(row, ["country", "nation"]);
+    const sharedCountry = pickValue(row, [
+      "country",
+      "countryname",
+      "country name",
+      "nation",
+    ]);
+    const fromCountry =
+      pickValue(row, [
+        "fromcountry",
+        "from country",
+        "origincountry",
+        "origin country",
+        "departurecountry",
+        "departure country",
+        "sourcecountry",
+        "source country",
+      ]) || sharedCountry;
+    const toCountry =
+      pickValue(row, [
+        "tocountry",
+        "to country",
+        "destinationcountry",
+        "destination country",
+        "arrivalcountry",
+        "arrival country",
+      ]) || sharedCountry;
+    const airlineCountry =
+      pickValue(row, [
+        "airlinecountry",
+        "airline country",
+        "carriercountry",
+        "carrier country",
+      ]) || sharedCountry;
 
     if (fromCity && toCity) {
       addRoute(routes, {
@@ -230,7 +302,7 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
 
     if (airlineName) {
       const code = airlineCode && isLikelyAirlineCode(airlineCode) ? airlineCode : guessAirlineCode(airlineName);
-      addAirline(airlines, airlineName, code, country);
+      addAirline(airlines, airlineName, code, airlineCountry);
     }
 
     if (fromAirportCode) {
@@ -239,7 +311,7 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
         fromAirportName || `${fromCity || fromAirportCode} Airport`,
         fromAirportCode,
         fromCity || fromAirportCode,
-        country,
+        fromCountry,
       );
     }
 
@@ -249,7 +321,7 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
         toAirportName || `${toCity || toAirportCode} Airport`,
         toAirportCode,
         toCity || toAirportCode,
-        country,
+        toCountry,
       );
     }
   }
@@ -276,10 +348,23 @@ export function mapAirlineRows(rows: Record<string, unknown>[]) {
       "carriercode",
     ]);
     const icaoCode = pickValue(row, ["icao", "icaocode", "icao code"]);
-    const country = pickValue(row, ["country", "nation"]);
+    const country = pickValue(row, [
+      "country",
+      "countryname",
+      "country name",
+      "nation",
+      "airlinecountry",
+      "airline country",
+    ]);
     const code = (iataCode.trim().toUpperCase() || (name ? guessAirlineCode(name) : "")).trim();
 
     if (!name.trim() || !isLikelyAirlineCode(code)) continue;
+
+    const existing = map.get(code);
+    if (existing) {
+      if (!existing.country && country.trim()) existing.country = country.trim();
+      continue;
+    }
 
     map.set(code, {
       name: name.trim(),
@@ -299,13 +384,26 @@ export function mapAirportRows(rows: Record<string, unknown>[]) {
     const name = pickValue(row, ["name", "airportname", "airport", "airport name"]);
     const iataCode = pickValue(row, ["iata", "iatacode", "iata code", "code", "airportcode"]);
     const city = pickValue(row, ["city", "airportcity", "location", "town"]);
-    const country = pickValue(row, ["country", "nation"]);
+    const country = pickValue(row, [
+      "country",
+      "countryname",
+      "country name",
+      "nation",
+      "airportcountry",
+      "airport country",
+    ]);
     const code = sanitizeAirportIata(iataCode) || iataCode.trim().toUpperCase();
 
     if (!isLikelyAirportCode(code)) continue;
 
     const finalCity = city.trim() || name.trim() || code;
     if (!finalCity) continue;
+
+    const existing = map.get(code);
+    if (existing) {
+      if (!existing.country && country.trim()) existing.country = country.trim();
+      continue;
+    }
 
     map.set(code, {
       name: name.trim() || `${finalCity} Airport`,

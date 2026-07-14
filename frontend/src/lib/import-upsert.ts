@@ -52,12 +52,21 @@ export async function upsertImportedAirline(
   siteOrigin: string,
 ): Promise<"inserted" | "updated" | "error"> {
   const iataCode = row.iata_code.trim().toUpperCase();
-  const seo = buildAirlineSeo(row.name, iataCode, row.country || "", siteOrigin);
+  const { data: existing } = await supabase
+    .from("airlines")
+    .select("id, country")
+    .eq("iata_code", iataCode)
+    .maybeSingle();
+
+  const localExisting = await findLocalAirlineByIata(iataCode);
+  const resolvedCountry =
+    row.country?.trim() || existing?.country || localExisting?.country || "";
+  const seo = buildAirlineSeo(row.name, iataCode, resolvedCountry, siteOrigin);
   const payload = {
     name: row.name.trim(),
     iata_code: iataCode,
     icao_code: row.icao_code?.trim().toUpperCase() || null,
-    country: row.country?.trim() || null,
+    country: resolvedCountry || null,
     slug: seo.slug,
     seo_title: seo.seo_title,
     meta_description: seo.meta_description,
@@ -66,29 +75,20 @@ export async function upsertImportedAirline(
     status: "active" as const,
   };
 
-  const { data: existing } = await supabase
-    .from("airlines")
-    .select("id")
-    .eq("iata_code", iataCode)
-    .maybeSingle();
-
   if (existing?.id) {
     const { error } = await supabase.from("airlines").update(payload).eq("id", existing.id);
     if (!error) {
-      const localDuplicate = await findLocalAirlineByIata(iataCode);
-      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirline(localDuplicate.id));
+      if (localExisting) await safeLocalCleanup(() => deleteLocalAirline(localExisting.id));
       return "updated";
     }
   } else {
     const { error } = await supabase.from("airlines").insert(payload);
     if (!error) {
-      const localDuplicate = await findLocalAirlineByIata(iataCode);
-      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirline(localDuplicate.id));
+      if (localExisting) await safeLocalCleanup(() => deleteLocalAirline(localExisting.id));
       return "inserted";
     }
   }
 
-  const localExisting = await findLocalAirlineByIata(iataCode);
   if (localExisting) {
     try {
       await updateLocalAirline(localExisting.id, payload);
@@ -116,12 +116,21 @@ export async function upsertImportedAirport(
   siteOrigin: string,
 ): Promise<"inserted" | "updated" | "error"> {
   const iataCode = row.iata_code.trim().toUpperCase();
-  const seo = buildAirportSeo(row.name, iataCode, row.city, row.country || "", siteOrigin);
+  const { data: existing } = await supabase
+    .from("airports")
+    .select("id, country")
+    .eq("iata_code", iataCode)
+    .maybeSingle();
+
+  const localExisting = await findLocalAirportByIata(iataCode);
+  const resolvedCountry =
+    row.country?.trim() || existing?.country || localExisting?.country || "";
+  const seo = buildAirportSeo(row.name, iataCode, row.city, resolvedCountry, siteOrigin);
   const payload = {
     name: row.name.trim(),
     iata_code: iataCode,
     city: row.city.trim(),
-    country: row.country?.trim() || null,
+    country: resolvedCountry || null,
     slug: seo.slug,
     seo_title: seo.seo_title,
     meta_description: seo.meta_description,
@@ -130,29 +139,20 @@ export async function upsertImportedAirport(
     status: "active" as const,
   };
 
-  const { data: existing } = await supabase
-    .from("airports")
-    .select("id")
-    .eq("iata_code", iataCode)
-    .maybeSingle();
-
   if (existing?.id) {
     const { error } = await supabase.from("airports").update(payload).eq("id", existing.id);
     if (!error) {
-      const localDuplicate = await findLocalAirportByIata(iataCode);
-      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirport(localDuplicate.id));
+      if (localExisting) await safeLocalCleanup(() => deleteLocalAirport(localExisting.id));
       return "updated";
     }
   } else {
     const { error } = await supabase.from("airports").insert(payload);
     if (!error) {
-      const localDuplicate = await findLocalAirportByIata(iataCode);
-      if (localDuplicate) await safeLocalCleanup(() => deleteLocalAirport(localDuplicate.id));
+      if (localExisting) await safeLocalCleanup(() => deleteLocalAirport(localExisting.id));
       return "inserted";
     }
   }
 
-  const localExisting = await findLocalAirportByIata(iataCode);
   if (localExisting) {
     try {
       await updateLocalAirport(localExisting.id, payload);

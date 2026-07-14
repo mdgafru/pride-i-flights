@@ -443,7 +443,7 @@ export function RoutesDashboard({ variant = "routes" }: { variant?: DashboardVar
         </button>
       </div>
       <p className="mb-3 text-[10px] text-slate-500">
-        Excel columns: From, To, Airline Name, From IATA, To IATA
+        Excel columns: From, To, Airline Name, From IATA, To IATA, Country / From Country / To Country
       </p>
 
       {message ? (

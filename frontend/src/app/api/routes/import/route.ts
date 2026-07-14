@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       extracted.airports.length === 0
     ) {
       return NextResponse.json(
-        { error: "No data found. Use columns: From, To, Airline Name, From IATA, To IATA." },
+        { error: "No data found. Use columns: From, To, Airline Name, From IATA, To IATA, Country." },
         { status: 400 },
       );
     }
