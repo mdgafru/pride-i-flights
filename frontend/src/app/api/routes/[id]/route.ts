@@ -34,7 +34,14 @@ export async function PATCH(
 
     const siteOrigin = getSiteOrigin(new URL(request.url).origin);
     const airlineName = String(body.airline_name || "").trim();
-    const seo = buildRouteSeo(fromCity, toCity, siteOrigin, airlineName);
+    const seo = buildRouteSeo(
+      fromCity,
+      toCity,
+      siteOrigin,
+      airlineName,
+      patch.from_airport_code || "",
+      patch.to_airport_code || "",
+    );
     const patch = {
       from_city: fromCity,
       to_city: toCity,

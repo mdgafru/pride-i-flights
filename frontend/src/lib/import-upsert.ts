@@ -179,7 +179,14 @@ export async function upsertImportedRoute(
   row: ParsedRouteRow,
   siteOrigin: string,
 ): Promise<"inserted" | "updated" | "error"> {
-  const seo = buildRouteSeo(row.from_city, row.to_city, siteOrigin, row.airline_name || "");
+  const seo = buildRouteSeo(
+    row.from_city,
+    row.to_city,
+    siteOrigin,
+    row.airline_name || "",
+    row.from_airport_code || "",
+    row.to_airport_code || "",
+  );
   const payload = {
     from_city: row.from_city,
     to_city: row.to_city,

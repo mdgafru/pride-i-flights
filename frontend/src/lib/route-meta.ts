@@ -12,10 +12,24 @@ export type RouteSeoMeta = {
   page_url: string;
 };
 
-export function buildRouteSlug(fromCity: string, toCity: string) {
+export function buildRouteSlug(
+  fromCity: string,
+  toCity: string,
+  airlineName = "",
+  fromAirportCode = "",
+  toAirportCode = "",
+) {
   const from = sanitizeSlug(fromCity) || "origin";
   const to = sanitizeSlug(toCity) || "destination";
-  return `${from}-to-${to}`;
+  const base = `${from}-to-${to}`;
+  const airline = sanitizeSlug(airlineName.trim());
+  if (airline) return `${base}-${airline}`;
+
+  const fromCode = sanitizeAirportIataCode(fromAirportCode);
+  const toCode = sanitizeAirportIataCode(toAirportCode);
+  if (fromCode && toCode) return `${base}-${fromCode.toLowerCase()}-${toCode.toLowerCase()}`;
+
+  return base;
 }
 
 export function buildRoutePageUrl(slug: string, siteOrigin = getSiteOrigin()) {
@@ -55,8 +69,10 @@ export function buildRouteSeo(
   toCity: string,
   siteOrigin = getSiteOrigin(),
   airlineName = "",
+  fromAirportCode = "",
+  toAirportCode = "",
 ): RouteSeoMeta {
-  const slug = buildRouteSlug(fromCity, toCity);
+  const slug = buildRouteSlug(fromCity, toCity, airlineName, fromAirportCode, toAirportCode);
   const seo = buildSeoFieldsFromSlug(slug);
   const ogTitle = buildRouteOgTitle(fromCity, toCity);
   const ogDescription = buildRouteOgDescription(fromCity, toCity);

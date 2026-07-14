@@ -181,21 +181,40 @@ function addAirport(
   });
 }
 
-function addRoute(map: Map<string, ParsedRouteRow>, row: Omit<ParsedRouteRow, "slug">) {
+export type ImportExtractStats = {
+  totalRows: number;
+  parsedRoutes: number;
+  skippedMissingCities: number;
+  mergedDuplicates: number;
+};
+
+function addRoute(
+  map: Map<string, ParsedRouteRow>,
+  row: Omit<ParsedRouteRow, "slug">,
+  stats?: { mergedDuplicates: number },
+) {
   const fromCity = row.from_city.trim();
   const toCity = row.to_city.trim();
   if (!fromCity || !toCity) return;
-  const slug = buildRouteSlug(fromCity, toCity);
-  if (!map.has(slug)) {
-    map.set(slug, {
-      from_city: fromCity,
-      to_city: toCity,
-      from_airport_code: sanitizeAirportIata(row.from_airport_code || "") || undefined,
-      to_airport_code: sanitizeAirportIata(row.to_airport_code || "") || undefined,
-      airline_name: row.airline_name?.trim() || undefined,
-      slug,
-    });
+  const slug = buildRouteSlug(
+    fromCity,
+    toCity,
+    row.airline_name || "",
+    row.from_airport_code || "",
+    row.to_airport_code || "",
+  );
+  if (map.has(slug)) {
+    if (stats) stats.mergedDuplicates += 1;
+    return;
   }
+  map.set(slug, {
+    from_city: fromCity,
+    to_city: toCity,
+    from_airport_code: sanitizeAirportIata(row.from_airport_code || "") || undefined,
+    to_airport_code: sanitizeAirportIata(row.to_airport_code || "") || undefined,
+    airline_name: row.airline_name?.trim() || undefined,
+    slug,
+  });
 }
 
 export function parseExcelBuffer(buffer: Buffer) {
@@ -215,6 +234,12 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
   const airlines = new Map<string, ParsedAirlineRow>();
   const airports = new Map<string, ParsedAirportRow>();
   const routes = new Map<string, ParsedRouteRow>();
+  const stats = {
+    totalRows: rows.length,
+    parsedRoutes: 0,
+    skippedMissingCities: 0,
+    mergedDuplicates: 0,
+  };
 
   for (const row of rows) {
     const fromCity = pickValue(row, [
@@ -291,13 +316,19 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
       ]) || sharedCountry;
 
     if (fromCity && toCity) {
-      addRoute(routes, {
-        from_city: fromCity,
-        to_city: toCity,
-        from_airport_code: fromAirportCode || undefined,
-        to_airport_code: toAirportCode || undefined,
-        airline_name: airlineName || undefined,
-      });
+      addRoute(
+        routes,
+        {
+          from_city: fromCity,
+          to_city: toCity,
+          from_airport_code: fromAirportCode || undefined,
+          to_airport_code: toAirportCode || undefined,
+          airline_name: airlineName || undefined,
+        },
+        stats,
+      );
+    } else {
+      stats.skippedMissingCities += 1;
     }
 
     if (airlineName) {
@@ -326,10 +357,13 @@ export function extractFlightDataFromRows(rows: Record<string, unknown>[]) {
     }
   }
 
+  stats.parsedRoutes = routes.size;
+
   return {
     routes: Array.from(routes.values()),
     airlines: Array.from(airlines.values()),
     airports: Array.from(airports.values()),
+    stats,
   };
 }
 

@@ -71,9 +71,15 @@ export async function POST(request: Request) {
       formatImportMessage("Airports", airportStats),
     ].join(". ");
 
+    const skipped = extracted.stats.skippedMissingCities + extracted.stats.mergedDuplicates;
+    const summary =
+      skipped > 0
+        ? `${message}. Excel rows: ${extracted.stats.totalRows}, unique routes: ${extracted.stats.parsedRoutes} (${skipped} skipped: ${extracted.stats.skippedMissingCities} missing From/To, ${extracted.stats.mergedDuplicates} duplicate).`
+        : `${message}. Excel rows: ${extracted.stats.totalRows}, unique routes: ${extracted.stats.parsedRoutes}.`;
+
     return NextResponse.json({
       success: true,
-      message: `${message}.`,
+      message: summary,
       insertedRoutes: routeStats.inserted,
       updatedRoutes: routeStats.updated,
       insertedAirlines: airlineStats.inserted,
@@ -82,7 +88,10 @@ export async function POST(request: Request) {
       updatedAirports: airportStats.updated,
       errors:
         routeStats.errors + airlineStats.errors + airportStats.errors,
-      totalRows: rows.length,
+      totalRows: extracted.stats.totalRows,
+      parsedRoutes: extracted.stats.parsedRoutes,
+      skippedMissingCities: extracted.stats.skippedMissingCities,
+      mergedDuplicates: extracted.stats.mergedDuplicates,
     });
   } catch (error) {
     console.error("routes import error:", error);

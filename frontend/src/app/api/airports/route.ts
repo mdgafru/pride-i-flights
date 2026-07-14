@@ -9,6 +9,7 @@ import {
   readLocalAirports,
   updateLocalAirportStatus,
 } from "@/lib/airport-local";
+import { clearSupabaseTable, safeLocalClear } from "@/lib/bulk-delete";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { formatStorageError, mergeWithLocalByCode, useLocalStorage } from "@/lib/storage-mode";
 import { createAdminClient, hasSupabaseConfig } from "@/lib/supabase-admin";
@@ -160,22 +161,19 @@ export async function DELETE(request: Request) {
     let deletedCount = 0;
 
     if (hasSupabaseConfig()) {
-      const supabase = createAdminClient();
-      const { data, error } = await supabase
-        .from("airports")
-        .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000")
-        .select("id");
-
-      if (error) {
+      try {
+        const supabase = createAdminClient();
+        deletedCount = await clearSupabaseTable(supabase, "airports");
+      } catch (error) {
         console.error("airports clear-all error:", error);
         return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
       }
-
-      deletedCount = data?.length ?? 0;
+    } else {
+      const localAirports = await readLocalAirports();
+      deletedCount = localAirports.length;
     }
 
-    await clearAllLocalAirports();
+    await safeLocalClear(clearAllLocalAirports, "airports");
 
     return NextResponse.json({
       success: true,
@@ -184,7 +182,10 @@ export async function DELETE(request: Request) {
     });
   } catch (error) {
     console.error("airports DELETE error:", error);
-    return NextResponse.json({ error: "Unable to clear airports." }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to clear airports." },
+      { status: 500 },
+    );
   }
 }
 

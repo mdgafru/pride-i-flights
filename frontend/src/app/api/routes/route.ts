@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminSessionFromRequest } from "@/lib/auth-session";
+import { clearSupabaseTable, safeLocalClear } from "@/lib/bulk-delete";
 import { getSiteOrigin } from "@/lib/banner-meta";
 import { upsertLinkedEntities } from "@/lib/link-route-entities";
 import { buildRouteSeo, sanitizeAirportIataCode } from "@/lib/route-meta";
@@ -104,7 +105,14 @@ export async function POST(request: Request) {
 
     const siteOrigin = getSiteOrigin(new URL(request.url).origin);
     const airlineName = String(body.airline_name || "").trim();
-    const seo = buildRouteSeo(fromCity, toCity, siteOrigin, airlineName);
+    const seo = buildRouteSeo(
+      fromCity,
+      toCity,
+      siteOrigin,
+      airlineName,
+      payload.from_airport_code || "",
+      payload.to_airport_code || "",
+    );
 
     const payload = {
       from_city: fromCity,
@@ -169,22 +177,19 @@ export async function DELETE(request: Request) {
     let deletedCount = 0;
 
     if (hasSupabaseConfig()) {
-      const supabase = createAdminClient();
-      const { data, error } = await supabase
-        .from("routes")
-        .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000")
-        .select("id");
-
-      if (error) {
+      try {
+        const supabase = createAdminClient();
+        deletedCount = await clearSupabaseTable(supabase, "routes");
+      } catch (error) {
         console.error("routes clear-all error:", error);
         return NextResponse.json({ error: formatStorageError(error) }, { status: 500 });
       }
-
-      deletedCount = data?.length ?? 0;
+    } else {
+      const localRoutes = await readLocalRoutes();
+      deletedCount = localRoutes.length;
     }
 
-    await clearAllLocalRoutes();
+    await safeLocalClear(clearAllLocalRoutes, "routes");
 
     return NextResponse.json({
       success: true,
@@ -193,7 +198,10 @@ export async function DELETE(request: Request) {
     });
   } catch (error) {
     console.error("routes DELETE error:", error);
-    return NextResponse.json({ error: "Unable to clear routes." }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to clear routes." },
+      { status: 500 },
+    );
   }
 }
 
